@@ -78,10 +78,8 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
       hspen_v2 <- hspen %>% filter(DepthPrefMin >= 0 & DepthPrefMin < 200 & DepthPrefMax >= 0 & DepthPrefMax < 200)
     } else if (olayer == "mesopelagic") {
       hspen_v2 <- hspen %>% filter(DepthPrefMin >= 200 & DepthPrefMin < 1000 & DepthPrefMax >= 200 & DepthPrefMax < 1000)
-    } else if (olayer == "bathypelagic") {
-      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 1000 & DepthPrefMin < 4000 & DepthPrefMax >= 1000 & DepthPrefMax < 4000)
-    } else if (olayer == "abyssopelagic") {
-      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 4000 & DepthPrefMax >= 4000)
+    } else if (olayer == "bathyabyssopelagic") {
+      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 1000 & DepthPrefMax >= 1000)
     } else {
       hspen_v2 <- hspen
     }
@@ -124,19 +122,19 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
 }
 
-# system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
-#                        outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/",
-#                        olayer = "mesopelagic",
-#                        prob_threshold = 0.5,
-#                        sp_env = 1,
-#                        data = "species",
-#                        region = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
-
-system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a",
-                       outdir = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/01_surface_mediterranean/",
+system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
+                       outdir = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer/",
                        olayer = "surface",
                        prob_threshold = 0.5,
                        sp_env = 1,
-                       data = "richness",
-                       region = "/Users/bri273/Desktop/AquaMaps_wflow/ETOPO1_05deg/etopos_mediterranean.grd"))
+                       data = "species",
+                       region = "/QRISdata/Q1216/BritoMorales/Project04b/ETOPO1_05deg/ETOPO1_ocean.grd"))
+
+# system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a",
+#                        outdir = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/01_surface_mediterranean/",
+#                        olayer = "surface",
+#                        prob_threshold = 0.5,
+#                        sp_env = 1,
+#                        data = "richness",
+#                        region = "/Users/bri273/Desktop/AquaMaps_wflow/ETOPO1_05deg/etopos_mediterranean.grd"))
 

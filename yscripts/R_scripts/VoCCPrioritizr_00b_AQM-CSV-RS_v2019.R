@@ -28,7 +28,7 @@ aqua_rs <- function(path, outdir, olayer) { # kill the cells that are not accord
       rs[] <- 1:ncell(rs)
     # Set up parallel structure
       cores  <-  detectCores()
-      ncores <- cores -1 # set 23 for cluster
+      ncores <- 24
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
       # Parallel Loop
@@ -48,11 +48,6 @@ aqua_rs <- function(path, outdir, olayer) { # kill the cells that are not accord
         stopCluster(cl)
 }
 
-# system.time(aqua_rs(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/v2019a/01_surface",
-#                     outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/rasters/v2019a/",
-#                     bathymetry_shp = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
-#                     olayer = "surface"))
-
-system.time(aqua_rs(path = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/01_surface_mediterranean",
-                    outdir = "/Users/bri273/Desktop/VoCC_Marxan/rasters/01_surface_mediterranean/",
+system.time(aqua_rs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_csv",
+                    outdir = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_rs/",
                     olayer = "surface"))
