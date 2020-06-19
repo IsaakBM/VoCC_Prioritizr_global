@@ -115,9 +115,9 @@
   return(PU_list_b)
   }
   
-  system.time(marxan_inputs(path = "features_rasters/01-epipelagic_etopo",
-                            outdir = "shapefiles_rasters/",
+  system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_rs",
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/",
                             region = TRUE,
-                            shapefile = "shapefiles_rasters/abnj_global_moll_05deg/abnj_global_moll_05deg.shp",
+                            shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
   

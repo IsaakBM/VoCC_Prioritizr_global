@@ -80,6 +80,8 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
       hspen_v2 <- hspen %>% filter(DepthPrefMin >= 200 & DepthPrefMin < 1000 & DepthPrefMax >= 200 & DepthPrefMax < 1000)
     } else if (olayer == "bathyabyssopelagic") {
       hspen_v2 <- hspen %>% filter(DepthPrefMin >= 1000 & DepthPrefMax >= 1000)
+    } else if (olayer == "all") {
+      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 0 & DepthPrefMax >= 0)
     } else {
       hspen_v2 <- hspen
     }
@@ -123,11 +125,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
 }
 
 system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
-                       outdir = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer/",
-                       olayer = "surface",
+                       outdir = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/",
+                       olayer = "all",
                        prob_threshold = 0.5,
                        sp_env = 1,
-                       data = "species",
+                       data = "richness",
                        region = "/QRISdata/Q1216/BritoMorales/Project04b/ETOPO1_05deg/ETOPO1_ocean.grd"))
 
 # system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a",
