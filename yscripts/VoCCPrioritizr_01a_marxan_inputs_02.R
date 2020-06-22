@@ -103,13 +103,12 @@
         PU_list_b <- do.call(rbind, PU_list)
         # Write the object
           si_pu <- paste(olayer, sep = "_")
-          # st_write(PU_list_b, dsn = paste(outdir, si_pu, sep = ""), driver = "ESRI Shapefile")
           st_write(PU_list_b, dsn = outdir, layer = si_pu, driver = "ESRI Shapefile")
   
   return(PU_list_b)
   }
   
-  system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_rs",
+  system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_shp",
                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/",
                             region = TRUE,
                             shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
