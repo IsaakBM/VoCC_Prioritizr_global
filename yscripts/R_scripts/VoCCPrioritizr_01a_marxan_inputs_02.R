@@ -83,22 +83,23 @@
           # get the polygons from the world raster data
             pu_int <- st_intersection(shp_PU_sf, single) %>% 
               filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON")) # we want just the polygons/multi not extra geometries
-          # filter the intersection with the world waster data to get the exact layer names
-            pu_int_b <- pu_int[pu_int$layer %in% shp_PU_sf$layer, ] %>% 
-              group_by(layer) %>% 
-              summarise(layer2 = unique(layer))
+          # Dilter the intersection with the world polygon data to get the exact layer names
+            if(nrow(pu_int) > 0) { # to avoid empty sf objects because some species are mainly at EEZs
+              pu_int_b <- pu_int[pu_int$layer %in% shp_PU_sf$layer, ] %>% 
+                group_by(layer) %>% 
+                summarise(layer2 = unique(layer))
               # Calculating area info + type of feature
-                pu_int_b <- pu_int_b %>%
-                  dplyr::mutate (area_km2 = as.numeric(st_area(pu_int_b)/1e+06),
-                                 feature_names = unlist(lapply(basename(files[i]), FUN = function(x) strsplit(x, "_")))[1]) %>%
-                  dplyr::rename(pu = layer) %>% 
-                  dplyr::select(-layer2) %>% 
-                  dplyr::filter(area_km2 >= pu_min_area) 
-                
-            files_list[[i]] <- pu_int_b 
+              pu_int_b <- pu_int_b %>%
+                dplyr::mutate (area_km2 = as.numeric(st_area(pu_int_b)/1e+06),
+                               feature_names = unlist(lapply(basename(files[i]), FUN = function(x) strsplit(x, "_")))[1]) %>%
+                dplyr::rename(pu = layer) %>% 
+                dplyr::select(-layer2) %>% 
+                dplyr::filter(area_km2 >= pu_min_area) 
+              
+              files_list[[i]] <- pu_int_b 
+              }
           }
       stopCluster(cl)
-      
       # Final sf dataframe with all species information and write that object (main object to develop marxan input files)
         PU_list_b <- do.call(rbind, PU_list)
         # Write the object
