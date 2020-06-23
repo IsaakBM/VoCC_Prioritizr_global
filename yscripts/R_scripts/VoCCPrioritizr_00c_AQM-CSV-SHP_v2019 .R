@@ -30,12 +30,11 @@ aqua_rs <- function(path, outdir, olayer, geo.prj) { # kill the cells that are n
       rs <- raster(ncol = 720, nrow = 360)
       rs[] <- 1:ncell(rs)
     # Set up parallel structure
-      cores  <-  detectCores()
-      ncores <- 24
+      ncores <- 21
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
       # Parallel Loop
-        rs_final <- foreach(j  = 1:length(files_csv), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom")) %dopar% {
+        rs_final <- foreach(j  = 1:length(files_csv), .packages = c("raster", "sf", "dplyr")) %dopar% {
           single <- read.csv(files_csv[j])
           ns <- basename(files_csv[j])
             code <- unlist(lapply(ns, function(x) strsplit(x, "_")[[1]][[1]]))
@@ -66,5 +65,5 @@ aqua_rs <- function(path, outdir, olayer, geo.prj) { # kill the cells that are n
 
 system.time(aqua_rs(path = "csvs/01_SurfaceLayer",
                     outdir = "csvs/",
-                    olayer = "surface",
+                    olayer = "epipelagic",
                     geo.prj = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
