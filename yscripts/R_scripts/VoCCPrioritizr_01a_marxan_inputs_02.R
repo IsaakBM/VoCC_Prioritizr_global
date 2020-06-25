@@ -91,9 +91,9 @@
               # Calculating area info + type of feature
               pu_int_b <- pu_int_b %>%
                 dplyr::mutate (area_km2 = as.numeric(st_area(pu_int_b)/1e+06),
-                               feature_names = unlist(lapply(basename(files[i]), FUN = function(x) strsplit(x, "_")))[1]) %>%
+                               feature_names = paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_")) %>%
                 dplyr::rename(pu = layer) %>% 
-                dplyr::select(-layer2) %>% 
+                dplyr::select(-layer2) %>%
                 dplyr::filter(area_km2 >= pu_min_area) 
               
               files_list[[i]] <- pu_int_b 
@@ -109,10 +109,20 @@
   return(PU_list_b)
   }
   
-  system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_shp",
-                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/",
+  # system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_shp",
+  #                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/",
+  #                           region = TRUE,
+  #                           shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
+  #                           proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
+  #                           olayer = "epipelagic"))
+  
+  system.time(marxan_inputs(path = "csvs",
+                            outdir = "shapefiles_rasters/",
                             region = TRUE,
-                            shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
+                            shapefile = "shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-                            olayer = "epipelagic"))
+                            olayer = "bathyabyssopelagic"))
+  
+  
+  
   
