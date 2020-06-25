@@ -43,7 +43,7 @@ pzr_function <- function(path, outdir, blm, sol) {
             mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm) %>%
               add_pool_portfolio(method = 2, number_solutions = interations[i])
           # Solve the problem
-            mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
+            mp3_solution <- prioritizr::solve(mp1)
             #  
               problem_list[[i]] <- mp3_solution
         }
@@ -61,4 +61,4 @@ pzr_function <- function(path, outdir, blm, sol) {
 system.time(pzr_function(path = "/Users/bri273/Desktop/VoCC_Marxan/output_datfiles", 
                          outdir = "/Users/bri273/Desktop/VoCC_Prioritizr_global/", 
                          blm = 0, 
-                         sol = 2))
+                         sol = 10))
