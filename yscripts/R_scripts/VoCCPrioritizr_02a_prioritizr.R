@@ -16,7 +16,14 @@ pzr_function <- function(path, outdir, blm, sol) {
   # Reading features raster files (AquaMaps | Trajectory classes)
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
     
-    for(kk in 1:length(dir.layers)) {
+  # Begin the parallel structure      
+    ncores <- 3
+    cl <- makeCluster(ncores)
+    registerDoParallel(cl)
+    
+    problem_list <- list()
+    
+    problems <-  foreach(kk = 1:length(dir.layers), .packages = c("prioritizr", "gurobi", "dplyr", "reldist")) %dopar% {
       
       #
         file_pu <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "pu.dat$"), sep = "/")
@@ -30,31 +37,17 @@ pzr_function <- function(path, outdir, blm, sol) {
           rij <- read.table(file_rij, sep = ",", header = TRUE)
       
       # How many interation per problem?
-        interations <- seq(1, sol, length.out = sol)
         problem_list <- list()
-      # Begin the parallel structure      
-        ncores <- 3
-        cl <- makeCluster(ncores)
-        registerDoParallel(cl)
-      # Loop
-        problems <- foreach(i = 1:length(interations), .packages = c("prioritizr", "gurobi", "dplyr", "reldist")) %dopar% {
-          
-          # Establish the Problem
-            mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm) %>%
-              add_pool_portfolio(method = 2, number_solutions = interations[i])
-          # Solve the problem
-            mp3_solution <- prioritizr::solve(mp1)
-            #  
-              problem_list[[i]] <- mp3_solution
-        }
-        stopCluster(cl)
-  
-      # 
-        test <- do.call(cbind, problems)
+      # Establish the Problem
+        mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm) %>%
+          add_pool_portfolio(method = 2, number_solutions = sol)
+        # Solve the problem
+          mp3_solution <- prioritizr::solve(mp1)
         # Write the object
           ns <- basename(dir.layers[kk])
-          write.csv(test, paste(outdir, ns, ".csv", sep = ""), row.names = FALSE)
+          write.csv(mp3_solution, paste(outdir, ns, ".csv", sep = ""), row.names = FALSE)
     }
+    stopCluster(cl)
 }
 
 
