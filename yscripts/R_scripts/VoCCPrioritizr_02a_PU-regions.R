@@ -5,6 +5,30 @@ library(ggplot2)
 
 long <- st_read("shapefiles_rasters/LonghurstProvinces/Longhurst_world_v4_2010.shp") %>% 
   st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+
+glasgow_prov <- st_read("shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicProvinces_v1_2017.shp") %>% 
+  st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+
+goods_prov <- st_read("shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp") %>% 
+  st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+
+ggplot() +
+  geom_sf(data = long, size = 0.05) +
+  ggtitle("Longhurst Provinces") +
+  ggsave("ypdfs/LonghurstProvinces.pdf", width = 20, height = 15, dpi = 300)
+
+ggplot() +
+  geom_sf(data = glasgow_prov, size = 0.05) +
+  ggtitle("Glasgow Provinces") +
+  ggsave("ypdfs/GlasgowProvinces.pdf", width = 20, height = 15, dpi = 300)
+
+ggplot() +
+  geom_sf(data = goods_prov, size = 0.05) +
+  ggtitle("Glasgow Provinces") +
+  ggsave("ypdfs/GOODSprovinces.pdf", width = 20, height = 15, dpi = 300)
+
+
+
 sf_pu <- st_read("shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp")
 prov_code <- as.character(long$ProvCode)
 
@@ -27,8 +51,11 @@ length(unique(sf_pu$layer))
 length(unique(pus_long$layer))
 
 
-ggplot() +
-  geom_sf(data = sf_pu, size = 0.05) +
-  ggtitle("Longhurst Provinces by pu 0.5° ABNJ") +
-  theme_opts3 +
-  ggsave("ypdfs/abnj_LonghurstProvinces_05deg_all-categ.pdf", width = 20, height = 15, dpi = 300)
+# ggplot() +
+#   geom_sf(data = sf_pu, size = 0.05) +
+#   ggtitle("Longhurst Provinces by pu 0.5° ABNJ") +
+#   theme_opts3 +
+#   ggsave("ypdfs/abnj_LonghurstProvinces_05deg_all-categ.pdf", width = 20, height = 15, dpi = 300)
+
+
+
