@@ -17,7 +17,7 @@ pzr_function <- function(path, outdir, blm, sol) {
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
     
   # Begin the parallel structure      
-    ncores <- 3
+    ncores <- 22
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     
