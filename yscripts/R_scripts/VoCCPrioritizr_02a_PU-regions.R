@@ -21,24 +21,14 @@ for(i in 1:length(prov_code)) {
 pus_long <- do.call(rbind, long_list) %>% 
   arrange(layer)
 sf_pu$long_prov <- pus_long$long_prov[match(sf_pu$layer, pus_long$layer)]
+sf_pu$long_prov <- ifelse(is.na(sf_pu$long_prov), "non-categ", sf_pu$long_prov)
 
 length(unique(sf_pu$layer))
-length(unique(pus_long$layer)) # less provinces because st_crop CUT things...
-
-
-
-ggplot() +
-  geom_sf(data = pus_long, size = 0.05) +
-  ggtitle("Longhurst Provinces by pu 0.5° ABNJ") +
-  theme_opts3 +
-  ggsave("ypdfs/abnj_LonghurstProvinces_05deg.pdf", width = 20, height = 15, dpi = 300)
+length(unique(pus_long$layer))
 
 
 ggplot() +
-  geom_sf(data = dt1, size = 0.05) +
+  geom_sf(data = sf_pu, size = 0.05) +
   ggtitle("Longhurst Provinces by pu 0.5° ABNJ") +
   theme_opts3 +
-  ggsave("ypdfs/abnj_LonghurstProvinces_BPLR_05deg.pdf", width = 20, height = 15, dpi = 300)
-
-
-# not categorized by provinces: give those polygons a name... like "not category?" [sounds like a good idea!]
+  ggsave("ypdfs/abnj_LonghurstProvinces_05deg_all-categ.pdf", width = 20, height = 15, dpi = 300)
