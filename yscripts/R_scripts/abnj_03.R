@@ -98,17 +98,17 @@ pus_global <- st_make_grid(global, square = F, cellsize = c(grid_spacing, grid_s
   pus_global_epi <- pus_global %>%
     mutate(layer = as.numeric(seq(1,nrow(pus_global)))) %>% 
     arrange(layer)
-  st_write(pus_global, dsn = "shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg", driver = "ESRI Shapefile")
+  st_write(sf_sf, dsn = "shapefiles_rasters/", layer = "abnj_02-epipelagic_global_moll_05deg", driver = "ESRI Shapefile")
 # Mesopelagic PUs
   pus_global_meso <- pus_global_epi %>%
-    mutate(layer = as.numeric(seq(90065,length.out = nrow(pus_global_epi)))) %>% 
+    mutate(layer = as.numeric(seq(90066, length.out = nrow(sf_sf)))) %>% 
     arrange(layer)
-  st_write(pus_global, dsn = "shapefiles_rasters/abnj_02-mesopelagic_global_moll_05deg", driver = "ESRI Shapefile")
+  st_write(pus_global_meso, dsn = "shapefiles_rasters/", layer = "abnj_03-mesopelagic_global_moll_05deg", driver = "ESRI Shapefile")
 # Bathyabyssopelagic PUs
   pus_global_bathy <- pus_global_meso %>%
-    mutate(layer = as.numeric(seq(180129,length.out = nrow(pus_global_meso)))) %>% 
+    mutate(layer = as.numeric(seq(180131,length.out = nrow(pus_global_meso)))) %>% 
     arrange(layer)
-  st_write(pus_global, dsn = "shapefiles_rasters/abnj_03-bathyabysso_global_moll_05deg", driver = "ESRI Shapefile")
+  st_write(pus_global_bathy, dsn = "shapefiles_rasters/", layer = "abnj_04-bathyabysso_global_moll_05deg", driver = "ESRI Shapefile")
 
 pus_area <- round(st_area(pus_global)/1e+06)
 range(pus_area)
