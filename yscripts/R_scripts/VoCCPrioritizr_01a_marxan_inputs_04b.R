@@ -34,6 +34,7 @@
         library(foreach)
         library(stringr)
         library(lwgeom)
+        library(data.table)
     
     # Creating planning unit based on region
     if(region == FALSE) {
@@ -75,7 +76,7 @@
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
       # Loop
-        PU_list <- foreach(i = 1:length(files), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom")) %dopar% {
+        PU_list <- foreach(i = 1:length(files), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom", "data.table")) %dopar% {
         # Reading features. If the raster is not projected, do it 
           single <- st_read(files[i]) %>% 
             st_transform(crs = CRS(geo.prj))
@@ -102,20 +103,25 @@
       # Final sf dataframe with all species information and write that object (main object to develop marxan input files)
         PU_list_b <- do.call(rbind, PU_list)
         # Write the object
-          sf_csv <- paste("poly-", olayer, ".csv", sep = "")
           pu_csv <- paste(olayer, ".csv", sep = "")
-          write.csv(dplyr::select(PU_list_b, -layer2), paste(outdir, sf_csv, sep = ""))
-          write.csv(dplyr::select(PU_list_b, -geometry, -layer2), paste(outdir, pu_csv, sep = ""))
+          fwrite(dplyr::select(PU_list_b, -geometry, -layer2), paste(outdir, pu_csv, sep = ""))
   
   return(PU_list_b)
   }
   
-  system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/04_BathyAbyssopelagicLayer_shp",
-                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/04-bathybyssopelagic_sps/",
+  # system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/04_BathyAbyssopelagicLayer_shp",
+  #                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/04-bathybyssopelagic_sps/",
+  #                           region = TRUE,
+  #                           shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_03-bathyabysso_global_moll_05deg/abnj_03-bathyabysso_global_moll_05deg.shp",
+  #                           proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
+  #                           olayer = "bathyabyssopelagicLayer"))
+  
+  system.time(marxan_inputs(path = "shapefiles_rasters/03_MesopelagicLayer_shp",
+                            outdir = "shapefiles_rasters/",
                             region = TRUE,
-                            shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_03-bathyabysso_global_moll_05deg/abnj_03-bathyabysso_global_moll_05deg.shp",
+                            shapefile = "shapefiles_rasters/abnj_03-bathyabysso_global_moll_05deg/abnj_03-bathyabysso_global_moll_05deg.shp",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-                            olayer = "bathyabyssopelagicLayer"))
+                            olayer = "bathyabyssopelagic"))
   
   
   
