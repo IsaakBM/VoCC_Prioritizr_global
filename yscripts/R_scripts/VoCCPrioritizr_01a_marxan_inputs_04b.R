@@ -71,7 +71,7 @@
     # Loop through each file
       files_list <- list() # to allocate results
     # Begin the parallel structure      
-      ncores <- 24
+      ncores <- 21
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
       # Loop
@@ -102,28 +102,20 @@
       # Final sf dataframe with all species information and write that object (main object to develop marxan input files)
         PU_list_b <- do.call(rbind, PU_list)
         # Write the object
-          sf_csv <- paste("sf-", olayer, ".csv", sep = "")
+          sf_csv <- paste("poly-", olayer, ".csv", sep = "")
           pu_csv <- paste(olayer, ".csv", sep = "")
-          # st_write(PU_list_b, dsn = outdir, layer = si_pu, driver = "ESRI Shapefile")
           write.csv(dplyr::select(PU_list_b, -layer2), paste(outdir, sf_csv, sep = ""))
           write.csv(dplyr::select(PU_list_b, -geometry, -layer2), paste(outdir, pu_csv, sep = ""))
   
   return(PU_list_b)
   }
   
-  # system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/02_EpipelagicLayer_shp",
-  #                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/",
-  #                           region = TRUE,
-  #                           shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
-  #                           proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-  #                           olayer = "epipelagic"))
-  
-  system.time( trial <- marxan_inputs(path = "shapefiles_rasters/03_MesopelagicLayer_shp",
-                            outdir = "shapefiles_rasters/",
+  system.time(marxan_inputs(path = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/04_BathyAbyssopelagicLayer_shp",
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/04-bathybyssopelagic_sps/",
                             region = TRUE,
-                            shapefile = "shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
+                            shapefile = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_03-bathyabysso_global_moll_05deg/abnj_03-bathyabysso_global_moll_05deg.shp",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-                            olayer = "mesopelagic"))
+                            olayer = "bathyabyssopelagicLayer"))
   
   
   
