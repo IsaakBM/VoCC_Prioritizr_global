@@ -26,7 +26,6 @@
    #      lapply(list.of.packages, library, character.only = TRUE)
         
         library(raster)
-        library(fasterize)
         library(rgdal)
         library(rgeos)
         library(sf)
@@ -94,7 +93,8 @@
                                feature_names = paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_")) %>%
                 dplyr::rename(pu = layer) %>% 
                 dplyr::select(-layer2) %>%
-                dplyr::filter(area_km2 >= pu_min_area) 
+                dplyr::filter(area_km2 >= pu_min_area) %>% 
+                as.data.frame()
               
               files_list[[i]] <- pu_int_b 
               }
@@ -103,8 +103,11 @@
       # Final sf dataframe with all species information and write that object (main object to develop marxan input files)
         PU_list_b <- do.call(rbind, PU_list)
         # Write the object
-          si_pu <- paste(olayer, sep = "_")
-          st_write(PU_list_b, dsn = outdir, layer = si_pu, driver = "ESRI Shapefile")
+          sf_csv <- paste("sf-", olayer, "-sf.csv", sep = "")
+          pu_csv <- paste(olayer, ".csv", sep = "")
+          # st_write(PU_list_b, dsn = outdir, layer = si_pu, driver = "ESRI Shapefile")
+          write.csv(PU_list_b, paste(outdir, sf_csv, sep = ""))
+          write.csv(select(PU_list_b, -geometry), paste(outdir, pu_csv, sep = ""))
   
   return(PU_list_b)
   }
@@ -116,12 +119,12 @@
   #                           proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
   #                           olayer = "epipelagic"))
   
-  system.time(marxan_inputs(path = "csvs",
+  system.time( trial <- marxan_inputs(path = "shapefiles_rasters/03_MesopelagicLayer_shp",
                             outdir = "shapefiles_rasters/",
                             region = TRUE,
                             shapefile = "shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-                            olayer = "bathyabyssopelagic"))
+                            olayer = "mesopelagic"))
   
   
   
