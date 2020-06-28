@@ -18,44 +18,51 @@ glasgow_prov <- st_read("shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicP
 goods_prov <- st_read("shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp") %>% 
   st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
 
-ggplot() +
-  geom_sf(data = long, size = 0.05) +
-  ggtitle("Longhurst Provinces") +
-  ggsave("ypdfs/LonghurstProvinces.pdf", width = 20, height = 15, dpi = 300)
+# ggplot() +
+#   geom_sf(data = long, size = 0.05) +
+#   ggtitle("Longhurst Provinces") +
+#   ggsave("ypdfs/LonghurstProvinces.pdf", width = 20, height = 15, dpi = 300)
+# 
+# ggplot() +
+#   geom_sf(data = glasgow_prov, size = 0.05) +
+#   ggtitle("Glasgow Provinces") +
+#   ggsave("ypdfs/GlasgowProvinces.pdf", width = 20, height = 15, dpi = 300)
+# 
+# ggplot() +
+#   geom_sf(data = goods_prov, size = 0.05) +
+#   ggtitle("Glasgow Provinces") +
+#   ggsave("ypdfs/GOODSprovinces.pdf", width = 20, height = 15, dpi = 300)
 
-ggplot() +
-  geom_sf(data = glasgow_prov, size = 0.05) +
-  ggtitle("Glasgow Provinces") +
-  ggsave("ypdfs/GlasgowProvinces.pdf", width = 20, height = 15, dpi = 300)
 
-ggplot() +
-  geom_sf(data = goods_prov, size = 0.05) +
-  ggtitle("Glasgow Provinces") +
-  ggsave("ypdfs/GOODSprovinces.pdf", width = 20, height = 15, dpi = 300)
+proj.geo <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
+prov_name <- "glasgow"
 
+pu_file <- "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp"
+pu_region <- st_read(pu_file) %>% 
+  st_transform(crs = CRS(proj.geo))
 
+province <- "shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicProvinces_v1_2017.shp"
+bioprovince <- st_read(province) %>% 
+  st_transform(crs = CRS(proj.geo))
 
-sf_pu <- st_read("shapefiles_rasters/abnj_01-epipelagic_global_moll_05deg/abnj_01-epipelagic_global_moll_05deg.shp")
-prov_code <- as.character(long$ProvCode)
+prov_code <- as.character(bioprovince$ProvId)
 
-long_list <- list()
+prov_list <- list()
 for(i in 1:length(prov_code)) {
-  single <- long %>% 
-    filter(ProvCode == prov_code[i])
-  dt1 <- st_crop(sf_pu, single)
-  long_list[[i]] <- dt1 %>% 
-    mutate(long_prov = prov_code[i])
+  single <- bioprovince %>% 
+    filter(ProvId == prov_code[i])
+  dt1 <- st_crop(pu_region, single)
+  prov_list[[i]] <- dt1 %>% 
+    mutate(province = prov_code[i])
 }
 
-# plot(st_geometry(long_list[[53]]))
-pus_long <- do.call(rbind, long_list) %>% 
+# plot(st_geometry(prov_list[[10]]))
+pus_prov <- do.call(rbind, prov_list) %>%
   arrange(layer)
-sf_pu$long_prov <- pus_long$long_prov[match(sf_pu$layer, pus_long$layer)]
-sf_pu$long_prov <- ifelse(is.na(sf_pu$long_prov), "non-categ", sf_pu$long_prov)
-
-length(unique(sf_pu$layer))
-length(unique(pus_long$layer))
-
+# length(unique(pus_prov$layer))
+pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
+# length(unique(pu_region$layer))
+pu_region$province <- ifelse(is.na(pu_region$province), paste("non-categ", prov_name, sep = "_"), paste(pu_region$province, prov_name, sep = "_"))
 
 
 bap_pu <- st_read("shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp")
