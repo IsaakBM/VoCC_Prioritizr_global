@@ -50,7 +50,7 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
 ### puvsp FILE (species[a different number that the species' code], pu[planning unit], amount[area])
     shp_df <- shp_csv %>% 
       select(pu, area_km2, feature_names_prov) %>% 
-      transform(id = as.numeric(factor(feature_names_prov)))
+      base::transform(id = as.numeric(factor(feature_names_prov)))
     
     puvsp <- shp_df %>% 
       select(id, pu, area_km2) %>% 
@@ -65,7 +65,7 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
             write.table(puvsp_order, file = paste(outdir, puvsp_name_order, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
     
 ### spec FILE (id[species ID], prop[proportion for protection of these species... 0.3 in general], spf[species penalty factor], name[species' name/code])  
-    spec <- shp_csv %>% 
+    spec <- shp_df %>% 
       group_by(id, feature_names_prov) %>% 
       summarize(total_area = sum(area_km2)) %>% 
       select(id, feature_names_prov) %>% 
