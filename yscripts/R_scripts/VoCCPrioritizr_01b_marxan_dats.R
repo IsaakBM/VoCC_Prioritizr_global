@@ -18,7 +18,7 @@
 
 # ~28 minutes global analysis at 0.5° resolution no parallel
 
-marxan_dat_files <- function(marxan_input, pu_shpfile, outdir, cost_file, cost_type, geo.proj) { # in this case cost_file is velocity but could be other
+marxan_dat_files <- function(marxan_input, marxan_input_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
 
 ### List of pacakges that we will use
     list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr")
@@ -33,14 +33,21 @@ marxan_dat_files <- function(marxan_input, pu_shpfile, outdir, cost_file, cost_t
     shp_csv <- fread(marxan_input_csv)
 
 ### bound.dat FILE
-    shp_PU_sp <- st_read(pu_shpfile) %>% st_transform(crs = geo.proj) %>% as("Spatial")
-    length_mtx <- prioritizr::boundary_matrix(shp_PU_sp) # a spare matrix ::: eleting the TRUE argument due crashed 
-    length_df  <-  as.data.frame(summary(length_mtx))
-      length_df <-  length_df[order(length_df$i),]
-      length_df <- length_df %>% dplyr::rename(id1 = i, id2 = j, boundary = x)
+    shp_PU_sp <- st_read(pu_shpfile) %>% 
+      st_transform(crs = proj.geo)
+    
+    length_mtx <- prioritizr::boundary_matrix(shp_PU_sp) # a spare matrix ::: deleting the TRUE argument due crashed 
+    length_data <- as(length_mtx, "dgTMatrix")
+    length_data <- data.frame(id1 = length_data@i + 1, id2 = length_data@j + 1, boundary = length_data@x)
+      # keep same name of original pus by converting into factor
+        length_data$id2 <- as.factor(length_data$id2)
+        length_data$id1 <- as.factor(length_data$id1)
+        # replace those name with original shapefile pu layer
+          levels(length_data$id2) <- shp_PU_sp$layer
+          levels(length_data$id1) <- shp_PU_sp$layer
     
             bound_name <- paste("bound", sep = "_")
-            write.table(length_df, file = paste(outdir, bound_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+            write.table(length_data, file = paste(outdir, bound_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
           
 ### puvsp FILE (species[a different number that the species' code], pu[planning unit], amount[area])
     shp_df <- shp_csv %>% 
@@ -60,8 +67,14 @@ marxan_dat_files <- function(marxan_input, pu_shpfile, outdir, cost_file, cost_t
             write.table(puvsp_order, file = paste(outdir, puvsp_name_order, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
     
 ### spec FILE (id[species ID], prop[proportion for protection of these species... 0.3 in general], spf[species penalty factor], name[species' name/code])  
-    spec <- shp_df %>% group_by(id, ftr_nms) %>% summarize(total_area = sum(are_km2)) %>% data.frame() %>% 
-      select(id, ftr_nms) %>% rename(id = id, name = ftr_nms) %>% mutate(prop = 0.2, spf = 1.1) %>% select(id, prop, spf, name) # try to put this above
+    spec <- shp_df %>% 
+      group_by(id, feature_names_prov) %>% 
+      summarize(total_area = sum(area_km2)) %>% 
+      select(id, feature_names_prov) %>% 
+      rename(id = id, name = feature_names_prov) %>% 
+      mutate(prop = 0.2, spf = 1.1) %>% 
+      select(id, prop, spf, name) %>% 
+      data.frame()
     # Write the file
       spec_name <- paste("spec", sep = "_")
       write.table(spec, file = paste(outdir, spec_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
