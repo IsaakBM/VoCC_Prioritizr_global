@@ -18,10 +18,10 @@
 
 # ~28 minutes global analysis at 0.5° resolution no parallel
 
-marxan_dat_files <- function(marxan_input, marxan_input_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
+marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
 
 ### List of pacakges that we will use
-    list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr")
+    list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr", "data.table")
     # If is not installed, install the pacakge
       new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages
       if(length(new.packages)) install.packages(new.packages) # if not, installed
@@ -29,22 +29,20 @@ marxan_dat_files <- function(marxan_input, marxan_input_csv, pu_shpfile, outdir,
         lapply(list.of.packages, require, character.only = TRUE) # or require
   
 ### Reading marxan_input file
-    shp_file <- st_read(marxan_input_shp)
+    shp_file <- st_read(pu_shpfile) %>% 
+      st_transform(crs = proj.geo)
     shp_csv <- fread(marxan_input_csv)
 
 ### bound.dat FILE
-    shp_PU_sp <- st_read(pu_shpfile) %>% 
-      st_transform(crs = proj.geo)
-    
-    length_mtx <- prioritizr::boundary_matrix(shp_PU_sp) # a spare matrix ::: deleting the TRUE argument due crashed 
+    length_mtx <- prioritizr::boundary_matrix(shp_file) # a spare matrix ::: deleting the TRUE argument due crashed 
     length_data <- as(length_mtx, "dgTMatrix")
     length_data <- data.frame(id1 = length_data@i + 1, id2 = length_data@j + 1, boundary = length_data@x)
       # keep same name of original pus by converting into factor
         length_data$id2 <- as.factor(length_data$id2)
         length_data$id1 <- as.factor(length_data$id1)
         # replace those name with original shapefile pu layer
-          levels(length_data$id2) <- shp_PU_sp$layer
-          levels(length_data$id1) <- shp_PU_sp$layer
+          levels(length_data$id2) <- shp_file$layer
+          levels(length_data$id1) <- shp_file$layer
     
             bound_name <- paste("bound", sep = "_")
             write.table(length_data, file = paste(outdir, bound_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
@@ -56,7 +54,7 @@ marxan_dat_files <- function(marxan_input, marxan_input_csv, pu_shpfile, outdir,
     
     puvsp <- shp_df %>% 
       select(id, pu, area_km2) %>% 
-      rename(species = id, amount = area_km2) %>% 
+      dplyr::rename(species = id, amount = area_km2) %>% 
       arrange(pu)
     # Write the file puvsp
       puvsp_name <- paste("puvsp", sep = "_")
@@ -67,11 +65,11 @@ marxan_dat_files <- function(marxan_input, marxan_input_csv, pu_shpfile, outdir,
             write.table(puvsp_order, file = paste(outdir, puvsp_name_order, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
     
 ### spec FILE (id[species ID], prop[proportion for protection of these species... 0.3 in general], spf[species penalty factor], name[species' name/code])  
-    spec <- shp_df %>% 
+    spec <- shp_csv %>% 
       group_by(id, feature_names_prov) %>% 
       summarize(total_area = sum(area_km2)) %>% 
       select(id, feature_names_prov) %>% 
-      rename(id = id, name = feature_names_prov) %>% 
+      dplyr::rename(id = id, name = feature_names_prov) %>% 
       mutate(prop = 0.2, spf = 1.1) %>% 
       select(id, prop, spf, name) %>% 
       data.frame()
@@ -80,34 +78,30 @@ marxan_dat_files <- function(marxan_input, marxan_input_csv, pu_shpfile, outdir,
       write.table(spec, file = paste(outdir, spec_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
       
 ### pu FILE (id[planning units id], cost[velocity], status[available locked in and locked out])
-      pu_shpfile <- st_read(pu_shpfile)
-        var.names <- colnames(pu_shpfile)
-        pu_shpfile <- pu_shpfile %>% 
-          magrittr::set_colnames(ifelse(str_detect(var.names, "(?i).*id*"), "id", # or (?i).*id*|(?i).*pu*?
-                                        ifelse(str_detect(var.names, "(?i)cost"), "cost", var.names))) %>% 
-          dplyr::select(id, geometry) %>% 
-          arrange(id)
+    col_shp <- colnames(shp_file)
+    col_shp[1] <- ifelse(col_shp[1] == "layer", "id", col_shp[1])
+    colnames(shp_file) <- col_shp
 
       if(cost_type == "Raster") {
         # Read raster object
-          cost_file <- readAll(raster(cost_file)) %>% disaggregate(2)
-            names(cost_file) <- "layer"
-            cost_file <- crop(cost_file, pu_shpfile) %>% as("SpatialPolygonsDataFrame")
+          cost_file <- readAll(raster(cost_file))
+          crs(cost_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+          names(cost_file) <- "layer"
+          cost_file <- crop(cost_file, shp_file) %>% 
+            as("SpatialPolygonsDataFrame")
           # Transform Cost layer into a SF object
-            geo.prj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0" 
-            sd_rs1 <- cost_file %>% spTransform(CRS(geo.prj)) %>% st_as_sf()
+            sd_rs1 <- cost_file %>% 
+              st_as_sf() %>% 
+              st_transform(crs = CRS(proj.geo))
           # Getting cost value by planning unit
-            pu_file <- st_intersection(pu_shpfile, sd_rs1) %>% 
+            pu_file <- st_intersection(shp_file, sd_rs1) %>% 
               filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON")) %>% 
-              rename(id = layer, cost = layer) %>% 
+              dplyr::rename(id = layer, cost = layer) %>% 
               mutate(cost = abs(cost)) %>% 
               arrange(id)
             pu_file <- pu_file[!duplicated(pu_file$id),] # just in case
-              pu_file <- pu_shpfile %>%
-                mutate(cost = pu_file$cost) %>% 
-                select(id, cost, geometry)
             # Write cost shapefile
-              st_write(pu_file, dsn = paste(outdir, sep = ""), driver = "ESRI Shapefile")
+              st_write(pu_file, dsn = outdir, layer = "pu", driver = "ESRI Shapefile")
             # Write .dat file
               pu_file_df <- pu_file %>%
                 mutate(cost = abs(cost), status = 0) %>% # status may change in the future (e.g., locked in and locked out? in this case locked out)
@@ -142,20 +136,20 @@ marxan_dat_files <- function(marxan_input, marxan_input_csv, pu_shpfile, outdir,
   }
 
   # # for vocc magnitude when cost is the raster file
-  #   system.time(marxan_dat_files(marxan_input = "features_shapefiles/01-surface_med_sps/sps_by_pu/sps_by_pu.shp",
-  #                                pu_shpfile = "features_shapefiles/costlayer2/costlayer2.shp",
-  #                                outdir = "output_datfiles/02-cost-vocc_feat-sps_ssp245/",
-  #                                cost_file = "annualvocc_b_inter/mag/ssp245/01_SurfaceLayer_ssp245/voccMag-thetao_01-Surface_MPI-ESM1-2-HR_ssp245-05deg_2020-2100.tif",
-  #                                cost_type = "Raster",
-  #                                geo.proj = "+proj=aea +lat_1=60 +lat_2=60 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"))
+    system.time(marxan_dat_files(marxan_input_csv = "shapefiles_rasters/bathyabyssopelagic_provinces.csv",
+                                 pu_shpfile = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp",
+                                 outdir = "output_datfiles/abnj_04-bathyabysso_global_moll_05deg/",
+                                 cost_file = "features_rasters/voccMag_04-bap_AEMean_ssp126_r1i1p1f1_2020-2100_.tif",
+                                 cost_type = "Raster",
+                                 proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
   
   # for trajectories shapefile when cost is the shapefile fishing effort
-    system.time(marxan_dat_files(marxan_input = "features_shapefiles/02-surface_med_slowspeed_ssp245/sps_by_pu/sps_by_pu.shp",
-                                 pu_shpfile = "features_shapefiles/costlayer2/costlayer2.shp",
-                                 outdir = "output_datfiles/03-cost-fish_feat-sps-slowspeed_ssp245/",
-                                 cost_file = "features_shapefiles/costlayer2/costlayer2.shp",
-                                 cost_type = "Shapefile",
-                                 geo.proj = "+proj=aea +lat_1=60 +lat_2=60 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"))
+    # system.time(marxan_dat_files(marxan_input = "features_shapefiles/02-surface_med_slowspeed_ssp245/sps_by_pu/sps_by_pu.shp",
+    #                              pu_shpfile = "features_shapefiles/costlayer2/costlayer2.shp",
+    #                              outdir = "output_datfiles/03-cost-fish_feat-sps-slowspeed_ssp245/",
+    #                              cost_file = "features_shapefiles/costlayer2/costlayer2.shp",
+    #                              cost_type = "Shapefile",
+    #                              proj.geo = "+proj=aea +lat_1=60 +lat_2=60 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"))
 
   
   # velocity cost
