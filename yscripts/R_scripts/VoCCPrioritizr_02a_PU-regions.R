@@ -65,6 +65,34 @@ pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
 pu_region$province <- ifelse(is.na(pu_region$province), paste("non-categ", prov_name, sep = "_"), paste(pu_region$province, prov_name, sep = "_"))
 
 
+# reading csv to match species
+
+csv_olayer <- "shapefiles_rasters/bathyabyssopelagic.csv"
+file_olayer <- fread(csv_olayer)
+head(file_olayer)
+length(unique(file_olayer$feature_names))
+# match province name with species name
+file_olayer$province <- pu_region$province[match(file_olayer$pu, pu_region$layer)]
+head(file_olayer)
+unique(file_olayer$province)
+
+file_olayer <- file_olayer %>% 
+  mutate(feature_names_prov = ifelse(is.na(province), paste("non-categ", prov_name, sep = "_"), 
+                                     paste(feature_names, province, sep = "_")))
+
+head(file_olayer)
+nrow(file_olayer)
+length(unique(file_olayer$feature_names_prov)) # increase the number of unique species features, which is OK and predictable
+
+
+
+
+
+
+
+
+fwrite(file_olayer, "shapefiles_rasters/bathyabyssopelagic_provinces.csv")
+
 bap_pu <- st_read("shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp")
 bap <- fread("shapefiles_rasters/bathyabyssopelagic.csv")
 bap2 <- bap %>% 
