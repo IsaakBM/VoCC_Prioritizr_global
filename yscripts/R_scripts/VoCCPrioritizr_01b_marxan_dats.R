@@ -29,7 +29,8 @@ marxan_dat_files <- function(marxan_input, pu_shpfile, outdir, cost_file, cost_t
         lapply(list.of.packages, require, character.only = TRUE) # or require
   
 ### Reading marxan_input file
-    shp_file <- st_read(marxan_input)
+    shp_file <- st_read(marxan_input_shp)
+    shp_csv <- fread(marxan_input_csv)
 
 ### bound.dat FILE
     shp_PU_sp <- st_read(pu_shpfile) %>% st_transform(crs = geo.proj) %>% as("Spatial")
@@ -42,8 +43,14 @@ marxan_dat_files <- function(marxan_input, pu_shpfile, outdir, cost_file, cost_t
             write.table(length_df, file = paste(outdir, bound_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
           
 ### puvsp FILE (species[a different number that the species' code], pu[planning unit], amount[area])
-    shp_df <- shp_file %>% data.frame %>% select(-geometry) %>% select(ftr_nms, pu, are_km2) %>% transform(id = as.numeric(factor(ftr_nms)))
-    puvsp <- shp_df %>% select(id, pu, are_km2) %>% rename(species = id, amount = are_km2) %>% arrange(pu)
+    shp_df <- shp_csv %>% 
+      select(pu, area_km2, feature_names_prov) %>% 
+      transform(id = as.numeric(factor(feature_names_prov)))
+    
+    puvsp <- shp_df %>% 
+      select(id, pu, area_km2) %>% 
+      rename(species = id, amount = area_km2) %>% 
+      arrange(pu)
     # Write the file puvsp
       puvsp_name <- paste("puvsp", sep = "_")
       write.table(puvsp, file = paste(outdir, puvsp_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
