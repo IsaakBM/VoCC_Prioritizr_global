@@ -23,10 +23,10 @@ for (s in 1:length(depth$Species)){
   # depth$MaxDepth[s] <- eco$depthRangeDeep
 }
 
-names(depth2) <- ns_species2
+names(depth2) <- ns_species # better to 
 depth3 <- do.call(rbind, depth2)
 depth3 <- depth3 %>% 
-  mutate(Species = ns_species2) %>% 
+  mutate(Species = ns_species) %>% 
   select(Species, DepthRangeShallow, DepthRangeDeep)
 
 plot(species$Acanthistius.brasilianus)
@@ -35,3 +35,4 @@ cost_all <- stackApply(species, indices = nlayers(species), fun = sum)
 plot(cost_all)
 
 writeRaster(cost_all, "Cost_Layers/Cost_Raster_Sum.tif")
+depth4 <- na.omit(depth3)
