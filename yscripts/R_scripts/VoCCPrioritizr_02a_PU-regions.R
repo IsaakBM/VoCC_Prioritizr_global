@@ -1,12 +1,57 @@
-library(raster)
-library(dplyr)
-library(sf)
-library(ggplot2)
-library(data.table)
-library(rnaturalearth)
-library(rnaturalearthdata)
-library(RColorBrewer)
-library(patchwork)
+
+
+
+pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir) {
+  
+  library(raster)
+  library(dplyr)
+  library(sf)
+  library(ggplot2)
+  library(data.table)
+  library(rnaturalearth)
+  library(rnaturalearthdata)
+  library(RColorBrewer)
+  library(patchwork)
+  
+  # Reading Planning Unit Region Shapefile
+    pu_file <- pu_file
+      pu_region <- st_read(pu_file) %>% st_transform(crs = CRS(proj.geo))
+  # Reading Marine Province Shapefile
+    province <- province_file
+      bioprovince <- st_read(province) %>% st_transform(crs = CRS(proj.geo)) 
+  
+  # Match 
+  if(prov_name == "Longhurst") {
+    
+    
+  } else if (prov_name == "Glasgow") {
+    
+    prov_code <- as.character(bioprovince$ProvId)
+    
+    prov_list <- list()
+    for(i in 1:length(prov_code)) {
+      single <- bioprovince %>% 
+        filter(ProvId == prov_code[i])
+      dt1 <- st_crop(pu_region, single)
+      prov_list[[i]] <- dt1 %>% 
+        mutate(province = prov_code[i])
+    }
+    
+    
+    
+  } else if (prov_name == "GOODS") {
+    
+    
+    
+  }
+    
+  
+  
+}
+
+
+
+
 
 
 long <- st_read("shapefiles_rasters/LonghurstProvinces/Longhurst_world_v4_2010.shp") %>% 
