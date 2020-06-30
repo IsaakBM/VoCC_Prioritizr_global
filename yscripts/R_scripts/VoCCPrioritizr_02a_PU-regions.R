@@ -22,36 +22,84 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir)
   
   # Match 
   if(prov_name == "Longhurst") {
-    
+    # Get the indicator for the provinces
+      prov_code <- as.character(bioprovince$ProvCode)
+      prov_list <- list() # to allocate results
+      for(i in 1:length(prov_code)) { # this could be set on parallel
+        single <- bioprovince %>% filter(ProvCode == prov_code[i])
+        dt1 <- st_crop(pu_region, single) # crop each polygon with the bioprovince
+        prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output
+      }
+    # Merge all the output
+      pus_prov <- do.call(rbind, prov_list) %>% arrange(layer)
+    # Match and establish categories
+      pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
+      pu_region$province <- ifelse(is.na(pu_region$province), 
+                                   paste("non-categ", prov_name, sep = "_"), 
+                                   paste(pu_region$province, prov_name, sep = "_"))
     
   } else if (prov_name == "Glasgow") {
+    # Get the indicator for the provinces
+      prov_code <- as.character(bioprovince$ProvId)
+      prov_list <- list() # to allocate results
+      for(i in 1:length(prov_code)) { # this could be set on parallel
+        single <- bioprovince %>% filter(ProvId == prov_code[i])
+        dt1 <- st_crop(pu_region, single) # crop each polygon with the bioprovince
+        prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output
+      }
+    # Merge all the output
+      pus_prov <- do.call(rbind, prov_list) %>% arrange(layer)
+    # Match and establish categories
+      pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
+      pu_region$province <- ifelse(is.na(pu_region$province), 
+                                   paste("non-categ", prov_name, sep = "_"), 
+                                   paste(pu_region$province, prov_name, sep = "_"))
+      
+  } else if (prov_name == "GOODS") { # this is for the seafloor
+    # Get the indicator for the provinces
+      prov_code <- as.character(bioprovince$Province)
+      prov_list <- list() # to allocate results
+      for(i in 1:length(prov_code)) { # this could be set on parallel
+        single <- bioprovince %>% filter(Province == prov_code[i])
+        dt1 <- st_crop(pu_region, single) # crop each polygon with the bioprovince
+        prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output
+      }
+    # Merge all the output
+      pus_prov <- do.call(rbind, prov_list) %>% arrange(layer)
+    # Match and establish categories
+      pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
+      pu_region$province <- ifelse(is.na(pu_region$province), 
+                                   paste("non-categ", prov_name, sep = "_"), 
+                                   paste(pu_region$province, prov_name, sep = "_"))
     
-    prov_code <- as.character(bioprovince$ProvId)
+  } # one extra for MPAS? or VMEs? YES INCLUDE THIS PLEASE
     
-    prov_list <- list()
-    for(i in 1:length(prov_code)) {
-      single <- bioprovince %>% 
-        filter(ProvId == prov_code[i])
-      dt1 <- st_crop(pu_region, single)
-      prov_list[[i]] <- dt1 %>% 
-        mutate(province = prov_code[i])
-    }
-    
-    
-    
-  } else if (prov_name == "GOODS") {
-    
-    
-    
-  }
-    
-  
+  return(pu_region)
   
 }
 
 
+test_longhurst <- pu_by_provinces(pu_file = "shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp", 
+                                province_file = "shapefiles_rasters/LonghurstProvinces/Longhurst_world_v4_2010.shp", 
+                                prov_name = "Longhurst", 
+                                proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
+                                outdir = "")
+
+test_glasgow <- pu_by_provinces(pu_file = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp", 
+                        province_file = "shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicProvinces_v1_2017.shp", 
+                        prov_name = "Glasgow", 
+                        proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
+                        outdir = "")
+
+test_good <- pu_by_provinces(pu_file = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp", 
+                                province_file = "shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp", 
+                                prov_name = "GOODS", 
+                                proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
+                                outdir = "")
 
 
+unique(test_longhurst$province)
+length(unique(test_longhurst$province))
 
 
 long <- st_read("shapefiles_rasters/LonghurstProvinces/Longhurst_world_v4_2010.shp") %>% 
@@ -62,53 +110,6 @@ glasgow_prov <- st_read("shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicP
 
 goods_prov <- st_read("shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp") %>% 
   st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-
-# ggplot() +
-#   geom_sf(data = long, size = 0.05) +
-#   ggtitle("Longhurst Provinces") +
-#   ggsave("ypdfs/LonghurstProvinces.pdf", width = 20, height = 15, dpi = 300)
-# 
-# ggplot() +
-#   geom_sf(data = glasgow_prov, size = 0.05) +
-#   ggtitle("Glasgow Provinces") +
-#   ggsave("ypdfs/GlasgowProvinces.pdf", width = 20, height = 15, dpi = 300)
-# 
-# ggplot() +
-#   geom_sf(data = goods_prov, size = 0.05) +
-#   ggtitle("Glasgow Provinces") +
-#   ggsave("ypdfs/GOODSprovinces.pdf", width = 20, height = 15, dpi = 300)
-
-
-proj.geo <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
-prov_name <- "glasgow"
-
-pu_file <- "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp"
-pu_region <- st_read(pu_file) %>% 
-  st_transform(crs = CRS(proj.geo))
-
-province <- "shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicProvinces_v1_2017.shp"
-bioprovince <- st_read(province) %>% 
-  st_transform(crs = CRS(proj.geo))
-
-prov_code <- as.character(bioprovince$ProvId)
-
-prov_list <- list()
-for(i in 1:length(prov_code)) {
-  single <- bioprovince %>% 
-    filter(ProvId == prov_code[i])
-  dt1 <- st_crop(pu_region, single)
-  prov_list[[i]] <- dt1 %>% 
-    mutate(province = prov_code[i])
-}
-
-# plot(st_geometry(prov_list[[10]]))
-pus_prov <- do.call(rbind, prov_list) %>%
-  arrange(layer)
-# length(unique(pus_prov$layer))
-pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
-# length(unique(pu_region$layer))
-pu_region$province <- ifelse(is.na(pu_region$province), paste("non-categ", prov_name, sep = "_"), paste(pu_region$province, prov_name, sep = "_"))
-
 
 # reading csv to match species
 
