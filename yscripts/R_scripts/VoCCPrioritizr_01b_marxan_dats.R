@@ -136,8 +136,8 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
   }
 
   # # for vocc magnitude when cost is the raster file
-    system.time(marxan_dat_files(marxan_input_csv = "shapefiles_rasters/bathyabyssopelagic_provinces.csv",
-                                 pu_shpfile = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp",
+    system.time(marxan_dat_files(marxan_input_csv = "shapefiles_rasters/bathyabyssopelagic_provinces2.csv",
+                                 pu_shpfile = "shapefiles_rasters/abnj_04b-bathyabysso_global_moll_05deg/abnj_04b-bathyabysso_global_moll_05deg.shp",
                                  outdir = "output_datfiles/abnj_04-bathyabysso_global_moll_05deg/",
                                  cost_file = "features_rasters/voccMag_04-bap_AEMean_ssp126_r1i1p1f1_2020-2100_.tif",
                                  cost_type = "Raster",
