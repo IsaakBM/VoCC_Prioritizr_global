@@ -31,7 +31,7 @@ mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
   # wb_sp <- as(wb, "Spatial")
   
   
-  pdf("ypdfs/best_sol_01d.pdf", width = 40, height = 20)
+  pdf("ypdfs/best_sol_01d_BLM.pdf", width = 40, height = 20)
   # plot(st_geometry(shp))
   plot(st_geometry(best_sol))
   # plot(wb_sp, add = TRUE)
