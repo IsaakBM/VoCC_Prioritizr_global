@@ -4,7 +4,7 @@
 # Caveat Emptor!
 
 
-pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir) {
+pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo, outdir) {
   
   library(raster)
   library(dplyr)
@@ -101,128 +101,26 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir)
                                    paste("non-categ", prov_name, sep = "_"), 
                                    paste(pu_region$province, prov_name, sep = "_"))
   }
-  return(pu_region)
+  pu_region <- as.data.frame(pu_region)
+  pu_csv <- paste(paste("pus", olayer, sep = "-"), prov_name, ".csv", sep = "_")
+  fwrite(dplyr::select(pu_region, -geometry), paste(outdir, pu_csv, sep = ""))
 }
 
 
-test_longhurst <- pu_by_provinces(pu_file = "shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp", 
-                                province_file = "shapefiles_rasters/LonghurstProvinces/Longhurst_world_v4_2010.shp", 
-                                prov_name = "Longhurst", 
-                                proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
-                                outdir = "")
 
-test_glasgow <- pu_by_provinces(pu_file = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp", 
-                        province_file = "shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicProvinces_v1_2017.shp", 
-                        prov_name = "Glasgow", 
-                        proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
-                        outdir = "")
+# system.time(pu_by_provinces(pu_file = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp",
+#                             province_file = "shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp",
+#                             prov_name = "GOODS",
+#                             olayer = "seafloor",
+#                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
+#                             outdir = ""))
 
-test_good <- pu_by_provinces(pu_file = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp", 
-                                province_file = "shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp", 
-                                prov_name = "GOODS", 
-                                proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
-                                outdir = "")
-
-test_good <- pu_by_provinces(pu_file = "shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp", 
-                             province_file = "shapefiles_rasters/mpas_v2018/mpas_v2018.shp", 
-                             prov_name = "mpas", 
-                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
-                             outdir = "")
+system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp",
+                            province_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/mpas_v2018/mpas_v2018.shp", 
+                            prov_name = "mpas",
+                            olayer = "epipelagic",
+                            proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/"))
 
 
 
-unique(test_longhurst$province)
-length(unique(test_longhurst$province))
-
-
-long <- st_read("shapefiles_rasters/LonghurstProvinces/Longhurst_world_v4_2010.shp") %>% 
-  st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-
-glasgow_prov <- st_read("shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicProvinces_v1_2017.shp") %>% 
-  st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-
-goods_prov <- st_read("shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp") %>% 
-  st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-
-
-
-# reading csv to match species
-
-csv_olayer <- "shapefiles_rasters/bathyabyssopelagic.csv"
-file_olayer <- fread(csv_olayer)
-head(file_olayer)
-length(unique(file_olayer$feature_names))
-# match province name with species name
-file_olayer$province <- pu_region$province[match(file_olayer$pu, pu_region$layer)]
-head(file_olayer)
-unique(file_olayer$province)
-
-file_olayer <- file_olayer %>% 
-  mutate(feature_names_prov = ifelse(is.na(province), paste("non-categ", prov_name, sep = "_"), 
-                                     paste(feature_names, province, sep = "_")))
-
-head(file_olayer)
-nrow(file_olayer)
-length(unique(file_olayer$feature_names_prov)) # increase the number of unique species features, which is OK and predictable
-
-
-
-
-
-
-
-
-fwrite(file_olayer, "shapefiles_rasters/bathyabyssopelagic_provinces.csv")
-
-bap_pu <- st_read("shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp")
-bap <- fread("shapefiles_rasters/bathyabyssopelagic.csv")
-bap2 <- bap %>% 
-  group_by(pu) %>% 
-  summarise(richness = n()) %>% 
-  data.frame()
-head(bap2)
-range(bap2$richness, na.rm = TRUE)
-
-bap_pu$richness <- bap2$richness[match(bap_pu$layer, bap2$pu)]
-
-nrow(bap_pu)
-range(bap_pu$richness, na.rm = TRUE)
-length(unique(bap$pu))
-
-bap_pu <- bap_pu %>% 
-  mutate(richness_log = log10(richness))
-
-pal_rich <- rev(brewer.pal(9, "RdYlBu"))
-cv_rich <- c("1", "", "", "10", "", "", "100", "", "1000")
-world_sf <- ne_countries(scale = "medium", returnclass = "sf")
-# Defining themes
-theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
-                          panel.grid.major = element_blank(),
-                          panel.background = element_rect(fill = "white", colour = "black"),
-                          plot.background = element_rect(fill = "white"),
-                          panel.border = element_blank(),
-                          axis.line = element_line(size = 1),
-                          axis.text.x = element_text(size = rel(2), angle = 0),
-                          axis.text.y = element_text(size = rel(2), angle = 0),
-                          axis.ticks = element_line(size = 1.5),
-                          axis.ticks.length = unit(.25, "cm"), 
-                          axis.title.x = element_blank(),
-                          axis.title.y = element_blank(),
-                          plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
-                          legend.title = element_text(colour = "black", face = "bold", size = 15),
-                          legend.text = element_text(colour = "black", face = "bold", size = 10), 
-                          legend.key.height = unit(1, "cm"),
-                          legend.key.width = unit(0.8, "cm"),
-                          plot.tag = element_text(size = 25, face = "bold")))
-
-ggplot() +
-  geom_sf(data = bap_pu, aes(fill = richness_log), color = NA) +
-  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-  ggtitle("Species richness") +
-  scale_fill_gradientn(name = "richness",
-                       colours = pal_rich,
-                       limits = c(0, 3),
-                       breaks = seq(0, 3, length.out = 9), 
-                       labels = cv_rich) +
-  theme_opts3 +
-  ggsave("ypdfs/abnj_04-bathyabysso_richness_moll_05deg.pdf", width = 40, height = 20, dpi = 300)
