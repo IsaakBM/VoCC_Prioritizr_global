@@ -21,7 +21,7 @@
 marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
 
 ### List of pacakges that we will use
-    list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr", "data.table")
+    list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")
     # If is not installed, install the pacakge
       new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages
       if(length(new.packages)) install.packages(new.packages) # if not, installed
@@ -85,20 +85,14 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
       if(cost_type == "Raster") {
         # Read raster object
           cost_file <- readAll(raster(cost_file))
-          crs(cost_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+          crs(cost_file) <- CRS(proj.geo)
           names(cost_file) <- "layer"
-          cost_file <-  as(cost_file, "SpatialPolygonsDataFrame")
-          # Transform Cost layer into a SF object
-            sd_rs1 <- cost_file %>% 
-              st_as_sf() %>% 
-              st_transform(crs = CRS(proj.geo))
           # Getting cost value by planning unit
-            pu_file <- st_intersection(shp_file, sd_rs1) %>% 
-              filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON")) %>% 
-              dplyr::rename(id = layer, cost = layer) %>% 
-              mutate(cost = abs(cost)) %>% 
-              arrange(id)
-            pu_file <- pu_file[!duplicated(pu_file$id),] # just in case
+            weight_rs <- raster::area(cost_file)
+            cost_bypu <- exact_extract(cost_file, shp_file, "weighted_mean", weights = weight_rs)
+            pu_file <- shp_file %>% 
+              mutate(cost = cost_bypu) %>% 
+              rename(id = layer)
             # Write cost shapefile
               st_write(pu_file, dsn = outdir, layer = "pu", driver = "ESRI Shapefile")
             # Write .dat file
