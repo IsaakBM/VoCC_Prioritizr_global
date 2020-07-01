@@ -30,7 +30,7 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
   
 ### Reading marxan_input file
     shp_file <- st_read(pu_shpfile) %>% 
-      st_transform(crs = proj.geo)
+      st_transform(crs = CRS(proj.geo))
     shp_csv <- fread(marxan_input_csv)
 
 ### bound.dat FILE
@@ -85,14 +85,14 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
       if(cost_type == "Raster") {
         # Read raster object
           cost_file <- readAll(raster(cost_file))
-          crs(cost_file) <- CRS(proj.geo)
-          names(cost_file) <- "layer"
+          weight_rs <- raster::area(cost_file)
+            cost_file <- projectRaster(cost_file, crs = CRS(proj.geo), method = "ngb", over = FALSE)
+            weight_rs <- projectRaster(weight_rs, crs = CRS(proj.geo), method = "ngb", over = FALSE)
+            names(cost_file) <- "layer"
           # Getting cost value by planning unit
-            weight_rs <- raster::area(cost_file)
             cost_bypu <- exact_extract(cost_file, shp_file, "weighted_mean", weights = weight_rs)
             pu_file <- shp_file %>% 
-              mutate(cost = cost_bypu) %>% 
-              rename(id = layer)
+              mutate(cost = cost_bypu)
             # Write cost shapefile
               st_write(pu_file, dsn = outdir, layer = "pu", driver = "ESRI Shapefile")
             # Write .dat file
