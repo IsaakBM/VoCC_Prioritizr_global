@@ -9,12 +9,16 @@ library(stringr)
 species <- read_rds("Cost_Layers/Cost_RasterStack_bySpecies.rds")
 ns_species <- names(species)
 ns_species2 <- stringr::str_replace_all(string = ns_species, pattern = "[.]", replacement = " ")
+head(ns_species2)
+length(ns_species2)
+ns_species3 <- validate_names(ns_species2)
+length(ns_species3)
 
 depth2 <- list()
-for (s in 1:length(ns_species2)){
-  depth2[[s]] <- rfishbase::species(ns_species2[s], fields = c("DepthRangeShallow", "DepthRangeDeep"))}
+for (s in 1:length(ns_species3)){
+  depth2[[s]] <- rfishbase::species(ns_species3[s], fields = c("DepthRangeShallow", "DepthRangeDeep"))}
 
-names(depth2) <- ns_species # better to 
+names(depth2) <- ns_species3 # better to 
 depth3 <- do.call(rbind, depth2)
 depth3 <- depth3 %>% 
   mutate(Species = ns_species) %>% 
