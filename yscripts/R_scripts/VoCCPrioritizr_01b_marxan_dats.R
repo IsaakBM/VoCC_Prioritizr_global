@@ -87,8 +87,7 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
           cost_file <- readAll(raster(cost_file))
           crs(cost_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
           names(cost_file) <- "layer"
-          cost_file <- crop(cost_file, shp_file) %>% 
-            as("SpatialPolygonsDataFrame")
+          cost_file <-  as(cost_file, "SpatialPolygonsDataFrame")
           # Transform Cost layer into a SF object
             sd_rs1 <- cost_file %>% 
               st_as_sf() %>% 
