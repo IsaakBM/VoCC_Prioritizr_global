@@ -79,7 +79,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
     
   } else if (prov_name == "mpas") {
     # Set up parallel structure
-      ncores <- 3 
+      ncores <- 21 
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
     # Get the indicator for the provinces
@@ -108,12 +108,12 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
 
 
 
-# system.time(pu_by_provinces(pu_file = "shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp",
-#                             province_file = "shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp",
+# system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/XXXXX",
+#                             province_file = "/data/Q1216/BritoMorales/Project04b/shapefiles_rasters/GOODSprovinces/GOODSprovinces_bathyal.shp",
 #                             prov_name = "GOODS",
 #                             olayer = "seafloor",
 #                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-#                             outdir = ""))
+#                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/"))
 
 system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp",
                             province_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/mpas_v2018/mpas_v2018.shp", 
