@@ -1,4 +1,7 @@
-
+# This code was written by Isaac Brito-Morales (i.britomorales@uq.edu.au)
+# Please do not distribute this code without permission.
+# NO GUARANTEES THAT CODE IS CORRECT
+# Caveat Emptor!
 
 
 pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir) {
@@ -6,12 +9,10 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir)
   library(raster)
   library(dplyr)
   library(sf)
-  library(ggplot2)
   library(data.table)
-  library(rnaturalearth)
-  library(rnaturalearthdata)
-  library(RColorBrewer)
-  library(patchwork)
+  library(foreach)
+  library(doParallel)
+
   
   # Reading Planning Unit Region Shapefile
     pu_file <- pu_file
@@ -19,6 +20,10 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir)
   # Reading Marine Province Shapefile
     province <- province_file
       bioprovince <- st_read(province) %>% st_transform(crs = CRS(proj.geo)) 
+  # Set up parallel structure
+    ncores <- 3 
+    cl <- makeCluster(ncores)
+    registerDoParallel(cl)
   
   # Match 
   if(prov_name == "Longhurst") {
@@ -72,7 +77,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, proj.geo, outdir)
                                    paste("non-categ", prov_name, sep = "_"), 
                                    paste(pu_region$province, prov_name, sep = "_"))
     
-  } # one extra for MPAS? or VMEs? YES INCLUDE THIS PLEASE
+  } # one extra for MPAS? or VMEs? YES INCLUDE THIS PLEASE ### something to delete duplicates because will happen with smaller polygons?
     
   return(pu_region)
   
@@ -110,6 +115,8 @@ glasgow_prov <- st_read("shapefiles_rasters/GlasgowProvinces/GlasgowMesopelagicP
 
 goods_prov <- st_read("shapefiles_rasters/GOODSprovinces/GOODSprovinces_abyssal.shp") %>% 
   st_transform(crs = CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+
+
 
 # reading csv to match species
 
