@@ -100,6 +100,29 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       pu_region$province <- ifelse(is.na(pu_region$province), 
                                    paste("non-categ", prov_name, sep = "_"), 
                                    paste(pu_region$province, prov_name, sep = "_"))
+  } else if (prov_name == "VMEs") {
+    # Set up parallel structure
+      ncores <- 21 
+      cl <- makeCluster(ncores)
+      registerDoParallel(cl)
+    # Get the indicator for the provinces
+      prov_code <- as.character(bioprovince$VME_ID)
+      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr")) %dopar% {
+        single <- bioprovince %>% filter(VME_ID == prov_code[i])
+        dt1 <- st_intersection(pu_region, single) %>% 
+          filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
+        if(nrow(dt1) > 0) { 
+          prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
+        }
+      }
+      stopCluster(cl)
+    # Merge all the output
+      pus_prov <- do.call(rbind, prov_par) %>% arrange(layer)
+    # Match and establish categories
+      pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
+      pu_region$province <- ifelse(is.na(pu_region$province), 
+                                   paste("non-categ", prov_name, sep = "_"), 
+                                   paste(pu_region$province, prov_name, sep = "_"))
   }
   pu_region <- as.data.frame(pu_region)
   pu_csv <- paste(paste("pus", olayer, sep = "-"), prov_name, ".csv", sep = "_")
