@@ -18,6 +18,9 @@ library(dplyr)
 csv_olayer_pus <- "shapefiles_rasters/pus-mesopelagic_Glasgow_.csv"
 csv_olayer_species <- "shapefiles_rasters/mesopelagic.csv"
 
+
+
+
 file_olayer_pus <- fread(csv_olayer_pus) %>% 
   arrange(layer)
 file_olayer_species <- fread(csv_olayer_species) %>% 
