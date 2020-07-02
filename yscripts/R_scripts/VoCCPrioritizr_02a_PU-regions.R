@@ -12,14 +12,13 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
   library(data.table)
   library(foreach)
   library(doParallel)
-
   
   # Reading Planning Unit Region Shapefile
     pu_file <- pu_file
       pu_region <- st_read(pu_file) %>% st_transform(crs = CRS(proj.geo))
   # Reading Marine Province Shapefile
     province <- province_file
-      bioprovince <- st_read(province) %>% st_transform(crs = CRS(proj.geo)) 
+      bioprovince <- st_read(province) %>% st_transform(crs = CRS(proj.geo)) %>% st_make_valid()
   # Match 
   if(prov_name == "Longhurst") {
     # Get the indicator for the provinces
@@ -87,7 +86,8 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       prov_list <- list() # to allocate results
       prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr")) %dopar% {
         single <- bioprovince %>% filter(wdpaid == prov_code[i])
-        dt1 <- st_crop(pu_region, single) # crop each polygon with the bioprovince
+        dt1 <- st_intersection(pu_region, single) %>% 
+          filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
         if(nrow(dt1) > 0) { 
           prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
         }
