@@ -101,7 +101,7 @@ pus_global <- st_make_grid(global, square = F, cellsize = c(grid_spacing, grid_s
   st_write(sf_sf, dsn = "shapefiles_rasters/", layer = "abnj_02-epipelagic_global_moll_05deg", driver = "ESRI Shapefile")
 # Mesopelagic PUs
   pus_global_meso <- pus_global_epi %>%
-    mutate(layer = as.numeric(seq(90066, length.out = nrow(sf_sf)))) %>% 
+    mutate(layer = as.numeric(seq(90065, length.out = nrow(sf_sf)))) %>% 
     arrange(layer)
   st_write(pus_global_meso, dsn = "shapefiles_rasters/", layer = "abnj_03-mesopelagic_global_moll_05deg", driver = "ESRI Shapefile")
 # Bathyabyssopelagic PUs
