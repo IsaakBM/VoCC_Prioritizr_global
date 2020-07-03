@@ -107,6 +107,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       registerDoParallel(cl)
     # Get the indicator for the provinces
       prov_code <- as.character(bioprovince$VME_ID)
+      prov_list <- list() # to allocate results
       prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr")) %dopar% {
         single <- bioprovince %>% filter(VME_ID == prov_code[i])
         dt1 <- st_intersection(pu_region, single) %>% 
