@@ -4,7 +4,7 @@ library(dplyr)
 library(readr)
 library(stringr)
 
-
+##### Not having been validated
 species <- read_rds("Cost_Layers/Cost_RasterStack_bySpecies.rds")
 ns_species <- names(species)
 ns_species2 <- stringr::str_replace_all(string = ns_species, pattern = "[.]", replacement = " ")
@@ -20,9 +20,8 @@ depth3 <- depth3 %>%
   select(Species, DepthRangeShallow, DepthRangeDeep)
 
 write.csv(depth3, "Cost_Layers/Cost_bySpecies_all.csv")
-depth4 <- na.omit(depth3)
-write.csv(depth4, "Cost_Layers/Cost_bySpecies_NOTall.csv")
 
+##### Validated
 Species_new <- list()
 for(j in 1:nrow(depth3)) {
   single <- as.character(depth3[j, 1])
