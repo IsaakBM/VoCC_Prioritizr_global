@@ -3,6 +3,9 @@
 # NO GUARANTEES THAT CODE IS CORRECT
 # Caveat Emptor!
 
+# MaxTarget% - PUs(i)/MaxPUs(all spp) * (MaxTarget%-MinTarget%)
+0.50 - (5/100) * (0.50 - 0.10)
+
 csvs_pus_provinces <- function(csv_olayer_pus, csv_olayer_species, olayer) {
   library(data.table)
   library(dplyr)
