@@ -67,6 +67,3 @@ writeRaster(species_mp_rs, "Cost_Layers/03-mesopelagic_Cost_Raster_Sum.tif")
 species_bap <- subset(species, str_replace_all(string = bap$Species, pattern = " ", replacement = "."))
 species_bap_rs <- stackApply(species_bap, nlayers(species_bap), fun = sum)
 writeRaster(species_bap_rs, "Cost_Layers/04-bathyabyssopelagic_Cost_Raster_Sum.tif")
-
-plot(log10(species_bap_rs))
-range(species_ep_rs[])
