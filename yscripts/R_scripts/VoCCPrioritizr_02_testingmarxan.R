@@ -7,12 +7,15 @@ library(gurobi)
 library(spatstat)
 library(reldist)
 
-pu <- read.table("output_datfiles/abnj_04-bathyabysso_global_moll_05deg/pu.dat", sep = ",", header = TRUE)
-features <- read.table("output_datfiles/abnj_04-bathyabysso_global_moll_05deg/spec.dat", sep = ",", header = TRUE)
-bound <- read.table("output_datfiles/abnj_04-bathyabysso_global_moll_05deg/bound.dat", sep = ",", header = TRUE)
-rij <- read.table("output_datfiles/abnj_04-bathyabysso_global_moll_05deg/puvsp.dat", sep = ",", header = TRUE)
+pu <- read.table("output_datfiles/02_EpipelagicLayer/pu.dat", sep = ",", header = TRUE)
+features <- read.table("output_datfiles/02_EpipelagicLayer/spec.dat", sep = ",", header = TRUE)
+bound <- read.table("output_datfiles/02_EpipelagicLayer/bound.dat", sep = ",", header = TRUE)
+rij <- read.table("output_datfiles/02_EpipelagicLayer/puvsp.dat", sep = ",", header = TRUE)
 
-mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 1) # does not like negative cost values
+pu$cost <- ifelse(is.na(pu$cost), 0, pu$cost)
+
+mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) # does not like negative cost values
+presolve_check(mp1)
 mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij2, bound = bound2, blm = 0) %>%
   add_pool_portfolio(method = 2, number_solutions = 2)
 
@@ -21,7 +24,7 @@ mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
 # write.csv(mp3_solution, "CSVs/mp3_solution.csv")
 
   sol_1 <- mp3_solution %>% filter(solution_1 == "1")
-  shp <- st_read("shapefiles_rasters/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp")
+  shp <- st_read("shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp")
   # rs <- raster("annualvocc_b_inter/mag/ssp245/01_SurfaceLayer_ssp245/voccMag-thetao_01-Surface_MPI-ESM1-2-HR_ssp245-05deg_2020-2100.tif") %>% disaggregate(2)
   best_sol <- shp[shp$layer %in% sol_1$id, ] # extrat the best solution polygons from the planning units sf file
   # rs <- crop(rs, best_sol)
@@ -31,7 +34,7 @@ mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
   # wb_sp <- as(wb, "Spatial")
   
   
-  pdf("ypdfs/best_sol_01d_BLM.pdf", width = 40, height = 20)
+  pdf("ypdfs/02-eppipelagic_best-sol_01a_BLM00.pdf", width = 40, height = 20)
   # plot(st_geometry(shp))
   plot(st_geometry(best_sol))
   # plot(wb_sp, add = TRUE)
