@@ -6,7 +6,7 @@
 # MaxTarget% - PUs(i)/MaxPUs(all spp) * (MaxTarget%-MinTarget%)
 0.50 - (5/100) * (0.50 - 0.10)
 
-csvs_pus_provinces <- function(csv_olayer_pus, csv_olayer_species, olayer) {
+csvs_pus_provinces <- function(csv_olayer_prov, csv_olayer_species, olayer) {
   library(data.table)
   library(dplyr)
   
@@ -18,38 +18,82 @@ csvs_pus_provinces <- function(csv_olayer_pus, csv_olayer_species, olayer) {
 library(data.table)
 library(dplyr)
 
-csv_olayer_pus <- "shapefiles_rasters/pus-mesopelagic_Glasgow_.csv"
-csv_olayer_species <- "shapefiles_rasters/mesopelagic.csv"
+csv_olayer_prov <- "CSVs/02_EpipelagicLayer/pus-epipelagic_Longhurst_.csv"
+csv_olayer_species <- "CSVs/02_EpipelagicLayer/epipelagic.csv"
 
-
-
-
-file_olayer_pus <- fread(csv_olayer_pus) %>% 
+file_olayer_pus <- fread(csv_olayer_prov) %>% 
   arrange(layer)
 file_olayer_species <- fread(csv_olayer_species) %>% 
   arrange(pu)
-
-head(file_olayer_pus)
-head(file_olayer_species)
-
-length(unique(file_olayer_pus$layer))
-length(unique(file_olayer_species$pu))
-
 # match province name with species name
 file_olayer_species$province <- file_olayer_pus$province[match(file_olayer_species$pu, file_olayer_pus$layer)]
-# head(file_olayer_species)
-# unique(file_olayer_species$province)
-
 file_olayer_species <- file_olayer_species %>% 
   mutate(feature_names_prov = ifelse(is.na(province), paste("non-categ", prov_name, sep = "_"),
                                      paste(feature_names, province, sep = "_")))
 
-head(file_olayer_species)
+# head(file_olayer_species)
 # nrow(file_olayer_species)
-length(unique(file_olayer_species$feature_names)) # increase the number of unique species features, which is OK and predictable
+# length(unique(file_olayer_species$feature_names)) # increase the number of unique species features, which is OK and predictable
 fwrite(file_olayer_species, "shapefiles_rasters/mesopelagic_provinces.csv")
 
 
+# defining targets
+provinces_bypu <- unique(file_olayer_pus$province)
+# species <- unique(file_olayer_species$feature_names_prov)
+min_target <- 0.2
+max_target <- 1
+
+dt_final <- list()
+for(i in 1:length(provinces_bypu)) {
+  
+  dt1 <- file_olayer_pus %>% 
+    filter(province == provinces_bypu[i])
+  max_pus <- length(unique(dt1$layer))
+  
+  dt2 <- file_olayer_species %>% 
+    filter(province == provinces_bypu[i]) %>%  
+    group_by(feature_names_prov) %>% 
+    summarise(cells = n()) %>% 
+    mutate(targets = (max_target - ((cells/max_pus) * (max_target - min_target))))
+  
+  dt_final[[i]] <- dt2
+  
+}
+
+dt_testing <- do.call(rbind, dt_final)
+
+
+dt1 <- file_olayer_pus %>% 
+  filter(province == provinces_bypu[2])
+max_pus <- length(unique(dt1$layer))
+
+dt2 <- file_olayer_species %>% 
+  filter(province == provinces_bypu[2]) %>%  
+  group_by(feature_names_prov) %>% 
+  summarise(cells = n()) %>% 
+  mutate(targets = (max_target - ((cells/max_pus) * (max_target - min_target))))
+  
+dt3 <- dt2 %>% 
+  group_by(feature_names_prov) %>% 
+  summarise(cells = n()) %>% 
+  mutate(targets = (max_target - ((cells/max_pus) * (max_target - min_target))))
+  
+head(dt3, 50)
+nrow(dt3)
+range(dt3$cells)
+range(dt3$target)
+
+filter(dt3, target >= 0.5)
+
+
+species_dt2 <- unique(dt2$feature_names_prov)
+length(species_dt2)
+
+
+(max_target - ((cells/max_pus) * (max_target - min_target)))
+
+# MaxTarget% - PUs(i)/MaxPUs(all spp) * (MaxTarget%-MinTarget%)
+1 - (838/838) * (1 - 0.2)
 
 
 
