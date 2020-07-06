@@ -17,7 +17,7 @@ pzr_function <- function(path, outdir, blm, sol) {
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
     
   # Begin the parallel structure      
-    ncores <- 22
+    ncores <- 10
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     
@@ -40,7 +40,8 @@ pzr_function <- function(path, outdir, blm, sol) {
         problem_list <- list()
       # Establish the Problem
         mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm) %>%
-          add_pool_portfolio(method = 2, number_solutions = sol)
+          #add_top_portfolio(number_solutions = sol)
+	  add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
         # Solve the problem
           mp3_solution <- prioritizr::solve(mp1)
         # Write the object
@@ -51,7 +52,7 @@ pzr_function <- function(path, outdir, blm, sol) {
 }
 
 
-system.time(pzr_function(path = "/Users/bri273/Desktop/VoCC_Marxan/output_datfiles", 
-                         outdir = "/Users/bri273/Desktop/VoCC_Prioritizr_global/", 
+system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles", 
+                         outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles/", 
                          blm = 0, 
-                         sol = 10))
+                         sol = 100))
