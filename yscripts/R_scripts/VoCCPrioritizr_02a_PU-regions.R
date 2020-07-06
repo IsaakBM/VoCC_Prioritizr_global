@@ -157,7 +157,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
 
 system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp",
                             province_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/mpas_v2018/mpas_v2018.shp", 
-                            prov_name = "mpas",
+                            prov_name = "Longhurst",
                             olayer = "epipelagic",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/"))

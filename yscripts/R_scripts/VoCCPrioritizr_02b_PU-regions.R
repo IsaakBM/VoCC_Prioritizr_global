@@ -53,7 +53,7 @@ csvs_pus_provinces <- function(csv_olayer_prov, csv_olayer_species, olayer, min_
 
 csvs_pus_provinces(csv_olayer_prov = "CSVs/02_EpipelagicLayer/pus-epipelagic_Longhurst_.csv", 
                    csv_olayer_species = "CSVs/02_EpipelagicLayer/epipelagic.csv", 
-                   olayer = "bathyabyssopelagic", 
+                   olayer = "epipelagic", 
                    min_target = 0.1, 
                    max_target = 0.3, 
                    outdir = "CSVs/02_EpipelagicLayer/")
