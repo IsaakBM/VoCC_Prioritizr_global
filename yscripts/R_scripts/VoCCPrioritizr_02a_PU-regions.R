@@ -21,16 +21,24 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       bioprovince <- st_read(province) %>% st_transform(crs = CRS(proj.geo)) %>% st_make_valid()
   # Match 
   if(prov_name == "Longhurst") {
+    # Set up parallel structure
+      ncores <- 21 
+      cl <- makeCluster(ncores)
+      registerDoParallel(cl)
     # Get the indicator for the provinces
       prov_code <- as.character(bioprovince$ProvCode)
       prov_list <- list() # to allocate results
-      for(i in 1:length(prov_code)) { # this could be set on parallel
+      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr")) %dopar% {
         single <- bioprovince %>% filter(ProvCode == prov_code[i])
-        dt1 <- st_crop(pu_region, single) # crop each polygon with the bioprovince
-        prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output
+        dt1 <- st_intersection(pu_region, single) %>% 
+          filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
+        if(nrow(dt1) > 0) { 
+          prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
+        }
       }
+      stopCluster(cl)
     # Merge all the output
-      pus_prov <- do.call(rbind, prov_list) %>% arrange(layer)
+      pus_prov <- do.call(rbind, prov_par) %>% arrange(layer)
     # Match and establish categories
       pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
       pu_region$province <- ifelse(is.na(pu_region$province), 
@@ -38,16 +46,24 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
                                    paste(pu_region$province, prov_name, sep = "_"))
     
   } else if (prov_name == "Glasgow") {
+    # Set up parallel structure
+      ncores <- 21 
+      cl <- makeCluster(ncores)
+      registerDoParallel(cl)
     # Get the indicator for the provinces
       prov_code <- as.character(bioprovince$ProvId)
       prov_list <- list() # to allocate results
-      for(i in 1:length(prov_code)) { # this could be set on parallel
+      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr")) %dopar% {
         single <- bioprovince %>% filter(ProvId == prov_code[i])
-        dt1 <- st_crop(pu_region, single) # crop each polygon with the bioprovince
-        prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output
+        dt1 <- st_intersection(pu_region, single) %>% 
+          filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
+        if(nrow(dt1) > 0) { 
+          prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
+        }
       }
+      stopCluster(cl)
     # Merge all the output
-      pus_prov <- do.call(rbind, prov_list) %>% arrange(layer)
+      pus_prov <- do.call(rbind, prov_par) %>% arrange(layer)
     # Match and establish categories
       pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
       pu_region$province <- ifelse(is.na(pu_region$province), 
