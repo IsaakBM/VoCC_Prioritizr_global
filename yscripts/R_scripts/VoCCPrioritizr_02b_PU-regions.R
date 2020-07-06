@@ -59,19 +59,19 @@ csvs_pus_provinces(csv_olayer_prov = "CSVs/04_BathyAbyssopelagicLayer/pus-bathya
                    outdir = "CSVs/04_BathyAbyssopelagicLayer/")
 
 
-ep <- fread("CSVs/02_EpipelagicLayer/sps_epipelagic_provinces.csv")
-ep_targets <- fread("CSVs/02_EpipelagicLayer/sps_epipelagic_targets.csv")
-length(unique(ep$feature_names_prov))
-length(unique(ep_targets$feature_names_prov))
-
-mp <- fread("CSVs/03_MesopelagicLayer/sps_mesopelagic_provinces.csv")
-mp_targets <- fread("CSVs/03_MesopelagicLayer/sps_mesopelagic_targets.csv")
-length(unique(mp$feature_names_prov))
-length(unique(mp_targets$feature_names_prov))
-
-bap <- fread("CSVs/04_BathyAbyssopelagicLayer/sps_bathyabyssopelagic_provinces.csv")
-bap_targets <- fread("CSVs/04_BathyAbyssopelagicLayer/sps_bathyabyssopelagic_targets.csv")
-length(unique(bap$feature_names_prov))
-length(unique(bap_targets$feature_names_prov))
+# ep <- fread("CSVs/02_EpipelagicLayer/sps_epipelagic_provinces.csv")
+# ep_targets <- fread("CSVs/02_EpipelagicLayer/sps_epipelagic_targets.csv")
+# length(unique(ep$feature_names_prov))
+# length(unique(ep_targets$feature_names_prov))
+# 
+# mp <- fread("CSVs/03_MesopelagicLayer/sps_mesopelagic_provinces.csv")
+# mp_targets <- fread("CSVs/03_MesopelagicLayer/sps_mesopelagic_targets.csv")
+# length(unique(mp$feature_names_prov))
+# length(unique(mp_targets$feature_names_prov))
+# 
+# bap <- fread("CSVs/04_BathyAbyssopelagicLayer/sps_bathyabyssopelagic_provinces.csv")
+# bap_targets <- fread("CSVs/04_BathyAbyssopelagicLayer/sps_bathyabyssopelagic_targets.csv")
+# length(unique(bap$feature_names_prov))
+# length(unique(bap_targets$feature_names_prov))
 
 
