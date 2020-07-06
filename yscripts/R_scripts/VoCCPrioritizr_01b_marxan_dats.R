@@ -18,7 +18,7 @@
 
 # ~28 minutes global analysis at 0.5° resolution no parallel
 
-marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
+marxan_dat_files <- function(marxan_input_csv, targets_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
 
 ### List of pacakges that we will use
     list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")
@@ -49,11 +49,11 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
           
 ### puvsp FILE (species[a different number that the species' code], pu[planning unit], amount[area])
     shp_df <- shp_csv %>% 
-      select(pu, area_km2, feature_names_prov) %>% 
+      dplyr::select(pu, area_km2, feature_names_prov) %>% 
       base::transform(id = as.numeric(factor(feature_names_prov)))
     
     puvsp <- shp_df %>% 
-      select(id, pu, area_km2) %>% 
+      dplyr::select(id, pu, area_km2) %>% 
       dplyr::rename(species = id, amount = area_km2) %>% 
       arrange(pu)
     # Write the file puvsp
@@ -66,13 +66,16 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
     
 ### spec FILE (id[species ID], prop[proportion for protection of these species... 0.3 in general], spf[species penalty factor], name[species' name/code])  
     spec <- shp_df %>% 
-      group_by(id, feature_names_prov) %>% 
+      dplyr::group_by(id, feature_names_prov) %>% 
       summarize(total_area = sum(area_km2)) %>% 
-      select(id, feature_names_prov) %>% 
+      dplyr::select(id, feature_names_prov) %>% 
       dplyr::rename(id = id, name = feature_names_prov) %>% 
       mutate(prop = 0.2, spf = 1.1) %>% 
-      select(id, prop, spf, name) %>% 
+      dplyr::select(id, prop, spf, name) %>% 
       data.frame()
+    # Reading target files
+      df_targets <- fread(targets_csv)
+      spec$prop <- df_targets$targets[match(spec$name, df_targets$feature_names_prov)] # matching the targets with the generic spec file
     # Write the file
       spec_name <- paste("spec", sep = "_")
       write.table(spec, file = paste(outdir, spec_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
@@ -97,9 +100,13 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
               st_write(pu_file, dsn = outdir, layer = "pu", driver = "ESRI Shapefile")
             # Write .dat file
               pu_file_df <- pu_file %>%
-                mutate(cost = abs(cost), status = 0) %>% # status may change in the future (e.g., locked in and locked out? in this case locked out)
+                mutate(cost = abs(cost), status = 0) %>% 
                 data.frame() %>% 
-                select(id, cost, status)
+                dplyr::select(id, cost, status)
+              # status may change in the future (e.g., locked in and locked out? in this case locked out)
+              # add the pu FILE and match with the pu_file_df
+              
+              
               pu_name <- paste("pu", sep = "_")
               write.table(pu_file_df, file = paste(outdir, pu_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
           
@@ -121,7 +128,7 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
               pu_file_df <- pu_file %>%
                 mutate(cost = abs(cost), status = 0) %>% # status may change in the future (e.g., locked in and locked out? in this case locked out)
                 data.frame() %>% 
-                select(id, cost, status)
+                dplyr::select(id, cost, status)
               pu_name <- paste("pu", sep = "_")
               write.table(pu_file_df, file = paste(outdir, pu_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
       }
@@ -129,10 +136,11 @@ marxan_dat_files <- function(marxan_input_csv, pu_shpfile, outdir, cost_file, co
   }
 
   # # for vocc magnitude when cost is the raster file
-    system.time(marxan_dat_files(marxan_input_csv = "shapefiles_rasters/bathyabyssopelagic_provinces2.csv",
-                                 pu_shpfile = "shapefiles_rasters/abnj_04b-bathyabysso_global_moll_05deg/abnj_04b-bathyabysso_global_moll_05deg.shp",
-                                 outdir = "output_datfiles/abnj_04-bathyabysso_global_moll_05deg/",
-                                 cost_file = "features_rasters/voccMag_04-bap_AEMean_ssp126_r1i1p1f1_2020-2100_.tif",
+    system.time(marxan_dat_files(marxan_input_csv = "CSVs/02_EpipelagicLayer/sps_epipelagic_provinces.csv",
+                                 targets_csv = "CSVs/02_EpipelagicLayer/sps_epipelagic_targets.csv",
+                                 pu_shpfile = "shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp",
+                                 outdir = "output_datfiles/02_EpipelagicLayer/",
+                                 cost_file = "Cost_Layers/02-epipelagic_Cost_Raster_Sum.tif",
                                  cost_type = "Raster",
                                  proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
   
