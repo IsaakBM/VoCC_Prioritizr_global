@@ -1,4 +1,7 @@
-
+# This code was written by Isaac Brito-Morales (i.britomorales@uq.edu.au)
+# Please do not distribute this code without permission.
+# NO GUARANTEES THAT CODE IS CORRECT
+# Caveat Emptor!
 
 pzr_function <- function(path, outdir, blm, sol) {
   
@@ -20,28 +23,24 @@ pzr_function <- function(path, outdir, blm, sol) {
     ncores <- 10
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
-    
     problem_list <- list()
-    
     problems <-  foreach(kk = 1:length(dir.layers), .packages = c("prioritizr", "gurobi", "dplyr", "reldist")) %dopar% {
       
-      #
+      # Identifying files per directories
         file_pu <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "pu.dat$"), sep = "/")
         file_features <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "spec.dat$"), sep = "/")
         file_bound <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*bound.*.dat$"), sep = "/")
         file_rij <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "puvsp.dat$"), sep = "/")
-        # 
+        # Reading files per directories
           pu <- read.table(file_pu, sep = ",", header = TRUE)
           features <- read.table(file_features, sep = ",", header = TRUE)
           bound <- read.table(file_bound, sep = ",", header = TRUE)
           rij <- read.table(file_rij, sep = ",", header = TRUE)
       
-      # How many interation per problem?
-        problem_list <- list()
       # Establish the Problem
         mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm) %>%
           #add_top_portfolio(number_solutions = sol)
-	  add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
+          add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
         # Solve the problem
           mp3_solution <- prioritizr::solve(mp1)
         # Write the object
