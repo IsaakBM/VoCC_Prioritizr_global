@@ -140,9 +140,30 @@ ggsave("zfigs/00_general-plots_02c.pdf", width = 20, height = 10, dpi = 300) # o
 # ggsave("zfigs/00_general-plots_01d.pdf", width = 40, height = 20, dpi = 300)
 
 
+cost <- st_read("output_datfiles/02_EpipelagicLayer/pu.shp") 
+cost$cost <- ifelse(is.na(cost$cost), 0, cost$cost)
+cost <- cost %>% 
+  mutate(cost_log = log10(cost + 1))
 
+# cost$cost_log2 <- ifelse(is.infinite(cost$cost_log), cost$cost, cost$cost_log)
 
-cost2 <- cost %>% filter(cost_log < 4)
-plot(st_geometry(cost))
-plot(st_geometry(cost2), col = "green")
+cv_cost <- c("1", "10", "100", "1000", "10000")
+# pal_cost <- c("#a1d99b", "#74c476", "#41ab5d",
+#               "#ffffcc", "#ffeda0", "#fed976", 
+#               "#d0d1e6", "#0570b0", "#023858")
 
+pal_cost <- rev(brewer.pal(5, "RdYlBu"))
+
+ggplot() + 
+  geom_sf(data = cost, aes(fill = cost_log), color = NA) +
+  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+  # coord_sf(xlim = c(-8, 35), ylim = c(30.5, 46)) +
+  ggtitle("Cost") +
+  scale_fill_gradientn(name = "Euros",
+                       colours = pal_cost,
+                       limits = c(0, 5),
+                       breaks = seq(0, 5, length.out = 5),
+                       labels = cv_cost,
+                       trans = "log") +
+  theme_opts3 +
+  ggsave("ypdfs/02-epipelagic_Cost_Raster_Sum_01a.pdf", width = 20, height = 10, dpi = 300) # original
