@@ -13,11 +13,12 @@ bound <- read.table("output_datfiles/02_EpipelagicLayer/bound.dat", sep = ",", h
 rij <- read.table("output_datfiles/02_EpipelagicLayer/puvsp.dat", sep = ",", header = TRUE)
 
 pu$cost <- ifelse(is.na(pu$cost), 0, pu$cost)
+pu$cost <- round(pu$cost)
 
 mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) # does not like negative cost values
 presolve_check(mp1)
 mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij2, bound = bound2, blm = 0) %>%
-  add_pool_portfolio(method = 2, number_solutions = 2)
+  add_pool_portfolio(method = 2, number_solutions = 1)
 
 mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
 # class(mp3_solution)
@@ -34,7 +35,7 @@ mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
   # wb_sp <- as(wb, "Spatial")
   
   
-  pdf("ypdfs/02-eppipelagic_best-sol_01a_BLM00.pdf", width = 40, height = 20)
+  pdf("ypdfs/02-eppipelagic_best-sol_01b_BLM00.pdf", width = 40, height = 20)
   # plot(st_geometry(shp))
   plot(st_geometry(best_sol))
   # plot(wb_sp, add = TRUE)
