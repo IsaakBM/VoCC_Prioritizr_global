@@ -18,7 +18,7 @@
 
 # ~28 minutes global analysis at 0.5° resolution no parallel
 
-marxan_dat_files <- function(marxan_input_csv, targets_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
+marxan_dat_files <- function(marxan_input_csv, targets_csv, mpas_csv, vmes_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
 
 ### List of pacakges that we will use
     list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")
@@ -103,10 +103,23 @@ marxan_dat_files <- function(marxan_input_csv, targets_csv, pu_shpfile, outdir, 
                 mutate(cost = abs(cost), status = 0) %>% 
                 data.frame() %>% 
                 dplyr::select(id, cost, status)
-              # status may change in the future (e.g., locked in and locked out? in this case locked out)
-              # add the pu FILE and match with the pu_file_df
-              
-              
+              # Status: available = 0; locked in = 2; locked out = 3)
+              # MPAs
+                pu_mpas <- read.csv(mpas_csv) %>% 
+                  filter(province != "non-categ_mpas") %>% 
+                  mutate(status = 2) # 2 locked in
+              # VMEs
+                pu_vmes <- read.csv(vmes_csv) %>% 
+                  filter(province != "non-categ_VMEs") %>% 
+                  mutate(status = 2) # 2 locked in
+              # Datas to locked-in/locked-out
+                pus_lock <- rbind(pu_mpas, pu_vmes)
+                pu_file_df <- pu_file_df %>% 
+                  mutate(status =  pus_lock$status[match(pu_file_df$id, pus_lock$layer)]) %>% 
+                  mutate(status = ifelse(is.na(status), 0, status)) %>% 
+                  mutate(cost = ifelse(is.na(cost), 0, cost)) %>% 
+                  mutate(status = ifelse(cost == 0, 3, status)) # if cost ZERO == 3 locked out
+            # Write the pu.dat FILE
               pu_name <- paste("pu", sep = "_")
               write.table(pu_file_df, file = paste(outdir, pu_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
           
@@ -138,6 +151,8 @@ marxan_dat_files <- function(marxan_input_csv, targets_csv, pu_shpfile, outdir, 
   # # for vocc magnitude when cost is the raster file
     system.time(marxan_dat_files(marxan_input_csv = "CSVs/02_EpipelagicLayer/sps_epipelagic_provinces.csv",
                                  targets_csv = "CSVs/02_EpipelagicLayer/sps_epipelagic_targets.csv",
+                                 mpas_csv = "CSVs/02_EpipelagicLayer/pus-epipelagic_mpas_.csv",
+                                 vmes_csv = "CSVs/02_EpipelagicLayer/pus-epipelagic_VMEs_.csv",
                                  pu_shpfile = "shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp",
                                  outdir = "output_datfiles/02_EpipelagicLayer/",
                                  cost_file = "Cost_Layers/02-epipelagic_Cost_Raster_Sum.tif",
