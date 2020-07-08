@@ -7,22 +7,27 @@ library(gurobi)
 library(spatstat)
 library(reldist)
 
-pu <- read.table("output_datfiles/02_EpipelagicLayer/pu.dat", sep = ",", header = TRUE)
-features <- read.table("output_datfiles/02_EpipelagicLayer/spec.dat", sep = ",", header = TRUE)
-bound <- read.table("output_datfiles/02_EpipelagicLayer/bound.dat", sep = ",", header = TRUE)
-rij <- read.table("output_datfiles/02_EpipelagicLayer/puvsp.dat", sep = ",", header = TRUE)
+pu <- read.table("output_datfiles/pu.dat", sep = ",", header = TRUE)
+features <- read.table("output_datfiles/spec.dat", sep = ",", header = TRUE)
+bound <- read.table("output_datfiles/bound.dat", sep = ",", header = TRUE)
+rij <- read.table("output_datfiles/puvsp.dat", sep = ",", header = TRUE)
 
 pu$cost <- ifelse(is.na(pu$cost), 0, pu$cost)
 pu$cost <- round(pu$cost)
+pu$status <- ifelse(pu$status == 3, 0, pu$status)
+pu$cost <- ifelse(pu$cost == 0, median(filter(pu, pu$cost != 0)$cost), pu$cost)
+range(pu$cost)
 
 mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) # does not like negative cost values
 presolve_check(mp1)
-mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij2, bound = bound2, blm = 0) %>%
+mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) %>%
   add_pool_portfolio(method = 2, number_solutions = 1)
 
 mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
 # class(mp3_solution)
 # write.csv(mp3_solution, "CSVs/mp3_solution.csv")
+# calculate representation
+r <- feature_abundances(mp1, na.rm = T)
 
   sol_1 <- mp3_solution %>% filter(solution_1 == "1")
   shp <- st_read("shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp")
@@ -35,7 +40,7 @@ mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
   # wb_sp <- as(wb, "Spatial")
   
   
-  pdf("ypdfs/02-eppipelagic_best-sol_01b_BLM00.pdf", width = 40, height = 20)
+  pdf("ypdfs/02-eppipelagic_best-sol_01d_BLM00-costMedian.pdf", width = 40, height = 20)
   # plot(st_geometry(shp))
   plot(st_geometry(best_sol))
   # plot(wb_sp, add = TRUE)
