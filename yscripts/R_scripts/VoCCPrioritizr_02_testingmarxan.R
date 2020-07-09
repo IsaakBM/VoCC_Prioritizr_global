@@ -12,6 +12,13 @@ features <- read.table("output_datfiles/spec.dat", sep = ",", header = TRUE)
 bound <- read.table("output_datfiles/bound.dat", sep = ",", header = TRUE)
 rij <- read.table("output_datfiles/puvsp.dat", sep = ",", header = TRUE)
 
+pu <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/pu.dat", sep = ",", header = TRUE)
+features <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/spec.dat", sep = ",", header = TRUE)
+bound <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/bound.dat", sep = ",", header = TRUE)
+rij <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/puvsp.dat", sep = ",", header = TRUE)
+
+
+
 pu$cost <- ifelse(is.na(pu$cost), 0, pu$cost)
 pu$cost <- round(pu$cost)
 pu$status <- ifelse(pu$status == 3, 0, pu$status)
@@ -21,13 +28,17 @@ range(pu$cost)
 mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) # does not like negative cost values
 presolve_check(mp1)
 mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) %>%
-  add_pool_portfolio(method = 2, number_solutions = 1)
+  add_pool_portfolio(method = 2, number_solutions = 2)
 
 mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
 # class(mp3_solution)
-# write.csv(mp3_solution, "CSVs/mp3_solution.csv")
+write.csv(mp3_solution, "output_prioritizr_blm-cal/mp3_solution_BLM-0_cost-normal.csv")
 # calculate representation
-r <- feature_abundances(mp1, na.rm = T)
+
+pu$cost <- 0
+mp2 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 1) # does not like negative cost values
+mp2_solution <- prioritizr::solve(mp2) # needs gurobi R package
+write.csv(mp2_solution, "output_prioritizr_blm-cal/mp3_solution_BLM-0_cost-0.csv")
 
   sol_1 <- mp3_solution %>% filter(solution_1 == "1")
   shp <- st_read("shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp")
