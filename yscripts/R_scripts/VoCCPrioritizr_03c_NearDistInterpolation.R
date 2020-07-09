@@ -115,7 +115,11 @@ near.dist <- function(path, outdir, type) { # add type of analysis interpolation
     }
 }
 
-  system.time(near.dist(path = "/QRISdata/Q1216/BritoMorales/Project04b/vocc_a_nointer/mag", 
-                        outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vocc_b_inter/mag/ssp126/", 
+  # system.time(near.dist(path = "/QRISdata/Q1216/BritoMorales/Project04b/vocc_a_nointer/mag", 
+  #                       outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vocc_b_inter/mag/ssp126/", 
+  #                       type = "general"))
+  
+  system.time(near.dist(path = "vocc_a_nointer/mag", 
+                        outdir = "vocc_a_nointer/mag/", 
                         type = "general"))
   
