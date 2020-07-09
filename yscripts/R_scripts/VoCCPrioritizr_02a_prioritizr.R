@@ -3,7 +3,7 @@
 # NO GUARANTEES THAT CODE IS CORRECT
 # Caveat Emptor!
 
-pzr_function <- function(path, outdir, blm, sol) {
+pzr_function <- function(path, outdir, cost, blm, sol) {
   
   library(raster)
   library(sf)
@@ -32,7 +32,12 @@ pzr_function <- function(path, outdir, blm, sol) {
         file_bound <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*bound.*.dat$"), sep = "/")
         file_rij <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "puvsp.dat$"), sep = "/")
         # Reading files per directories
-          pu <- read.table(file_pu, sep = ",", header = TRUE)
+          pu <- read.table(file_pu, sep = ",", header = TRUE) %>% 
+            mutate(cost = ifelse(is.na(cost), 0, cost)) %>% 
+            mutate(cost = round(cost)) %>% 
+            mutate(status = ifelse(status == 3, 0, status))
+            pu$cost <- ifelse(pu$cost == 0, median(filter(pu, pu$cost != 0)$cost), pu$cost)
+            if(cost == "calibration") {pu$cost <- 0}
           features <- read.table(file_features, sep = ",", header = TRUE)
           bound <- read.table(file_bound, sep = ",", header = TRUE)
           rij <- read.table(file_rij, sep = ",", header = TRUE)
@@ -45,13 +50,14 @@ pzr_function <- function(path, outdir, blm, sol) {
           mp3_solution <- prioritizr::solve(mp1)
         # Write the object
           ns <- basename(dir.layers[kk])
-          write.csv(mp3_solution, paste(outdir, ns, ".csv", sep = ""), row.names = FALSE)
+          write.csv(mp3_solution, paste(outdir, paste(ns, blm, sol, sep = "_"), ".csv", sep = ""), row.names = FALSE)
     }
     stopCluster(cl)
 }
 
 
-system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles", 
-                         outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles/", 
+system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal", 
+                         outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal/",
+                         cost = "general",
                          blm = 0, 
-                         sol = 100))
+                         sol = 10))
