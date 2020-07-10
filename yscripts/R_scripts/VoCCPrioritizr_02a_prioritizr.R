@@ -44,12 +44,10 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
       
       # Establish the Problem
         mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm) %>%
-          #add_top_portfolio(number_solutions = sol)
           add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
         # Solve the problem
-          # mp3_solution <- prioritizr::solve(mp1)
           mp3_solution <- mp1 %>% 
-            add_gurobi_solver(gap = 0.2, presolve = 2, time_limit = 7200) %>% 
+            add_gurobi_solver(gap = 0.01, presolve = 2, time_limit = 3600, threads = 14, first_feasible = TRUE) %>% 
             solve()
         # Write the object
           ns <- basename(dir.layers[kk])
@@ -61,6 +59,6 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
 
 system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal", 
                          outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal/",
-                         cost = "calibration",
-                         blm = 1, 
+                         cost = "general",
+                         blm = 0.002294, 
                          sol = 10))
