@@ -51,12 +51,12 @@ csvs_pus_provinces <- function(csv_olayer_prov, csv_olayer_species, olayer, min_
     fwrite(dt_testing, paste(outdir, ns2, ".csv", sep = ""))
 }
 
-csvs_pus_provinces(csv_olayer_prov = "CSVs/04_BathyAbyssopelagicLayer/pus-bathyabyssopelagic_Glasgow_.csv", 
-                   csv_olayer_species = "CSVs/04_BathyAbyssopelagicLayer/bathyabyssopelagic.csv", 
-                   olayer = "bathyabyssopelagic", 
+csvs_pus_provinces(csv_olayer_prov = "CSVs/03_MesopelagicLayer/pus-mesopelagic_Glasgow_.csv", 
+                   csv_olayer_species = "CSVs/03_MesopelagicLayer/mesopelagic.csv", 
+                   olayer = "mesopelagic", 
                    min_target = 0.1, 
                    max_target = 0.3, 
-                   outdir = "CSVs/04_BathyAbyssopelagicLayer/")
+                   outdir = "CSVs/03_MesopelagicLayer/")
 
 
 # ep <- fread("CSVs/02_EpipelagicLayer/sps_epipelagic_provinces.csv")
