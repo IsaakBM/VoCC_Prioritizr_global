@@ -90,8 +90,8 @@ posthoc_marxan <- function(path, outdir, pu_shpfile, proj.geo) {
   
 }
 
-  system.time(posthoc_marxan(path = "output_prioritizr_blm-cal",
-                             outdir = "output_prioritizr_blm-cal/",
-                             pu_shpfile = "output_datfiles/02_EpipelagicLayer/pu.shp",
+  system.time(posthoc_marxan(path = "output_prioritizr_blm-cal2",
+                             outdir = "output_prioritizr_blm-cal2/",
+                             pu_shpfile = "output_prioritizr_blm-cal2/02_EpipelagicLayer/pu.shp",
                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
 

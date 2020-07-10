@@ -47,7 +47,10 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
           #add_top_portfolio(number_solutions = sol)
           add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
         # Solve the problem
-          mp3_solution <- prioritizr::solve(mp1)
+          # mp3_solution <- prioritizr::solve(mp1)
+          mp3_solution <- mp1 %>% 
+            add_gurobi_solver(gap = 0.2, presolve = 2, time_limit = 7200) %>% 
+            solve()
         # Write the object
           ns <- basename(dir.layers[kk])
           write.csv(mp3_solution, paste(outdir, paste(ns, blm, sol, sep = "_"), ".csv", sep = ""), row.names = FALSE)
@@ -58,6 +61,6 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
 
 system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal", 
                          outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal/",
-                         cost = "general",
-                         blm = 0, 
+                         cost = "calibration",
+                         blm = 1, 
                          sol = 10))

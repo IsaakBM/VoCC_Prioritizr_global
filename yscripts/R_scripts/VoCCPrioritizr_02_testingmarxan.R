@@ -24,13 +24,15 @@ pu$cost <- round(pu$cost)
 pu$status <- ifelse(pu$status == 3, 0, pu$status)
 pu$cost <- ifelse(pu$cost == 0, median(filter(pu, pu$cost != 0)$cost), pu$cost)
 range(pu$cost)
+sum(pu$cost)
 
-mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) # does not like negative cost values
+mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0.002294) # does not like negative cost values
 presolve_check(mp1)
-mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0) %>%
-  add_pool_portfolio(method = 2, number_solutions = 2)
+mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = 0.002294) %>%
+  add_gap_portfolio(number_solutions = 100, pool_gap = 0.2)
 
 mp3_solution <- prioritizr::solve(mp1) # needs gurobi R package
+mp3_solution <- mp1 %>% add_gurobi_solver(gap = 0.2, presolve = 2, time_limit = 10) %>% solve()
 # class(mp3_solution)
 write.csv(mp3_solution, "output_prioritizr_blm-cal/mp3_solution_BLM-0_cost-normal.csv")
 # calculate representation
