@@ -3,7 +3,7 @@
 # NO GUARANTEES THAT CODE IS CORRECT
 # Caveat Emptor!
 
-pzr_function <- function(path, outdir, n_blm, sol) {
+pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
   
   library(raster)
   library(sf)
@@ -33,12 +33,13 @@ pzr_function <- function(path, outdir, n_blm, sol) {
           bound <- read.table(file_bound, sep = ",", header = TRUE)
           rij <- read.table(file_rij, sep = ",", header = TRUE)
         # Begin the parallel structure      
-          ncores <- 10
+          ncores <- n_blm
           cl <- makeCluster(ncores)
           registerDoParallel(cl)
           problem_list <- list()
         # Calibration BLM
-          blm_cal <- round(seq(0, 1, length.out = n_blm), digits = 4)
+          # blm_cal <- round(seq(0, 1, length.out = n_blm), digits = 4)
+          blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 4)
           problems <- foreach(i  = 1:length(blm_cal), .packages = c("prioritizr", "gurobi", "dplyr", "reldist")) %dopar% {
             # Establish the Problem      
               mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm_cal[i]) %>%
@@ -56,8 +57,10 @@ pzr_function <- function(path, outdir, n_blm, sol) {
 
 system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles",
                          outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles/",
-                         n_blm = 10,
-                         sol = 100))
+                         n_blm = 24,
+                         min_blm = 0.001,
+                         max_blm = 0.003,
+                         sol = 10))
 
 # system.time(pzr_function(path = "output_datfiles", 
 #                          outdir = "output_datfiles/", 
