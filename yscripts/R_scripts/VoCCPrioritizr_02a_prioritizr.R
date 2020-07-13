@@ -47,7 +47,7 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
           add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
         # Solve the problem
           mp3_solution <- mp1 %>% 
-            add_gurobi_solver(gap = 0.01, presolve = 2, time_limit = 3600, threads = 14, first_feasible = TRUE) %>% 
+            add_gurobi_solver(gap = 0, presolve = 2, time_limit = 3600, threads = 14, first_feasible = FALSE) %>% 
             solve()
         # Write the object
           ns <- basename(dir.layers[kk])
