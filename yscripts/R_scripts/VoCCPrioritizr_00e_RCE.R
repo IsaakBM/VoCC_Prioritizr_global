@@ -55,3 +55,10 @@ rce <- function(omon, slp, from, to, outdir, ...) {
       # Write the raster 
         writeRaster(RCE, paste(outdir, name.rs, ".tif", sep = ""), overwrite = TRUE)
 }
+
+system.time(rce(omon = "/QRISdata/Q1216/BritoMorales/Project04b/CMIP6_zrasters_zensemble/thetao_05deg/ssp126/01_SurfaceLayer/01-sf_thetao_AEMean_ssp126_r1i1p1f1_2015-2100.grd", 
+                slp = "/QRISdata/Q1216/BritoMorales/Project04b/vocc_a_nointer/slpTrends/ssp126/01_SurfaceLayer/slpTrends_01-sf_AEMean_ssp126_r1i1p1f1_2020-2100_.tif", 
+                from = 2015, 
+                to = 2020, 
+                outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vocc_a_nointer/RCE/"))
+
