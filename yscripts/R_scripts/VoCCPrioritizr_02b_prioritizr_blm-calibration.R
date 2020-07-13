@@ -33,19 +33,20 @@ pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
           bound <- read.table(file_bound, sep = ",", header = TRUE)
           rij <- read.table(file_rij, sep = ",", header = TRUE)
         # Begin the parallel structure      
-          ncores <- n_blm
+          ncores <- 24
           cl <- makeCluster(ncores)
           registerDoParallel(cl)
           problem_list <- list()
         # Calibration BLM
-          # blm_cal <- round(seq(0, 1, length.out = n_blm), digits = 4)
-          blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 4)
+          blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 5)
           problems <- foreach(i  = 1:length(blm_cal), .packages = c("prioritizr", "gurobi", "dplyr", "reldist")) %dopar% {
             # Establish the Problem      
               mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm_cal[i]) %>%
-                add_gap_portfolio(number_solutions = sol, pool_gap = 0.1)
+                add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
             # Solve the problem
-              mp3_solution <- prioritizr::solve(mp1)    
+              mp3_solution <- mp1 %>% 
+                add_gurobi_solver(gap = 0, presolve = 2, time_limit = 7200, threads = 1, first_feasible = FALSE) %>% 
+                solve()
             # Write the object
               ns <- basename(dir.layers[kk])
               write.csv(mp3_solution, paste(outdir, paste(ns, blm_cal[i], sep = "_"), ".csv", sep = ""), row.names = FALSE)
@@ -58,8 +59,8 @@ pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
 system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles",
                          outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_datfiles/",
                          n_blm = 24,
-                         min_blm = 0.001,
-                         max_blm = 0.003,
+                         min_blm = 0.0011,
+                         max_blm = 0.0031,
                          sol = 10))
 
 # system.time(pzr_function(path = "output_datfiles", 
