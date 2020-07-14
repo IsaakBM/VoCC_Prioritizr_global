@@ -88,6 +88,7 @@ marxan_dat_files <- function(marxan_input_csv, targets_csv, mpas_csv, vmes_csv, 
       if(cost_type == "Raster") {
         # Read raster object
           cost_file <- readAll(raster(cost_file))
+          crs(cost_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") # if error delete please!
           weight_rs <- raster::area(cost_file)
             cost_file <- projectRaster(cost_file, crs = CRS(proj.geo), method = "ngb", over = FALSE)
             weight_rs <- projectRaster(weight_rs, crs = CRS(proj.geo), method = "ngb", over = FALSE)
