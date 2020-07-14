@@ -42,6 +42,7 @@ mp2 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm 
 mp2_solution <- prioritizr::solve(mp2) # needs gurobi R package
 write.csv(mp2_solution, "output_prioritizr_blm-cal/mp3_solution_BLM-0_cost-0.csv")
 
+  mp3_solution <- read.csv("output_prioritizr_blm-cal/02_EpipelagicLayer_0.001173349_10.csv")
   sol_1 <- mp3_solution %>% filter(solution_1 == "1")
   shp <- st_read("shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp")
   # rs <- raster("annualvocc_b_inter/mag/ssp245/01_SurfaceLayer_ssp245/voccMag-thetao_01-Surface_MPI-ESM1-2-HR_ssp245-05deg_2020-2100.tif") %>% disaggregate(2)
@@ -53,7 +54,7 @@ write.csv(mp2_solution, "output_prioritizr_blm-cal/mp3_solution_BLM-0_cost-0.csv
   # wb_sp <- as(wb, "Spatial")
   
   
-  pdf("ypdfs/02-eppipelagic_best-sol_01d_BLM00-costMedian.pdf", width = 40, height = 20)
+  pdf("ypdfs/02-eppipelagic_best-sol_01d_BLM-0.001173349-costMedian.pdf", width = 40, height = 20)
   # plot(st_geometry(shp))
   plot(st_geometry(best_sol))
   # plot(wb_sp, add = TRUE)
