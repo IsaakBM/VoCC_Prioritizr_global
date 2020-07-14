@@ -13,8 +13,6 @@ rs_lower_qt <- function(path, outdir) {
   # Folder's structure
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
     dir.olayers <- paste(list.dirs(path = dir.scenarios, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory per ocean layer
-  # Loop through each file
-    files_list <- list() # to allocate results
   # Begin the parallel structure      
     cores  <-  detectCores()
     cl <- makeCluster(cores - 1)
@@ -32,7 +30,7 @@ rs_lower_qt <- function(path, outdir) {
           model <- unlist(strsplit(x = ns, split = "_"))[3]
           ssp <- unlist(strsplit(x = ns, split = "_"))[4]
           period <- unlist(strsplit(unlist(strsplit(x = ns, split = "[.]"))[1], split = "_"))[5]
-          name.rs <- paste(var, olayer, model, ssp, period, sep = "_")
+        name.rs <- paste(olayer, var, model, ssp, period, sep = "_")
         # Write the rasters
           writeRaster(rs, paste(outdir, name.rs, ".tif", sep = ""), overwrite = TRUE)
     }
