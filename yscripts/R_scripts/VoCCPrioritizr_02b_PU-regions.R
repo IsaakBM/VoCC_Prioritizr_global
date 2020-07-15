@@ -51,27 +51,16 @@ csvs_pus_provinces <- function(csv_olayer_prov, csv_olayer_species, olayer, min_
     fwrite(dt_testing, paste(outdir, ns2, ".csv", sep = ""))
 }
 
-csvs_pus_provinces(csv_olayer_prov = "CSVs/03_MesopelagicLayer/pus-mesopelagic_Glasgow_.csv", 
-                   csv_olayer_species = "CSVs/03_MesopelagicLayer/mesopelagic.csv", 
-                   olayer = "mesopelagic", 
+csvs_pus_provinces(csv_olayer_prov = "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245/pus-bathyabyssopelagic_Glasgow_.csv", 
+                   csv_olayer_species = "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245/bathyabyssopelagic_sps-rce.csv", 
+                   olayer = "bathyabyssopelagic", 
                    min_target = 0.1, 
                    max_target = 0.3, 
-                   outdir = "CSVs/03_MesopelagicLayer/")
+                   outdir = "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245/")
 
-
-# ep <- fread("CSVs/02_EpipelagicLayer/sps_epipelagic_provinces.csv")
-# ep_targets <- fread("CSVs/02_EpipelagicLayer/sps_epipelagic_targets.csv")
-# length(unique(ep$feature_names_prov))
-# length(unique(ep_targets$feature_names_prov))
-# 
-# mp <- fread("CSVs/03_MesopelagicLayer/sps_mesopelagic_provinces.csv")
-# mp_targets <- fread("CSVs/03_MesopelagicLayer/sps_mesopelagic_targets.csv")
-# length(unique(mp$feature_names_prov))
-# length(unique(mp_targets$feature_names_prov))
-# 
-# bap <- fread("CSVs/04_BathyAbyssopelagicLayer/sps_bathyabyssopelagic_provinces.csv")
-# bap_targets <- fread("CSVs/04_BathyAbyssopelagicLayer/sps_bathyabyssopelagic_targets.csv")
-# length(unique(bap$feature_names_prov))
-# length(unique(bap_targets$feature_names_prov))
+# SETTING 0.20 TARGETS FOR LOW QT RCE
+# test <- read.csv("features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245/sps_bathyabyssopelagic_targets.csv")
+# test$targets[str_detect(string = test$feature_names_prov, pattern = "RCE") == TRUE] = 0.20
+# write.csv(test, "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245/sps_bathyabyssopelagic_targets_rce020.csv")
 
 

@@ -21,7 +21,7 @@
 marxan_dat_files <- function(marxan_input_csv, targets_csv, mpas_csv, vmes_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
 
 ### List of pacakges that we will use
-    list.of.packages <- c("raster", "sf", "dplyr", "future.apply", "cleangeo", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")
+    list.of.packages <- c("raster", "sf", "dplyr", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")
     # If is not installed, install the pacakge
       new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages
       if(length(new.packages)) install.packages(new.packages) # if not, installed
