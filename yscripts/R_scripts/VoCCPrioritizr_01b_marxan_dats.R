@@ -114,7 +114,7 @@ marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
               pu_file <- shp_file %>% 
               mutate(cost = cost_bypu)
               # Write cost shapefile
-                st_write(pu_file, dsn = outdir, layer = "pu", driver = "ESRI Shapefile")
+                st_write(pu_file, dsn = outdir, layer = paste("pu", basename(dir.scenarios[i]), sep = "_"), driver = "ESRI Shapefile")
               # Write .dat file
               pu_file_df <- pu_file %>%
                 mutate(cost = abs(cost), status = 0) %>% 
