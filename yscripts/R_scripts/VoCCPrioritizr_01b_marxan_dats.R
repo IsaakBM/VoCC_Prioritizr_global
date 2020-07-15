@@ -18,88 +18,104 @@
 
 # ~28 minutes global analysis at 0.5° resolution no parallel
 
-marxan_dat_files <- function(marxan_input_csv, targets_csv, mpas_csv, vmes_csv, pu_shpfile, outdir, cost_file, cost_type, proj.geo) { # in this case cost_file is velocity but could be other
+marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
 
-### List of pacakges that we will use
-    list.of.packages <- c("raster", "sf", "dplyr", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")
-    # If is not installed, install the pacakge
-      new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages
-      if(length(new.packages)) install.packages(new.packages) # if not, installed
-      # Load packages
-        lapply(list.of.packages, require, character.only = TRUE) # or require
+### Libraries to call
+    library(raster)
+    library(sf)
+    library(dplyr)
+    library(prioritizr)
+    library(lwgeom)
+    library(stringr)
+    library(data.table)
+    library(exactextractr)
   
-### Reading marxan_input file
-    shp_file <- st_read(pu_shpfile) %>% 
-      st_transform(crs = CRS(proj.geo))
-    shp_csv <- fread(marxan_input_csv)
-
-### bound.dat FILE
-    length_mtx <- prioritizr::boundary_matrix(shp_file) # a spare matrix ::: deleting the TRUE argument due crashed 
-    length_data <- as(length_mtx, "dgTMatrix")
-    length_data <- data.frame(id1 = length_data@i + 1, id2 = length_data@j + 1, boundary = length_data@x)
-      # keep same name of original pus by converting into factor
-        length_data$id2 <- as.factor(length_data$id2)
-        length_data$id1 <- as.factor(length_data$id1)
-        # replace those name with original shapefile pu layer
-          levels(length_data$id2) <- shp_file$layer
-          levels(length_data$id1) <- shp_file$layer
-    
-            bound_name <- paste("bound", sep = "_")
-            write.table(length_data, file = paste(outdir, bound_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+### Define all the interation directories 
+    dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
+### Begin the parallel structure      
+    cores  <-  24
+    cl <- makeCluster(cores)
+    registerDoParallel(cl)
+    foreach(i = 1:length(dir.scenarios), .packages = c("raster", "sf", "dplyr", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")) %dopar% {
+      ### Files location [shapefile, sps info by province, targets by sps, mpas locked-in, vmes locked-in]
+          shp_file <- list.files(path = dir.scenarios[i], pattern = "*.shp$", full.names = TRUE)
+          marxan_input_csv <- list.files(path = dir.scenarios[i], pattern = "*_provinces.*.csv$", full.names = TRUE)
+          targets_csv <- list.files(path = dir.scenarios[i], pattern = "*_targets.*.csv$", full.names = TRUE)
+          mpas_csv <- list.files(path = dir.scenarios[i], pattern = "*_mpas.*.csv$", full.names = TRUE)
+          vmes_csv <- list.files(path = dir.scenarios[i], pattern = "*_VMEs.*.csv$", full.names = TRUE)     
+          cost_file <- list.files(path = dir.scenarios[i], pattern = "*_Cost.*.tif$", full.names = TRUE)
+      ### Reading planning unit shapefile AND species by provinces for every prioritization scenario 
+          shp_file <- st_read(pu_shpfile) %>% 
+            st_transform(crs = CRS(proj.geo))
+          shp_csv <- fread(marxan_input_csv)
           
-### puvsp FILE (species[a different number that the species' code], pu[planning unit], amount[area])
-    shp_df <- shp_csv %>% 
-      dplyr::select(pu, area_km2, feature_names_prov) %>% 
-      base::transform(id = as.numeric(factor(feature_names_prov)))
-    
-    puvsp <- shp_df %>% 
-      dplyr::select(id, pu, area_km2) %>% 
-      dplyr::rename(species = id, amount = area_km2) %>% 
-      arrange(pu)
-    # Write the file puvsp
-      puvsp_name <- paste("puvsp", sep = "_")
-      write.table(puvsp, file = paste(outdir, puvsp_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
-      ### Write the file puvsp_sporder (orderer by species column)
-          puvsp_order <- puvsp %>% arrange(species)
-            puvsp_name_order <- paste("puvsp_sporder", sep = "_")
-            write.table(puvsp_order, file = paste(outdir, puvsp_name_order, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
-    
-### spec FILE (id[species ID], prop[proportion for protection of these species... 0.3 in general], spf[species penalty factor], name[species' name/code])  
-    spec <- shp_df %>% 
-      dplyr::group_by(id, feature_names_prov) %>% 
-      summarize(total_area = sum(area_km2)) %>% 
-      dplyr::select(id, feature_names_prov) %>% 
-      dplyr::rename(id = id, name = feature_names_prov) %>% 
-      mutate(prop = 0.2, spf = 1.1) %>% 
-      dplyr::select(id, prop, spf, name) %>% 
-      data.frame()
-    # Reading target files
-      df_targets <- fread(targets_csv)
-      spec$prop <- df_targets$targets[match(spec$name, df_targets$feature_names_prov)] # matching the targets with the generic spec file
-    # Write the file
-      spec_name <- paste("spec", sep = "_")
-      write.table(spec, file = paste(outdir, spec_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
-      
-### pu FILE (id[planning units id], cost[velocity], status[available locked in and locked out])
-    col_shp <- colnames(shp_file)
-    col_shp[1] <- ifelse(col_shp[1] == "layer", "id", col_shp[1])
-    colnames(shp_file) <- col_shp
-
-      if(cost_type == "Raster") {
-        # Read raster object
-          cost_file <- readAll(raster(cost_file))
-          crs(cost_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") # if error delete please!
-          weight_rs <- raster::area(cost_file)
-            cost_file <- projectRaster(cost_file, crs = CRS(proj.geo), method = "ngb", over = FALSE)
-            weight_rs <- projectRaster(weight_rs, crs = CRS(proj.geo), method = "ngb", over = FALSE)
-            names(cost_file) <- "layer"
-          # Getting cost value by planning unit
-            cost_bypu <- exact_extract(cost_file, shp_file, "weighted_mean", weights = weight_rs)
-            pu_file <- shp_file %>% 
+      ### bound.dat FILE
+          length_mtx <- prioritizr::boundary_matrix(shp_file) # a spare matrix ::: deleting the TRUE argument due crashed 
+          length_data <- as(length_mtx, "dgTMatrix")
+          length_data <- data.frame(id1 = length_data@i + 1, id2 = length_data@j + 1, boundary = length_data@x)
+            # keep same name of original pus by converting into factor
+              length_data$id2 <- as.factor(length_data$id2)
+              length_data$id1 <- as.factor(length_data$id1)
+              # replace those name with original shapefile pu layer
+                levels(length_data$id2) <- shp_file$layer
+                levels(length_data$id1) <- shp_file$layer
+              # Writing the object
+                bound_name <- paste("bound", basename(dir.scenarios[i]), sep = "_")
+                write.table(length_data, file = paste(outdir, bound_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+                
+      ### puvsp FILE (species[a different number that the species' code], pu[planning unit], amount[area])
+          shp_df <- shp_csv %>% 
+            dplyr::select(pu, area_km2, feature_names_prov) %>% 
+            base::transform(id = as.numeric(factor(feature_names_prov)))
+                
+          puvsp <- shp_df %>% 
+            dplyr::select(id, pu, area_km2) %>% 
+            dplyr::rename(species = id, amount = area_km2) %>%
+            arrange(pu)
+          # Write the file puvsp
+            puvsp_name <- paste("puvsp", basename(dir.scenarios[i]), sep = "_")
+            write.table(puvsp, file = paste(outdir, puvsp_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+            # Write the file puvsp_sporder (orderer by species column)
+              puvsp_order <- puvsp %>% arrange(species)
+              puvsp_name_order <- paste("puvsp_sporder", basename(dir.scenarios[i]), sep = "_")
+              write.table(puvsp_order, file = paste(outdir, puvsp_name_order, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+              
+      ### spec FILE (id[species ID], prop[proportion for protection of these species... 0.3 in general], spf[species penalty factor], name[species' name/code])  
+          spec <- shp_df %>% 
+            dplyr::group_by(id, feature_names_prov) %>% 
+            summarize(total_area = sum(area_km2)) %>% 
+            dplyr::select(id, feature_names_prov) %>% 
+            dplyr::rename(id = id, name = feature_names_prov) %>% 
+            mutate(prop = 0.2, spf = 1.1) %>% 
+            dplyr::select(id, prop, spf, name) %>% 
+            data.frame()
+          # Reading target files
+            df_targets <- fread(targets_csv)
+            spec$prop <- df_targets$targets[match(spec$name, df_targets$feature_names_prov)] # matching the targets with the generic spec file
+            # Write the file
+              spec_name <- paste("spec", basename(dir.scenarios[i]), sep = "_")
+              write.table(spec, file = paste(outdir, spec_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+              
+      ### pu FILE (id[planning units id], cost[velocity], status[available locked in and locked out])
+          col_shp <- colnames(shp_file)
+          col_shp[1] <- ifelse(col_shp[1] == "layer", "id", col_shp[1])
+          colnames(shp_file) <- col_shp
+          
+          if(cost_type == "Raster") {
+            # Read raster object
+              cost_file <- readAll(raster(cost_file))
+              crs(cost_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") # if error delete please!
+              weight_rs <- raster::area(cost_file)
+              cost_file <- projectRaster(cost_file, crs = CRS(proj.geo), method = "ngb", over = FALSE)
+              weight_rs <- projectRaster(weight_rs, crs = CRS(proj.geo), method = "ngb", over = FALSE)
+              names(cost_file) <- "layer"
+            # Getting cost value by planning unit
+              cost_bypu <- exact_extract(cost_file, shp_file, "weighted_mean", weights = weight_rs)
+              pu_file <- shp_file %>% 
               mutate(cost = cost_bypu)
-            # Write cost shapefile
-              st_write(pu_file, dsn = outdir, layer = "pu", driver = "ESRI Shapefile")
-            # Write .dat file
+              # Write cost shapefile
+                st_write(pu_file, dsn = outdir, layer = "pu", driver = "ESRI Shapefile")
+              # Write .dat file
               pu_file_df <- pu_file %>%
                 mutate(cost = abs(cost), status = 0) %>% 
                 data.frame() %>% 
@@ -120,55 +136,37 @@ marxan_dat_files <- function(marxan_input_csv, targets_csv, mpas_csv, vmes_csv, 
                     mutate(status = ifelse(is.na(status), 0, status)) %>% 
                     mutate(cost = ifelse(is.na(cost), 0, cost)) %>% 
                     mutate(status = ifelse(cost == 0, 3, status)) # if cost ZERO == 3 locked out
-            # Write the pu.dat FILE
-              pu_name <- paste("pu", sep = "_")
-              write.table(pu_file_df, file = paste(outdir, pu_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
-          
-      } else {
-        # Read shapefile object (in this case is the same as the pu_shpfile)
-          cost_shpfile <- st_read(cost_file)
-          var.cost <- colnames(cost_shpfile)
-          cost_shpfile <- cost_shpfile %>% 
-            magrittr::set_colnames(ifelse(str_detect(var.cost, "(?i).*id*"), "id", # or (?i).*id*|(?i).*pu*?
-                                          ifelse(str_detect(var.cost, "(?i)cost"), "cost", var.cost))) %>% 
-            dplyr::select(id, cost, geometry) %>% 
-            arrange(id)
-          # Getting cost value by planning unit
+                # Write the pu.dat FILE
+                  pu_name <- paste("pu", basename(dir.scenarios[i]), sep = "_")
+                  write.table(pu_file_df, file = paste(outdir, pu_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+            
+          } else {
+            # Read shapefile object (in this case is the same as the pu_shpfile)
+            cost_shpfile <- st_read(cost_file)
+            var.cost <- colnames(cost_shpfile)
+            cost_shpfile <- cost_shpfile %>% 
+              magrittr::set_colnames(ifelse(str_detect(var.cost, "(?i).*id*"), "id", # or (?i).*id*|(?i).*pu*?
+                                            ifelse(str_detect(var.cost, "(?i)cost"), "cost", var.cost))) %>% 
+              dplyr::select(id, cost, geometry) %>% 
+              arrange(id)
+            # Getting cost value by planning unit
             pu_file <- cost_shpfile[cost_shpfile$id %in% pu_shpfile$id, ]
-              pu_file <- pu_file[!duplicated(pu_file$id),]
+            pu_file <- pu_file[!duplicated(pu_file$id),]
             # Write cost shapefile
-              st_write(pu_file, dsn = paste(outdir, sep = ""), driver = "ESRI Shapefile")
+            st_write(pu_file, dsn = paste(outdir, sep = ""), driver = "ESRI Shapefile")
             # Write .dat file
-              pu_file_df <- pu_file %>%
-                mutate(cost = abs(cost), status = 0) %>% # status may change in the future (e.g., locked in and locked out? in this case locked out)
-                data.frame() %>% 
-                dplyr::select(id, cost, status)
-              pu_name <- paste("pu", sep = "_")
-              write.table(pu_file_df, file = paste(outdir, pu_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
-      }
-        
-  }
+            pu_file_df <- pu_file %>%
+              mutate(cost = abs(cost), status = 0) %>% # status may change in the future (e.g., locked in and locked out? in this case locked out)
+              data.frame() %>% 
+              dplyr::select(id, cost, status)
+            pu_name <- paste("pu", sep = "_")
+            write.table(pu_file_df, file = paste(outdir, pu_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
+          }
+    }
+    stopCluster(cl)
+}
 
-  # # for vocc magnitude when cost is the raster file
-    system.time(marxan_dat_files(marxan_input_csv = "CSVs/02_EpipelagicLayer/sps_epipelagic_provinces.csv",
-                                 targets_csv = "CSVs/02_EpipelagicLayer/sps_epipelagic_targets.csv",
-                                 mpas_csv = "CSVs/02_EpipelagicLayer/pus-epipelagic_mpas_.csv",
-                                 vmes_csv = "CSVs/02_EpipelagicLayer/pus-epipelagic_VMEs_.csv",
-                                 pu_shpfile = "shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp",
-                                 outdir = "output_datfiles/",
-                                 cost_file = "Cost_Layers/02-epipelagic_Cost_Raster_Sum.tif",
-                                 cost_type = "Raster",
-                                 proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-  
-  # for trajectories shapefile when cost is the shapefile fishing effort
-    # system.time(marxan_dat_files(marxan_input = "features_shapefiles/02-surface_med_slowspeed_ssp245/sps_by_pu/sps_by_pu.shp",
-    #                              pu_shpfile = "features_shapefiles/costlayer2/costlayer2.shp",
-    #                              outdir = "output_datfiles/03-cost-fish_feat-sps-slowspeed_ssp245/",
-    #                              cost_file = "features_shapefiles/costlayer2/costlayer2.shp",
-    #                              cost_type = "Shapefile",
-    #                              proj.geo = "+proj=aea +lat_1=60 +lat_2=60 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"))
-
-  
-  # velocity cost
-  # "/Users/bri273/Desktop/VoCC_Marxan/rasters/vocc/vocc_2_GFDL-CM4_ssp585_r1i1p1f1_2015-2100_interpolation_02.grd" 
-
+system.time(marxan_dat_files(path = , 
+                             outdir = , 
+                             cost_type = "Raster", 
+                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
