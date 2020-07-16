@@ -18,7 +18,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
     dir.shpfile <- paste(list.dirs(path = shp_path, full.names = TRUE, recursive = FALSE), sep = "/") # Planning unit realm per depth
       dir.shpfile <- c(dir.shpfile, dir.shpfile) # add one more for ssp585 [and for bottom :-)]
   # Begin the parallel structure      
-    cores  <-  24
+    cores  <-  10
     cl <- makeCluster(cores)
     registerDoParallel(cl)    
     foreach(i = 1:length(dir.olayers), .packages = c("raster", "dplyr", "sf", "exactextractr")) %dopar% {
@@ -43,7 +43,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
           dplyr::mutate(area_km2 = as.numeric(st_area(shp_file)/1e+06)) %>%
           dplyr::mutate(feature_names = var_name) %>% 
           dplyr::rename(pu = id) %>% 
-          na.omit() %>%
+          na.omit() %>% # not with velocity PLEASE!
           as.data.frame() %>% 
           dplyr::select(pu, area_km2, feature_names, climate_feature)
       # Write csv file
