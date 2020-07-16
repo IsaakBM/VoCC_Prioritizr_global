@@ -18,7 +18,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
     dir.shpfile <- paste(list.dirs(path = shp_path, full.names = TRUE, recursive = FALSE), sep = "/") # Planning unit realm per depth
       dir.shpfile <- c(dir.shpfile, dir.shpfile) # add one more for ssp585 [and for bottom :-)]
   # Begin the parallel structure      
-    cores  <-  10
+    cores  <-  3
     cl <- makeCluster(cores)
     registerDoParallel(cl)    
     foreach(i = 1:length(dir.olayers), .packages = c("raster", "dplyr", "sf", "exactextractr")) %dopar% {
@@ -43,7 +43,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
           dplyr::mutate(area_km2 = as.numeric(st_area(shp_file)/1e+06)) %>%
           dplyr::mutate(feature_names = var_name) %>% 
           dplyr::rename(pu = id) %>% 
-          na.omit() %>% # not with velocity PLEASE!
+          # na.omit() %>% # not with velocity PLEASE!
           as.data.frame() %>% 
           dplyr::select(pu, area_km2, feature_names, climate_feature)
       # Write csv file
@@ -61,15 +61,15 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
 }
 
 
-climatevar_feature(rs_path = "/QRISdata/Q1216/BritoMorales/Project04b/climate-change_inputs/vocc_mag_nobottom", 
-                   shp_path = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/02_abnjs_filterdepth", 
-                   outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_CSVs/", 
-                   var_name = "VoCC", 
-                   proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
-
-# climatevar_feature(rs_path = "climate-change_inputs/vocc_mag_nobottom", 
-#                    shp_path = "shapefiles_rasters/02_abnjs_filterdepth", 
-#                    outdir = "features_CSVs/", 
+# climatevar_feature(rs_path = "/QRISdata/Q1216/BritoMorales/Project04b/climate-change_inputs/vocc_mag_nobottom", 
+#                    shp_path = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/02_abnjs_filterdepth", 
+#                    outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_CSVs/", 
 #                    var_name = "VoCC", 
 #                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
+
+climatevar_feature(rs_path = "climate-change_inputs/vocc_mag_nobottom",
+                   shp_path = "shapefiles_rasters/02_abnjs_filterdepth",
+                   outdir = "features_CSVs/",
+                   var_name = "VoCC",
+                   proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
 
