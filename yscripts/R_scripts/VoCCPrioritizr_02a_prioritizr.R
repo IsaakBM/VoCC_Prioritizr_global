@@ -29,7 +29,7 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
       # Identifying files per directories
         file_pu <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*pu_.*.dat$"), sep = "/")
         file_features <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*spec_.*.dat$"), sep = "/")
-        file_bound <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*bound_.*.dat$"), sep = "/")
+        file_bound <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*bound.*._.*.dat$"), sep = "/")
         file_rij <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*puvsp_0.*.dat$"), sep = "/")
       
         # Reading files per directories
@@ -58,8 +58,8 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
 }
 
 
-system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal", 
-                         outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal/",
+system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_ydatfiles_blm-vocc", 
+                         outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/",
                          cost = "general",
-                         blm = 0.002294, 
+                         blm = 0, 
                          sol = 10))
