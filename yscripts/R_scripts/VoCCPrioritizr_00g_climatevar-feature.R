@@ -18,8 +18,8 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
     dir.shpfile <- paste(list.dirs(path = shp_path, full.names = TRUE, recursive = FALSE), sep = "/") # Planning unit realm per depth
       dir.shpfile <- c(dir.shpfile, dir.shpfile) # add one more for ssp585 [and for bottom :-)]
   # Begin the parallel structure      
-    cores  <-  detectCores()
-    cl <- makeCluster(cores - 1)
+    cores  <-  24
+    cl <- makeCluster(cores)
     registerDoParallel(cl)    
     foreach(i = 1:length(dir.olayers), .packages = c("raster", "dplyr", "sf", "exactextractr")) %dopar% {
       # Reading marxan_input file
@@ -45,7 +45,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
           dplyr::rename(pu = id) %>% 
           na.omit() %>%
           as.data.frame() %>% 
-          dplyr::select(pu, area_km2, feature_names)
+          dplyr::select(pu, area_km2, feature_names, climate_feature)
       # Write csv file
         ns <- basename(list.files(path = dir.olayers[i] , pattern = ".tif", full.names = TRUE))
           var <- unlist(strsplit(x = ns, split = "_"))[2]
@@ -61,9 +61,15 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
 }
 
 
-climatevar_feature(rs_path = "climate-change_inputs/RCE_25qt_nobottom", 
-                   shp_path = "shapefiles_rasters/02_abnjs_filterdepth", 
-                   outdir = "features_CSVs/", 
-                   var_name = "RCE_25qt", 
+climatevar_feature(rs_path = "/QRISdata/Q1216/BritoMorales/Project04b/climate-change_inputs/vocc_mag_nobottom", 
+                   shp_path = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/02_abnjs_filterdepth", 
+                   outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_CSVs/", 
+                   var_name = "VoCC", 
                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
+
+# climatevar_feature(rs_path = "climate-change_inputs/vocc_mag_nobottom", 
+#                    shp_path = "shapefiles_rasters/02_abnjs_filterdepth", 
+#                    outdir = "features_CSVs/", 
+#                    var_name = "VoCC", 
+#                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
 
