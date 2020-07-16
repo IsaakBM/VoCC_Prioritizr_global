@@ -4,19 +4,13 @@
 # Caveat Emptor!
 
 # AIM: 
-# marxan_input: directory of the outcome from marxan_inputs.R script
-# pu_shpfile:
-# outdir: 
-# cost_file: climate velocity raster (or any raster?)
-# cost_type
+
 
 # pu: information planning units id, cost and status (available locked in and locked out). status can be associated with a MPAs or a status??? put that in the argument function
 # spec: id (species ID); prop (how proportion for this species); spf (species penalty factor. missing target..).[this file is not associated with planning units]
 # puvsp.dat: species information by planning units
 # puvsp_sporder.dat: same as puvsp.dat by ordered by species
 # bound.dat: boundary shared by planning units
-
-# ~28 minutes global analysis at 0.5° resolution no parallel
 
 marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
 
@@ -33,12 +27,12 @@ marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
 ### Define all the interation directories 
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
 ### Begin the parallel structure      
-    cores  <-  24
+    cores  <-  24 for the cluster
     cl <- makeCluster(cores)
     registerDoParallel(cl)
     foreach(i = 1:length(dir.scenarios), .packages = c("raster", "sf", "dplyr", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")) %dopar% {
       ### Files location [shapefile, sps info by province, targets by sps, mpas locked-in, vmes locked-in]
-          shp_file <- list.files(path = dir.scenarios[i], pattern = "*.shp$", full.names = TRUE)
+          pu_shpfile <- list.files(path = dir.scenarios[i], pattern = "*.shp$", full.names = TRUE)
           marxan_input_csv <- list.files(path = dir.scenarios[i], pattern = "*_provinces.*.csv$", full.names = TRUE)
           targets_csv <- list.files(path = dir.scenarios[i], pattern = "*_targets.*.csv$", full.names = TRUE)
           mpas_csv <- list.files(path = dir.scenarios[i], pattern = "*_mpas.*.csv$", full.names = TRUE)
@@ -166,7 +160,12 @@ marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
     stopCluster(cl)
 }
 
-system.time(marxan_dat_files(path = , 
-                             outdir = , 
+# system.time(marxan_dat_files(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_scenarios", 
+#                              outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_ydatfiles/", 
+#                              cost_type = "Raster", 
+#                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+
+system.time(marxan_dat_files(path = "prioritization_scenarios", 
+                             outdir = "prioritization_ydatfiles/", 
                              cost_type = "Raster", 
                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
