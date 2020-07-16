@@ -12,10 +12,10 @@ features <- read.table("output_datfiles/spec.dat", sep = ",", header = TRUE)
 bound <- read.table("output_datfiles/bound.dat", sep = ",", header = TRUE)
 rij <- read.table("output_datfiles/puvsp.dat", sep = ",", header = TRUE)
 
-pu <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/pu.dat", sep = ",", header = TRUE)
-features <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/spec.dat", sep = ",", header = TRUE)
-bound <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/bound.dat", sep = ",", header = TRUE)
-rij <- read.table("output_prioritizr_blm-cal/02_EpipelagicLayer_01BLM-0_cost-normal/puvsp.dat", sep = ",", header = TRUE)
+pu <- read.table("prioritization_ydatfiles_blm-vocc/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126/pu_02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126.dat", sep = ",", header = TRUE)
+features <- read.table("prioritization_ydatfiles_blm-vocc/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126/spec_02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126.dat", sep = ",", header = TRUE)
+bound <- read.table("prioritization_ydatfiles_blm-vocc/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126/bound-vocc_02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126.dat", sep = ",", header = TRUE)
+rij <- read.table("prioritization_ydatfiles_blm-vocc/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126/puvsp_02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp126.dat", sep = ",", header = TRUE)
 
 
 
