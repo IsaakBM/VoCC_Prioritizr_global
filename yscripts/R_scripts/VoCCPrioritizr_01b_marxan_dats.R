@@ -27,7 +27,7 @@ marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
 ### Define all the interation directories 
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
 ### Begin the parallel structure      
-    cores  <-  24 for the cluster
+    cores  <-  24 # for the cluster
     cl <- makeCluster(cores)
     registerDoParallel(cl)
     foreach(i = 1:length(dir.scenarios), .packages = c("raster", "sf", "dplyr", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")) %dopar% {
