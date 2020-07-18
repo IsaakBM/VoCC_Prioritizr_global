@@ -5,38 +5,27 @@ library(patchwork)
 library(inflection)
 
 
-rs_final <- read.csv("prioritization_zblm-cal/PostHoc_Calibration_01.csv")
-# rs_final <- rs_final %>% 
-#   dplyr::filter(scenario != "02_EpipelagicLayer_1_10")
-rs_final$scenario <- as.factor(rs_final$scenario)
-rs_final$solution <- as.factor(rs_final$solution)
-rs_final$BLM <- as.factor(rs_final$BLM)
+rs_final <- read.csv("prioritization_zblm-cal/PostHoc_Calibration_01.csv", stringsAsFactors = FALSE) %>% 
+  # dplyr::mutate(scenario = as.factor(scenario)) %>% 
+  dplyr::mutate(solution = as.factor(solution)) %>% 
+  dplyr::mutate(BLM = as.factor(BLM))
+head(rs_final)
 
-rs_final2 <- rs_final %>%
-  filter(scenario != "02_EpipelagicLayer_0_10")
-rs_final2 <- rs_final2 %>%
-  filter(scenario != "02_EpipelagicLayer_1_10")
+scenarios <- unique(rs_final$scenario)
+blm_list <- vector("list", length = length(scenarios))
+for(i in 1:length(scenarios)) {
+  # Reading the file
+    single <- rs_final %>% 
+      dplyr::filter(scenario == scenarios[i])
+  # Getting the numetaros index for the Sweet spot
+    cost_x <- mean(single$total_cost[single$BLM == 0], na.rm = TRUE)
+    cost_y <- mean(single$total_cost[single$BLM == 1], na.rm = TRUE)
+  # Getting the denominator index for the Sweet spot
+    bound_x <- mean(single$perimeter_m[single$BLM == 0], na.rm = TRUE)
+    bound_y <- mean(single$perimeter_m[single$BLM == 1], na.rm = TRUE)
+  # 
+    blm_list[[i]] <- abs((cost_x - cost_y)/(bound_x - bound_y))
+}
+names(blm_list) <- scenarios
 
-rs_final2 <- rs_final %>%
-  filter(scenario != "02_EpipelagicLayer_0_10" | scenario != "02_EpipelagicLayer_1_10")
-
-cost_x <- mean(rs_final2$total_cost[rs_final2$scenario == "02_EpipelagicLayer_0_10"], na.rm = TRUE)
-cost_y <- mean(rs_final2$total_cost[rs_final2$scenario == "02_EpipelagicLayer_1_10"], na.rm = TRUE)
-
-bound_x <- mean(rs_final2$perimeter_m[rs_final2$scenario == "02_EpipelagicLayer_0_10"], na.rm = TRUE)
-bound_y <- mean(rs_final2$perimeter_m[rs_final2$scenario == "02_EpipelagicLayer_1_10"], na.rm = TRUE)
-
-blm_final <- abs((cost_x - cost_y)/(bound_x - bound_y))
-
-rs_final3 <- rs_final %>%
-  filter(scenario == "02_EpipelagicLayer_0.00015_10" | scenario == "02_EpipelagicLayer_0.00022_10" | scenario == "02_EpipelagicLayer_0.00029_10" | scenario == "02_EpipelagicLayer_0.00036_10" | scenario == "02_EpipelagicLayer_0.00051_10")
-
-
-
-p2 <- ggplot() +
-  geom_point(data = rs_final, aes(x = perimeter_m, y = total_cost, colour = BLM), size = 3) +
-  ggtitle("Perimeter vc Total Cost") +
-  facet_wrap(~ scenario) +
-  ggsave("ypdfs/BLM_calibration_test01.pdf", width = 10, height = 10) +
-  theme_bw(base_size = 15)
 
