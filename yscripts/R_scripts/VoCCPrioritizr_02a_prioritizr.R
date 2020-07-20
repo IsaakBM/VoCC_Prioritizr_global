@@ -3,7 +3,7 @@
 # NO GUARANTEES THAT CODE IS CORRECT
 # Caveat Emptor!
 
-pzr_function <- function(path, outdir, cost, blm, sol) {
+pzr_function <- function(path, outdir, cost, blm_df, sol) {
   
   library(raster)
   library(sf)
@@ -42,13 +42,14 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
           features <- read.table(file_features, sep = ",", header = TRUE)
           bound <- read.table(file_bound, sep = ",", header = TRUE)
           rij <- read.table(file_rij, sep = ",", header = TRUE)
-      
+        # Reading BLM file
+          blm_df <- read.csv(blm_df)
       # Establish the Problem
-        mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm) %>%
+        mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm_df[kk, 2]) %>%
           add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
         # Solve the problem
           mp3_solution <- mp1 %>% 
-            add_gurobi_solver(gap = 0, presolve = 2, time_limit = 3600, threads = 14, first_feasible = FALSE) %>% 
+            add_gurobi_solver(gap = 0, presolve = 2, time_limit = 7200, threads = 14, first_feasible = FALSE) %>% 
             solve()
         # Write the object
           ns <- basename(dir.layers[kk])
@@ -61,5 +62,5 @@ pzr_function <- function(path, outdir, cost, blm, sol) {
 system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_ydatfiles_blm-vocc", 
                          outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/",
                          cost = "general",
-                         blm = 0, 
+                         blm_df = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/BLM_sweet.csv", 
                          sol = 10))
