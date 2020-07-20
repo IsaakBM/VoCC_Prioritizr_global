@@ -20,19 +20,17 @@ pzr_function <- function(path, outdir, blm_df, n_blm, sol) {
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
     
   # Begin the parallel structure      
-    ncores <- 10 # 24 and pass the argument
+    ncores <- 24 # 24 and pass the argument
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     problem_list <- list()
-  # Reading BLM file
-    blm_df <- read.csv(blm_df)
     problems <-  foreach(kk = 1:length(dir.layers), .packages = c("prioritizr", "gurobi", "dplyr", "reldist")) %dopar% {
       
       # Identifying files per directories
-        file_pu <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "pu.dat$"), sep = "/")
-        file_features <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "spec.dat$"), sep = "/")
-        file_bound <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*bound.*.dat$"), sep = "/")
-        file_rij <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "puvsp.dat$"), sep = "/")
+        file_pu <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*pu_.*.dat$"), sep = "/")
+        file_features <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*spec_.*.dat$"), sep = "/")
+        file_bound <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*bound.*._.*.dat$"), sep = "/")
+        file_rij <- paste(dir.layers[kk], list.files(path = paste(dir.layers[kk], sep = "/"), pattern = "*puvsp_0.*.dat$"), sep = "/")
         # Reading files per directories
           pu <- read.table(file_pu, sep = ",", header = TRUE) %>% 
             mutate(cost = ifelse(is.na(cost), 0, cost)) %>% 
@@ -42,6 +40,8 @@ pzr_function <- function(path, outdir, blm_df, n_blm, sol) {
           features <- read.table(file_features, sep = ",", header = TRUE)
           bound <- read.table(file_bound, sep = ",", header = TRUE)
           rij <- read.table(file_rij, sep = ",", header = TRUE)
+      # Reading BLM file
+        blm_df <- read.csv(blm_df)
       # Calibration BLM
         min_blm <- 0
         max_blm <- blm_df[kk, 2] * 2 # try with 1.5
@@ -63,8 +63,14 @@ pzr_function <- function(path, outdir, blm_df, n_blm, sol) {
 }
 
 
-system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal", 
-                         outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal/",
-                         blm_df = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/BLM_sweet.csv",
+# system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal", 
+#                          outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal/",
+#                          blm_df = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/BLM_sweet.csv",
+#                          n_blm = 20,
+#                          sol = 10))
+
+system.time(pzr_function(path = "prioritization_ydatfiles_blm-vocc", 
+                         outdir = "prioritization_zblm-cal/",
+                         blm_df = "prioritization_zblm-cal/BLM_sweet.csv",
                          n_blm = 20,
                          sol = 10))
