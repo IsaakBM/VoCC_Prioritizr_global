@@ -50,7 +50,7 @@ pzr_function <- function(path, outdir, cost, blm_df, sol) {
         # Solve the problem
           mp3_solution <- mp1 %>% 
             add_gurobi_solver(gap = 0, presolve = 2, time_limit = 7200, threads = 14, first_feasible = FALSE) %>% 
-            solve()
+            solve(force = TRUE)
         # Write the object
           ns <- basename(dir.layers[kk])
           write.csv(mp3_solution, paste(outdir, paste(ns, blm, sol, sep = "_"), ".csv", sep = ""), row.names = FALSE)
