@@ -3,7 +3,7 @@
 # NO GUARANTEES THAT CODE IS CORRECT
 # Caveat Emptor!
 
-pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
+pzr_function <- function(path, outdir, blm_df, n_blm, sol) {
   
   library(raster)
   library(sf)
@@ -20,10 +20,12 @@ pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
     
   # Begin the parallel structure      
-    ncores <- 10
+    ncores <- 10 # 24 and pass the argument
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     problem_list <- list()
+  # Reading BLM file
+    blm_df <- read.csv(blm_df)
     problems <-  foreach(kk = 1:length(dir.layers), .packages = c("prioritizr", "gurobi", "dplyr", "reldist")) %dopar% {
       
       # Identifying files per directories
@@ -41,6 +43,8 @@ pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
           bound <- read.table(file_bound, sep = ",", header = TRUE)
           rij <- read.table(file_rij, sep = ",", header = TRUE)
       # Calibration BLM
+        min_blm <- 0
+        max_blm <- blm_df[kk, 2] * 2 # try with 1.5
         blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 5)
         for(i in 1:length(blm_cal)) {
           # Establish the Problem
@@ -48,7 +52,7 @@ pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
               add_gap_portfolio(number_solutions = sol, pool_gap = 0.2)
           # Solve the problem
             mp3_solution <- mp1 %>% 
-              add_gurobi_solver(gap = 0, presolve = 2, time_limit = 3600, threads = 14, first_feasible = FALSE) %>% 
+              add_gurobi_solver(gap = 0, presolve = 2, time_limit = 7200, threads = 14, first_feasible = FALSE) %>% 
               solve()
           # Write the object
             ns <- basename(dir.layers[kk])
@@ -61,7 +65,6 @@ pzr_function <- function(path, outdir, n_blm, min_blm, max_blm, sol) {
 
 system.time(pzr_function(path = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal", 
                          outdir = "/QRISdata/Q1216/BritoMorales/Project04b/output_prioritizr_blm-cal/",
+                         blm_df = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/BLM_sweet.csv",
                          n_blm = 20,
-                         min_blm = 0.0011,
-                         max_blm = 0.0031,
                          sol = 10))
