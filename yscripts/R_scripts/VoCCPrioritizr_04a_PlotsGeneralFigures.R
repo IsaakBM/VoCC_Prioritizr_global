@@ -221,7 +221,10 @@ rce_shp_files2 <- lapply(rce_shp_files, function(x) {
                                                    ifelse(croot_rce > 0.6 & croot_rce <= 0.8, 4, 
                                                           ifelse(croot_rce > 0.8 & croot_rce <= 1.1, 5, 
                                                                  ifelse(croot_rce > 1.1 & croot_rce <= 1.2, 6, 
-                                                                        ifelse(croot_rce > 1.2 & croot_rce <= 1.5, 7, 8)))))))) # add 11 category
+                                                                        ifelse(croot_rce > 1.2 & croot_rce <= 1.5, 7, 
+                                                                               ifelse(croot_rce > 1.5 & croot_rce <= 2, 8, 
+                                                                                      ifelse(croot_rce > 2 & croot_rce <= 4, 9,
+                                                                                             ifelse(croot_rce > 4 & croot_rce <= 6, 10, 11))))))))))) # add 11 category
 })
 
 # Begin the parallel structure
@@ -232,7 +235,7 @@ foreach(i = 1:length(rce_shp_files2), .packages = c("sf", "raster", "dplyr", "gg
   
   # Defining generalities
   pal_rce <- rev(brewer.pal(11, "Spectral"))
-  cv_rce <- c("0", "", "", "", "", "", "", "> 1.5")
+  cv_rce <- c("min", "", "", "", "", "", "", "", "", "", "max")
   world_sf <- ne_countries(scale = "medium", returnclass = "sf")  
   # Defining themes
   theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
@@ -250,8 +253,8 @@ foreach(i = 1:length(rce_shp_files2), .packages = c("sf", "raster", "dplyr", "gg
                             plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
                             legend.title = element_text(colour = "black", face = "bold", size = 15),
                             legend.text = element_text(colour = "black", face = "bold", size = 10), 
-                            legend.key.height = unit(1, "cm"),
-                            legend.key.width = unit(0.8, "cm"),
+                            legend.key.height = unit(2, "cm"),
+                            legend.key.width = unit(0.9, "cm"),
                             plot.tag = element_text(size = 25, face = "bold")))
   # Plotting the figures
   ggplot() + 
@@ -260,8 +263,8 @@ foreach(i = 1:length(rce_shp_files2), .packages = c("sf", "raster", "dplyr", "gg
     ggtitle("RCE index") +
     scale_fill_gradientn(name = "RCE index",
                          colours = pal_rce,
-                         limits = c(1, 8),
-                         breaks = seq(1, 8, 1),
+                         limits = c(1, 11),
+                         breaks = seq(1, 11, 1),
                          labels = cv_rce) +
     ggtitle(basename(files_rce[i])) +
     theme_opts3 +
