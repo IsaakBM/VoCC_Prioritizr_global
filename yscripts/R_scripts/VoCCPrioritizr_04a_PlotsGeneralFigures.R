@@ -174,12 +174,99 @@ foreach(i = 1:length(vocc_shp_files2), .packages = c("sf", "raster", "dplyr", "g
 }
 stopCluster(cl)
 
+#### RCE
+#### Reading features shapefiles
+dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
+files_rce <- list.files(paste(list.dirs(path = dir.layers[1], full.names = TRUE, recursive = FALSE), sep = "/"), pattern = ".csv", full.names = TRUE)
+rce_csv_files <- lapply(files_rce, function(x) {
+  single <- read.csv(x)
+  final <- single %>% 
+    dplyr::select(-X) %>% 
+    dplyr::arrange(pu)
+  final$climate_feature <- ifelse(is.na(final$climate_feature), median(filter(final, final$climate_feature != 0)$climate_feature), final$climate_feature)
+  final <- final})
 
+# Creating general files
+rce_shp_ep_ssp126 <- rce_shp_ep_ssp245 <- cost_shp_files[[1]]
+rce_shp_mp_ssp126 <- rce_shp_mp_ssp245 <- cost_shp_files[[2]]
+rce_shp_bap_ssp126 <- rce_shp_bap_ssp245 <- cost_shp_files[[3]]
+# Epipelagic
+rce_shp_ep_ssp126$rce <- rce_csv_files[[1]]$climate_feature
+rce_shp_ep_ssp245$rce <- rce_csv_files[[2]]$climate_feature
+# Mesopelagic
+rce_shp_mp_ssp126$rce <- rce_csv_files[[3]]$climate_feature
+rce_shp_mp_ssp245$rce <- rce_csv_files[[4]]$climate_feature
+# Bathyabyssopelagic
+rce_shp_bap_ssp126$rce <- rce_csv_files[[5]]$climate_feature
+rce_shp_bap_ssp245$rce <- rce_csv_files[[6]]$climate_feature
 
+rce_shp_files <- list(rce_shp_ep_ssp126, rce_shp_ep_ssp245,
+                       rce_shp_mp_ssp126, rce_shp_mp_ssp245,
+                       rce_shp_bap_ssp126, rce_shp_bap_ssp245)
 
+ranges_rce <- lapply(rce_shp_files, function(x) {
+  single <- x
+  ranges_rce <- range(single$rce)})
 
+kader:::cuberoot(min(unlist(ranges_rce)))
+kader:::cuberoot(max(unlist(ranges_rce)))
 
+rce_shp_files2 <- lapply(rce_shp_files, function(x) { 
+  single <- x %>% 
+    dplyr::mutate(croot_rce = kader:::cuberoot(rce))
+  vocc <- single %>% 
+    dplyr::mutate(rce_categ = ifelse(croot_rce <= 0.2, 1, 
+                                     ifelse(croot_rce > 0.2 & croot_rce <= 0.4, 2, 
+                                            ifelse(croot_rce > 0.4 & croot_rce <= 0.6, 3, 
+                                                   ifelse(croot_rce > 0.6 & croot_rce <= 0.8, 4, 
+                                                          ifelse(croot_rce > 0.8 & croot_rce <= 1.1, 5, 
+                                                                 ifelse(croot_rce > 1.1 & croot_rce <= 1.2, 6, 
+                                                                        ifelse(croot_rce > 1.2 & croot_rce <= 1.5, 7, 8)))))))) # add 11 category
+})
 
-
+# Begin the parallel structure
+UseCores <- detectCores() -1
+cl <- makeCluster(UseCores)  
+registerDoParallel(cl)
+foreach(i = 1:length(rce_shp_files2), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer", "patchwork")) %dopar% { 
+  
+  # Defining generalities
+  pal_rce <- rev(brewer.pal(11, "Spectral"))
+  cv_rce <- c("0", "", "", "", "", "", "", "> 1.5")
+  world_sf <- ne_countries(scale = "medium", returnclass = "sf")  
+  # Defining themes
+  theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                            panel.grid.major = element_blank(),
+                            panel.background = element_rect(fill = "white", colour = "black"),
+                            plot.background = element_rect(fill = "white"),
+                            panel.border = element_blank(),
+                            axis.line = element_line(size = 1),
+                            axis.text.x = element_text(size = rel(2), angle = 0),
+                            axis.text.y = element_text(size = rel(2), angle = 0),
+                            axis.ticks = element_line(size = 1.5),
+                            axis.ticks.length = unit(.25, "cm"), 
+                            axis.title.x = element_blank(),
+                            axis.title.y = element_blank(),
+                            plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                            legend.title = element_text(colour = "black", face = "bold", size = 15),
+                            legend.text = element_text(colour = "black", face = "bold", size = 10), 
+                            legend.key.height = unit(1, "cm"),
+                            legend.key.width = unit(0.8, "cm"),
+                            plot.tag = element_text(size = 25, face = "bold")))
+  # Plotting the figures
+  ggplot() + 
+    geom_sf(data = rce_shp_files2[[i]], aes(fill = rce_categ), color = NA) +
+    geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+    ggtitle("RCE index") +
+    scale_fill_gradientn(name = "RCE index",
+                         colours = pal_rce,
+                         limits = c(1, 8),
+                         breaks = seq(1, 8, 1),
+                         labels = cv_rce) +
+    ggtitle(basename(files_rce[i])) +
+    theme_opts3 +
+    ggsave(paste(outdir, basename(files_rce[i]), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+}
+stopCluster(cl)
 
 
