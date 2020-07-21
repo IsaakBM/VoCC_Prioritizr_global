@@ -42,7 +42,7 @@ posthoc_marxan <- function(path, outdir, proj.geo) {
           registerDoParallel(cl)
           ls_geom <- list() # empty list to allocate results
           # A parallel structure to search the different solutions per iterations and calculates boundaries and perimeters 
-            geom_list <- foreach(j = 1:length(out_files), .packages = c("sf", "raster", "dplyr", "tidyr", "lwgeom", "stringr", "magrittr")) %dopar% {
+            geom_list <- foreach(j = 1:length(out_files), .packages = c("sf", "raster", "dplyr", "lwgeom", "stringr", "magrittr")) %dopar% {
               # Read outfiles
                 dt <- read.csv(out_files[j], sep = ",", header = TRUE)
                 # Solution's names
