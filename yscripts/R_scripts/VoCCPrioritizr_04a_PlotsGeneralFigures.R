@@ -7,26 +7,139 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(RColorBrewer)
 library(patchwork)
+library(foreach)
+library(doParallel)
+library(data.table)
 
+path = "wgeneral_figs"
+outdir = "wgeneral_figs/"
+#### Cost 
+#### Reading features shapefiles
+dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
+files_shp <- list.files(paste(list.dirs(path = dir.layers[3], full.names = TRUE, recursive = FALSE), sep = "/"), pattern = ".shp", full.names = TRUE)
+cost_shp_files <- lapply(files_shp, function(x) {
+  single <- st_read(x)
+  final <- single %>% 
+    dplyr::mutate(cost = ifelse(is.na(cost), 0, cost)) %>% 
+    mutate(cost = round(cost))
+  final$cost <- ifelse(final$cost == 0, median(filter(final, final$cost != 0)$cost), final$cost)
+  final <- final %>% 
+    dplyr::mutate(cost_log = log10(cost))
+  final <- final})
 
-# sf objects
-  richness <- st_read("features_shapefiles/richness_by_pu/richness_by_pu.shp") %>% 
-    mutate(richness_log = log10(richness))
-  cost <- st_read("output_datfiles/03-cost-fish_feat-sps-trajclass_ssp245/03-cost-fish_feat-sps-trajclass_ssp245.shp") %>% 
-    mutate(cost_log = log10(cost))
-  vocc <- st_read("output_datfiles/02-cost-vocc_feat-sps_ssp245/02-cost-vocc_feat-sps_ssp245.shp") %>%
-    mutate(vocc = ifelse(cost <= 1, 1, 
-                         ifelse(cost > 1 & cost <= 2, 2, 
-                                ifelse(cost > 2 & cost <= 3, 3, 
-                                       ifelse(cost > 3 & cost <= 4, 4, 
-                                              ifelse(cost > 4 & cost <= 5, 5, 
-                                                     ifelse(cost > 5 & cost <= 10, 6,
-                                                            ifelse(cost > 10 & cost <= 15, 7, 8))))))))
-  traj <- st_read("features_shapefiles/trajectories_by_pu/traj_by_pu.shp")
-  slow_vocc <- vocc %>% filter(cost <= 1.874664) %>% 
-    mutate(ftr_nms = 1)
+# Begin the parallel structure
+UseCores <- detectCores() -1
+cl <- makeCluster(UseCores)  
+registerDoParallel(cl)
+foreach(i = 1:length(cost_shp_files), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer", "patchwork")) %dopar% { 
   
-# Defining themes
+  # Defining generalities
+    # pal_cost <- rev(brewer.pal(6, "YlGn"))
+    pal_cost <- c("#a1d99b", "#74c476",
+                  "#ffffcc", "#ffeda0", 
+                  "#d0d1e6", "#0570b0")
+    cv_cost <- c("1", "10", "100", "1000", expression(1~x~10^4), expression(1~x~10^5))
+    world_sf <- ne_countries(scale = "medium", returnclass = "sf")  
+  # Defining themes
+    theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                              panel.grid.major = element_blank(),
+                              panel.background = element_rect(fill = "white", colour = "black"),
+                              plot.background = element_rect(fill = "white"),
+                              panel.border = element_blank(),
+                              axis.line = element_line(size = 1),
+                              axis.text.x = element_text(size = rel(2), angle = 0),
+                              axis.text.y = element_text(size = rel(2), angle = 0),
+                              axis.ticks = element_line(size = 1.5),
+                              axis.ticks.length = unit(.25, "cm"), 
+                              axis.title.x = element_blank(),
+                              axis.title.y = element_blank(),
+                              plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                              legend.title = element_text(colour = "black", face = "bold", size = 15),
+                              legend.text = element_text(colour = "black", face = "bold", size = 10), 
+                              legend.key.height = unit(1, "cm"),
+                              legend.key.width = unit(0.8, "cm"),
+                              plot.tag = element_text(size = 25, face = "bold")))
+  # Plotting the figures
+    ggplot() + 
+      geom_sf(data = cost_shp_files[[i]], aes(fill = cost_log), color = NA) +
+      geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+      ggtitle("Cost") +
+      scale_fill_gradientn(name = "USD",
+                           colours = pal_cost,
+                           limits = c(0, 5),
+                           breaks = seq(0, 5, length.out = 6),
+                           labels = cv_cost) +
+      ggtitle(basename(files_shp[i])) +
+      theme_opts3 +
+      ggsave(paste(outdir, basename(files_shp[i]), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+}
+stopCluster(cl)
+
+#### VoCC
+#### Reading features shapefiles
+dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
+files_vocc <- list.files(paste(list.dirs(path = dir.layers[2], full.names = TRUE, recursive = FALSE), sep = "/"), pattern = ".csv", full.names = TRUE)
+vocc_csv_files <- lapply(files_vocc, function(x) {
+  single <- read.csv(x)
+  final <- single %>% 
+    dplyr::select(-X) %>% 
+    dplyr::arrange(pu)
+  final$climate_feature <- ifelse(is.na(final$climate_feature), median(filter(final, final$climate_feature != 0)$climate_feature), final$climate_feature)
+  final <- final})
+# Creating general files
+vocc_shp_ep_ssp126 <- vocc_shp_ep_ssp245 <- cost_shp_files[[1]]
+vocc_shp_mp_ssp126 <- vocc_shp_mp_ssp245 <- cost_shp_files[[2]]
+vocc_shp_bap_ssp126 <- vocc_shp_bap_ssp245 <- cost_shp_files[[3]]
+# Epipelagic
+vocc_shp_ep_ssp126$vocc <- vocc_csv_files[[1]]$climate_feature
+vocc_shp_ep_ssp245$vocc <- vocc_csv_files[[2]]$climate_feature
+# Mesopelagic
+vocc_shp_mp_ssp126$vocc <- vocc_csv_files[[3]]$climate_feature
+vocc_shp_mp_ssp245$vocc <- vocc_csv_files[[4]]$climate_feature
+# Bathyabyssopelagic
+vocc_shp_bap_ssp126$vocc <- vocc_csv_files[[5]]$climate_feature
+vocc_shp_bap_ssp245$vocc <- vocc_csv_files[[6]]$climate_feature
+
+vocc_shp_files <- list(vocc_shp_ep_ssp126, vocc_shp_ep_ssp245,
+                       vocc_shp_mp_ssp126, vocc_shp_mp_ssp245,
+                       vocc_shp_bap_ssp126, vocc_shp_bap_ssp245)
+
+# ranges_vocc <- lapply(vocc_shp_files, function(x) {
+#   single <- x 
+#   ranges_vocc <- range(single$vocc)})
+
+
+vocc_shp_files2 <- lapply(vocc_shp_files, function(x) { 
+  single <- x %>% 
+    dplyr::mutate(vocc_dec = vocc*10)
+  vocc <- single %>% 
+    dplyr::mutate(vocc_categ = ifelse(vocc_dec <= -50, 1, 
+                                      ifelse(vocc_dec > -50 & vocc_dec <= -20, 2, 
+                                             ifelse(vocc_dec > -20 & vocc_dec <= -10, 3,
+                                                    ifelse(vocc_dec > -10 & vocc_dec <= -5, 4, 
+                                                           ifelse(vocc_dec > -5 & vocc_dec <= 5, 5, 
+                                                                  ifelse(vocc_dec > 5 & vocc_dec <= 10, 6,
+                                                                         ifelse(vocc_dec > 10 & vocc_dec <= 20, 7, 
+                                                                                ifelse(vocc_dec > 20 & vocc_dec <= 50, 8,
+                                                                                       ifelse(vocc_dec > 50 & vocc_dec <= 100, 9, 
+                                                                                              ifelse(vocc_dec > 100 & vocc_dec <= 200, 10, 11)))))))))))
+  })
+
+
+# Begin the parallel structure
+UseCores <- detectCores() -1
+cl <- makeCluster(UseCores)  
+registerDoParallel(cl)
+foreach(i = 1:length(vocc_shp_files2), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer", "patchwork")) %dopar% { 
+  
+  # Defining generalities
+  bls <- rev(brewer.pal(6, "Blues"))[1:5]
+  rds <- brewer.pal(6, "OrRd")
+  pal_vocc <- c(bls, rds)
+  cv_vocc <- c("< -50", "-50 - -20", "-20 - -10", "-10 - -5", "-5 - 5",
+               "5 - 10", "10 - 20", "20 - 50", "50 - 100", "100 - 200", "> 200")
+  world_sf <- ne_countries(scale = "medium", returnclass = "sf")  
+  # Defining themes
   theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
                             panel.grid.major = element_blank(),
                             panel.background = element_rect(fill = "white", colour = "black"),
@@ -45,125 +158,28 @@ library(patchwork)
                             legend.key.height = unit(1, "cm"),
                             legend.key.width = unit(0.8, "cm"),
                             plot.tag = element_text(size = 25, face = "bold")))
-
-# 
-  dat2 <- list(cost, richness, vocc, traj, slow_vocc)
-  names(dat2) <- c("cost", "richness", "vocc", "traj", "slow")
-  world_sf <- ne_countries(scale = "medium", returnclass = "sf")
-
-# color palette
-  # pal_vocc <- rev(brewer.pal(4, "RdYlGn"))
-  pal_rich <- rev(brewer.pal(9, "RdYlBu"))
-  pal_cost <- c("#a1d99b", "#74c476", "#41ab5d",
-                "#ffffcc", "#ffeda0", "#fed976", 
-                "#d0d1e6", "#0570b0", "#023858")
-  pal_vocc <- rev(brewer.pal(8, "Spectral"))
-
-# legend 
-  cv_cost <- c("10", "", "100", "", expression(1~x~10^4), "", expression(1~x~10^6), "", expression(1~x~10^8), "")
-  cv_vocc <- c("0 - 1", "1 - 2", "2 - 3", "3 - 4",
-           "4 - 5", "5 - 10", "10 - 15", "> 15")
-  cv_rich <- c("1", "", "", "10", "", "100", "", "", "1000")
+  # Plotting the figures
+  ggplot() + 
+    geom_sf(data = vocc_shp_files2[[i]], aes(fill = vocc_categ), color = NA) +
+    geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+    ggtitle("Climate velocity") +
+    scale_fill_gradientn(name = expression(km~dec^-1),
+                         colours = pal_vocc,
+                         limits = c(1, 11),
+                         breaks = seq(1, 11, 1),
+                         labels = cv_vocc) +
+    ggtitle(basename(files_vocc[i])) +
+    theme_opts3 +
+    ggsave(paste(outdir, basename(files_vocc[i]), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+}
+stopCluster(cl)
 
 
-p1 <- ggplot() + 
-  geom_sf(data = dat2[[1]], aes(fill = cost_log), color = NA) +
-  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-  coord_sf(xlim = c(-8, 35), ylim = c(30.5, 46)) +
-  ggtitle("Opportunity cost") +
-  scale_fill_gradientn(name = "Euros",
-                       colours = pal_cost,
-                       limits = c(0, 9),
-                       breaks = seq(0, 9, 1),
-                       labels = cv_cost) +
-  theme_opts3
-
-p2 <- ggplot() +
-  geom_sf(data = dat2[[2]], aes(fill = richness_log), color = NA) +
-  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-  coord_sf(xlim = c(-8, 35), ylim = c(30.5, 46)) +
-  ggtitle("Species richness") +
-  scale_fill_gradientn(name = "richness",
-                       colours = pal_rich,
-                       limits = c(0, 3.2),
-                       breaks = seq(0, 3.2, length.out = 9), 
-                       labels = cv_rich) +
-  theme_opts3
-
-p3 <- ggplot() + 
-  geom_sf(data = dat2[[3]], aes(fill = vocc), color = NA) +
-  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-  coord_sf(xlim = c(-8, 35), ylim = c(30.5, 46)) +
-  ggtitle("Climate velocity") +
-  scale_fill_gradientn(name = expression(km~yr^-1),
-                       colours = pal_vocc,
-                       limits = c(1, 8),
-                       breaks = seq(1, 8, 1),
-                       labels = cv_vocc) +
-  theme_opts3
-
-p4 <- ggplot() + 
-  geom_sf(data = dat2[[4]], aes(fill = ftr_nms), color = NA) +
-  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-  coord_sf(xlim = c(-8, 35), ylim = c(30.5, 46)) +
-  ggtitle("Climate-velocity trajectory classes") +
-  scale_fill_manual(values = c("#fdae61", "#41b6c4", "#a6611a",
-                               "#cccccc", "#cb181d", "#bae4bc", "#0570b0"), 
-                    name = "Classes",
-                    labels = c("Sinks", "Divergence", "Internal sinks",
-                               "Non-moving", "Relative sinks", "Slow-moving", "Sources")) +
-  theme_opts3
-
-p5 <- ggplot() + 
-  geom_sf(data = dat2[[5]], aes(fill = as.factor(ftr_nms)), color = NA) +
-  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-  coord_sf(xlim = c(-8, 35), ylim = c(30.5, 46)) +
-  ggtitle("Slow climate-velocity areas") +
-  scale_fill_manual(values = "#31a354", 
-                    name = "") +
-  theme_opts3 +
-  theme(legend.position = "none")
 
 
-# p0_final1 <- ((p1+p2+p3+p4) | p5) +
-#   plot_annotation(tag_levels = 'A', 
-#                   tag_suffix = ')',) +
-#   theme_opts3
-
-p0_final2 <- ((p3+p4+p2+p1)) +
-  plot_annotation(tag_prefix = "(",
-                  tag_levels = "a", 
-                  tag_suffix = ")",) +
-  theme_opts3
-
-ggsave("zfigs/00_general-plots_02c.pdf", width = 20, height = 10, dpi = 300) # original
-# ggsave("zfigs/00_general-plots_01d.pdf", width = 40, height = 20, dpi = 300)
 
 
-cost <- st_read("output_datfiles/02_EpipelagicLayer/pu.shp") 
-cost$cost <- ifelse(is.na(cost$cost), 0, cost$cost)
-cost <- cost %>% 
-  mutate(cost_log = log10(cost + 1))
 
-# cost$cost_log2 <- ifelse(is.infinite(cost$cost_log), cost$cost, cost$cost_log)
 
-cv_cost <- c("1", "10", "100", "1000", "10000")
-# pal_cost <- c("#a1d99b", "#74c476", "#41ab5d",
-#               "#ffffcc", "#ffeda0", "#fed976", 
-#               "#d0d1e6", "#0570b0", "#023858")
 
-pal_cost <- rev(brewer.pal(5, "RdYlBu"))
 
-ggplot() + 
-  geom_sf(data = cost, aes(fill = cost_log), color = NA) +
-  geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-  # coord_sf(xlim = c(-8, 35), ylim = c(30.5, 46)) +
-  ggtitle("Cost") +
-  scale_fill_gradientn(name = "Euros",
-                       colours = pal_cost,
-                       limits = c(0, 5),
-                       breaks = seq(0, 5, length.out = 5),
-                       labels = cv_cost,
-                       trans = "log") +
-  theme_opts3 +
-  ggsave("ypdfs/02-epipelagic_Cost_Raster_Sum_01a.pdf", width = 20, height = 10, dpi = 300) # original
