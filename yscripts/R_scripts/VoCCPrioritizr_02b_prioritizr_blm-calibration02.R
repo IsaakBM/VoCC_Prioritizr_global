@@ -9,13 +9,16 @@
 
 posthoc_marxan <- function(path, outdir, proj.geo) { 
   
-  # List of pacakges that we will use
-    list.of.packages <- c("raster", "sf", "dplyr", "readr", "lwgeom", "doParallel", "parallel", "stringr", "magrittr")
-    # If is not installed, install the pacakge
-      new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages?
-      if(length(new.packages)) install.packages(new.packages) # if not -> install it
-  # Load packages
-    lapply(list.of.packages, require, character.only = TRUE)
+  library(raster)
+  library(sf)
+  library(dplyr)
+  # library(readr)
+  library(lwgeom)
+  library(doParallel)
+  library(parallel)
+  library(foreach)
+  library(stringr)
+  library(magrittr)
   
   # Define all the directories 
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
@@ -34,12 +37,12 @@ posthoc_marxan <- function(path, outdir, proj.geo) {
             magrittr::set_colnames(ifelse(str_detect(var.names, "(?i).*id*"), "id", 
                                           ifelse(str_detect(var.names, "(?i)cost"), "cost", var.names)))
         # Begin the parallel structure
-          UseCores <- detectCores() -1
+          UseCores <- 24 #detectCores() -1
           cl <- makeCluster(UseCores)  
           registerDoParallel(cl)
           ls_geom <- list() # empty list to allocate results
           # A parallel structure to search the different solutions per iterations and calculates boundaries and perimeters 
-            geom_list <- foreach(j = 1:length(out_files), .packages = c("sf", "raster", "dplyr", "tidyr", "readr", "lwgeom", "stringr", "magrittr")) %dopar% {
+            geom_list <- foreach(j = 1:length(out_files), .packages = c("sf", "raster", "dplyr", "tidyr", "lwgeom", "stringr", "magrittr")) %dopar% {
               # Read outfiles
                 dt <- read.csv(out_files[j], sep = ",", header = TRUE)
                 # Solution's names
@@ -93,7 +96,11 @@ posthoc_marxan <- function(path, outdir, proj.geo) {
   
 }
 
-  system.time(posthoc_marxan(path = "prioritization_zblm-cal",
-                             outdir = "prioritization_zblm-cal/",
+  system.time(posthoc_marxan(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal",
+                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/",
                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+  
+  # system.time(posthoc_marxan(path = "prioritization_zblm-cal",
+  #                            outdir = "prioritization_zblm-cal/",
+  #                            proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
 
