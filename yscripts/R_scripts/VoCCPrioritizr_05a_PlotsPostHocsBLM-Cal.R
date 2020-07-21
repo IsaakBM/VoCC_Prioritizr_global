@@ -28,18 +28,16 @@ blm_sweet <- function(posthoc_csv, outdir) {
         bound_x <- mean(single$perimeter_m[single$BLM == 0], na.rm = TRUE)
         bound_y <- mean(single$perimeter_m[single$BLM == 1], na.rm = TRUE)
       # Calculating the sweet spot
-        blm_list[[i]] <- abs((cost_x - cost_y)/(bound_x - bound_y))
+        blm_list[[i]] <- round(abs((cost_x - cost_y)/(bound_x - bound_y)), digits = 7)
     }
     names(blm_list) <- scenarios
     blm_df <- do.call(rbind, blm_list) %>% 
       as.data.frame()
   # Write data frame
-    write.csv(blm_df, paste(outdir, "BLM_sweet", ".csv", sep = ""))
+    write.csv(blm_df, paste(outdir, "BLM_sweet-spot", ".csv", sep = ""))
   
 }
 
 blm_sweet(posthoc_csv = "prioritization_zblm-cal/PostHoc_Calibration_01.csv", 
           outdir = "prioritization_zblm-cal/")
 
-blm_df <- read.csv("prioritization_zblm-cal/BLM_sweet.csv")
-blm_df[4,2]

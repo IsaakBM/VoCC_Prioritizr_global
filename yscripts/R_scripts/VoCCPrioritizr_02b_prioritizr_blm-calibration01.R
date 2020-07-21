@@ -45,7 +45,7 @@ pzr_function <- function(path, outdir, blm_df, n_blm, sol) {
       # Calibration BLM
         min_blm <- 0
         max_blm <- blm_df[kk, 2] * 2 # try with 1.5
-        blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 10)
+        blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 5)
         for(i in 1:length(blm_cal)) {
           # Establish the Problem
             mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm_cal[i]) %>%
