@@ -2,7 +2,6 @@ library(sf)
 library(raster)
 library(dplyr)
 library(ggplot2)
-library(tmap)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(RColorBrewer)
@@ -269,6 +268,84 @@ foreach(i = 1:length(rce_shp_files2), .packages = c("sf", "raster", "dplyr", "gg
     ggtitle(basename(files_rce[i])) +
     theme_opts3 +
     ggsave(paste(outdir, basename(files_rce[i]), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+}
+stopCluster(cl)
+
+
+#### Species Richness
+#### Reading features shapefiles
+dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
+files_richness <- list.files(paste(list.dirs(path = dir.layers[4], full.names = TRUE, recursive = FALSE), sep = "/"), pattern = ".csv", full.names = TRUE)
+
+richness_csv_files <- lapply(files_richness, function(x) {
+  single <- fread(x)
+  final <- single %>% 
+    dplyr::group_by(pu) %>% 
+    dplyr::summarise(richness = n()) %>% 
+    dplyr::arrange(pu) %>% 
+    data.frame()})
+# Getting the data
+richness_shp_ep <- cost_shp_files[[1]][cost_shp_files[[1]]$id %in% richness_csv_files[[1]]$pu, ]
+richness_shp_mp <- cost_shp_files[[2]][cost_shp_files[[2]]$id %in% richness_csv_files[[2]]$pu, ]
+richness_shp_bap <- cost_shp_files[[3]][cost_shp_files[[3]]$id %in% richness_csv_files[[3]]$pu, ]
+
+# Epipelagic
+richness_shp_ep$richness <- richness_csv_files[[1]]$richness
+# Mesopelagic
+richness_shp_mp$richness <- richness_csv_files[[2]]$richness
+# Bathyabyssopelagic
+richness_shp_bap$richness <- richness_csv_files[[3]]$richness
+
+richness_shp_files <- list(richness_shp_ep, richness_shp_mp, richness_shp_bap)
+
+richness_shp_files2 <- lapply(richness_shp_files, function(x) {
+  single <- x
+  final <- single %>% 
+    dplyr::mutate(log_richness = log10(richness))})
+
+
+# Begin the parallel structure
+UseCores <- detectCores() -1
+cl <- makeCluster(UseCores)  
+registerDoParallel(cl)
+foreach(i = 1:length(richness_shp_files2), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer", "patchwork")) %dopar% { 
+  
+  # Defining generalities
+  pal_rich <- rev(brewer.pal(5, "RdYlBu"))
+  cv_rich <- c("1", "10", "100", "1000", expression(1~x~10^4))
+  world_sf <- ne_countries(scale = "medium", returnclass = "sf")  
+  # Defining themes
+  theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                            panel.grid.major = element_blank(),
+                            panel.background = element_rect(fill = "white", colour = "black"),
+                            plot.background = element_rect(fill = "white"),
+                            panel.border = element_blank(),
+                            axis.line = element_line(size = 1),
+                            axis.text.x = element_text(size = rel(2), angle = 0),
+                            axis.text.y = element_text(size = rel(2), angle = 0),
+                            axis.ticks = element_line(size = 1.5),
+                            axis.ticks.length = unit(.25, "cm"), 
+                            axis.title.x = element_blank(),
+                            axis.title.y = element_blank(),
+                            plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                            legend.title = element_text(colour = "black", face = "bold", size = 15),
+                            legend.text = element_text(colour = "black", face = "bold", size = 10), 
+                            legend.key.height = unit(2, "cm"),
+                            legend.key.width = unit(0.9, "cm"),
+                            plot.tag = element_text(size = 25, face = "bold")))
+  # Plotting the figures
+  ggplot() + 
+    geom_sf(data = richness_shp_files2[[i]], aes(fill = log_richness), color = NA) +
+    geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+    ggtitle("Species richness") +
+    scale_fill_gradientn(name = "Richness",
+                         colours = pal_rich,
+                         limits = c(0, 4),
+                         breaks = seq(0, 4, length.out = 5),
+                         labels = cv_rich) +
+    ggtitle(basename(files_richness[i])) +
+    theme_opts3 +
+    ggsave(paste(outdir, basename(files_richness[i]), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
 }
 stopCluster(cl)
 
