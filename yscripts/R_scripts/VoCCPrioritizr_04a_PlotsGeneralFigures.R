@@ -56,8 +56,8 @@ foreach(i = 1:length(cost_shp_files), .packages = c("sf", "raster", "dplyr", "gg
                               plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
                               legend.title = element_text(colour = "black", face = "bold", size = 15),
                               legend.text = element_text(colour = "black", face = "bold", size = 10), 
-                              legend.key.height = unit(1, "cm"),
-                              legend.key.width = unit(0.8, "cm"),
+                              legend.key.height = unit(2, "cm"),
+                              legend.key.width = unit(0.9, "cm"),
                               plot.tag = element_text(size = 25, face = "bold")))
   # Plotting the figures
     ggplot() + 
@@ -155,8 +155,8 @@ foreach(i = 1:length(vocc_shp_files2), .packages = c("sf", "raster", "dplyr", "g
                             plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
                             legend.title = element_text(colour = "black", face = "bold", size = 15),
                             legend.text = element_text(colour = "black", face = "bold", size = 10), 
-                            legend.key.height = unit(1, "cm"),
-                            legend.key.width = unit(0.8, "cm"),
+                            legend.key.height = unit(2, "cm"),
+                            legend.key.width = unit(0.9, "cm"),
                             plot.tag = element_text(size = 25, face = "bold")))
   # Plotting the figures
   ggplot() + 
