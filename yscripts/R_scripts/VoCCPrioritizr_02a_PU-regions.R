@@ -94,15 +94,18 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
     
   } else if (prov_name == "mpas") {
     # Set up parallel structure
-      ncores <- 21 
+      ncores <- 24
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
     # Get the indicator for the provinces
       prov_code <- as.character(bioprovince$wdpaid)
       prov_list <- list() # to allocate results
-      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr")) %dopar% {
+      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "rgeos", "rgdal")) %dopar% {
         single <- bioprovince %>% filter(wdpaid == prov_code[i])
-        dt1 <- st_intersection(pu_region, single) %>% 
+          single_sp <- as(single, "Spatial")
+          single_buf <- gBuffer(single_sp, width = -0.2)
+          single_sf <- st_as_sf(single_buf)
+        dt1 <- st_intersection(pu_region, single_sf) %>% 
           filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
         if(nrow(dt1) > 0) { 
           prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
