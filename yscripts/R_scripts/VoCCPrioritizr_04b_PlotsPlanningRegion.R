@@ -32,12 +32,13 @@ plot_solutions <- function(path, outdir) {
             single <- read.csv(files_solution[i])
             sol_csv <- single %>% 
               dplyr::mutate(freq_sel = rowSums(single[, 6:ncol(single)])) %>% 
-              dplyr::select(id, cost, freq_sel)
+              dplyr::select(id, cost, freq_sel) %>% 
+              dplyr::mutate(freq_cat = (freq_sel)/(length(6:ncol(single)))*10)
             freq_base <- sol_csv %>% 
-              mutate(freq_cat = ifelse(freq_sel == 0, 1, 
-                                       ifelse(freq_sel > 0 & freq_sel <= 2, 2,
-                                              ifelse(freq_sel > 2 & freq_sel <= 5, 3, 
-                                                     ifelse(freq_sel > 5 & freq_sel <= 7, 4, 5)))))
+              mutate(freq_cat2 = ifelse(freq_cat == 0, 1, 
+                                       ifelse(freq_cat > 0 & freq_cat <= 2, 2,
+                                              ifelse(freq_cat > 2 & freq_cat <= 5, 3, 
+                                                     ifelse(freq_cat > 5 & freq_cat <= 7, 4, 5))))) # categories needs to be based on max length columns
         # Get the freq solutions from the corresponding planning unit shapefile
           best_freq_sol <- pu_shpfile[pu_shpfile$id %in% freq_base$id, ] %>% 
             mutate(freq_cat = freq_base$freq_cat)
@@ -67,7 +68,7 @@ plot_solutions <- function(path, outdir) {
         ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
       # Plot
         ggplot() + 
-          geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat), fill = as.factor(freq_cat)), color = NA) +
+          geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat2), fill = as.factor(freq_cat2)), color = NA) +
           geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
           scale_fill_manual(values = pal,
                             name = "Selection Frequency (%)",
