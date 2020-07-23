@@ -41,7 +41,7 @@ plot_solutions <- function(path, outdir) {
                                                      ifelse(freq_cat > 5 & freq_cat <= 7, 4, 5))))) # categories needs to be based on max length columns
         # Get the freq solutions from the corresponding planning unit shapefile
           best_freq_sol <- pu_shpfile[pu_shpfile$id %in% freq_base$id, ] %>% 
-            mutate(freq_cat = freq_base$freq_cat)
+            mutate(freq_cat = freq_base$freq_cat2)
         # Define themes to plot 
           theme_opts2 <- list(theme(panel.grid.minor = element_blank(),
                                     panel.grid.major = element_blank(),
@@ -68,7 +68,7 @@ plot_solutions <- function(path, outdir) {
         ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
       # Plot
         ggplot() + 
-          geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat2), fill = as.factor(freq_cat2)), color = NA) +
+          geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat), fill = as.factor(freq_cat)), color = NA) +
           geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
           scale_fill_manual(values = pal,
                             name = "Selection Frequency (%)",
