@@ -1,13 +1,15 @@
-
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(inflection)
-
+# This code was written by Isaac Brito-Morales (i.britomorales@uq.edu.au)
+# Please do not distribute this code without permission.
+# NO GUARANTEES THAT CODE IS CORRECT
+# Caveat Emptor!
 
 blm_sweet <- function(posthoc_csv, outdir) { 
   
+  library(ggplot2)
   library(dplyr)
+  library(patchwork)
+  library(inflection)
+  
   # Reading
     rs_final <- read.csv(posthoc_csv, stringsAsFactors = FALSE) %>% 
       # dplyr::mutate(scenario = as.factor(scenario)) %>% 
@@ -46,5 +48,22 @@ blm_sweet <- function(posthoc_csv, outdir) {
   
 }
 
-blm_sweet(posthoc_csv = "prioritization_zblm-cal/PostHoc_Calibration_02.csv", 
+blm_sweet(posthoc_csv = "prioritization_zblm-cal-test/PostHoc_Calibration_01.csv", 
           outdir = "prioritization_zblm-cal/")
+
+
+
+prio_scenarios <- unique(rs_final$scenario)
+for(i in 1:length(prio_scenarios)) {
+  
+  single <- rs_final %>% 
+    dplyr::filter(scenario == prio_scenarios[i])
+  ggplot() +
+    geom_point(data = single, aes(x = perimeter_m, y = total_cost, colour = BLM), size = 3) +
+    ggtitle("Perimeter vc Total Cost") +
+    ggsave(paste(outdir, prio_scenarios[i], ".pdf", sep = ""), width = 15, height = 10)
+  
+}
+
+
+
