@@ -9,6 +9,8 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
   library(raster)
   library(dplyr)
   library(sf)
+  library(rgeos)
+  library(rgdal)
   library(data.table)
   library(foreach)
   library(doParallel)
