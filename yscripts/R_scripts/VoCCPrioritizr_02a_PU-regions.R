@@ -105,13 +105,16 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "rgeos", "rgdal")) %dopar% {
         single <- bioprovince %>% filter(wdpaid == prov_code[i])
           single_sp <- as(single, "Spatial")
-          single_buf <- gBuffer(single_sp, width = -0.2)
-          single_sf <- st_as_sf(single_buf)
-        dt1 <- st_intersection(pu_region, single_sf) %>% 
-          filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
-        if(nrow(dt1) > 0) { 
-          prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
-        }
+            single_sp <- spTransform(single_sp, CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+          single_buf <- gBuffer(single_sp, width = -150)
+          if(is.null(single_buf) == FALSE) {
+            single_sf <- st_as_sf(single_buf)
+            dt1 <- st_intersection(pu_region, single_sf) %>% 
+              filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
+            if(nrow(dt1) > 0) { 
+              prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
+            }
+          }
       }
       stopCluster(cl)
     # Merge all the output
