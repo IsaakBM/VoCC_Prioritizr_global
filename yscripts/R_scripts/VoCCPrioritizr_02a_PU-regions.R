@@ -105,10 +105,10 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "rgeos", "rgdal")) %dopar% {
         single <- bioprovince %>% filter(wdpaid == prov_code[i])
           single_sp <- as(single, "Spatial")
-            single_sp <- spTransform(single_sp, CRS("+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-          single_buf <- gBuffer(single_sp, width = -150)
+            single_sp2 <- spTransform(single_sp, CRS(proj.geo))
+          single_buf <- gBuffer(single_sp2, width = -140)
           if(is.null(single_buf) == FALSE) {
-            single_sf <- st_as_sf(single_buf)
+            single_sf <- st_as_sf(single_buf) %>% st_make_valid()
             dt1 <- st_intersection(pu_region, single_sf) %>% 
               filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
             if(nrow(dt1) > 0) { 
@@ -132,7 +132,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
     # Get the indicator for the provinces
       prov_code <- as.character(bioprovince$VME_ID)
       prov_list <- list() # to allocate results
-      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr")) %dopar% {
+      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "lwgeom")) %dopar% {
         single <- bioprovince %>% filter(VME_ID == prov_code[i])
         dt1 <- st_intersection(pu_region, single) %>% 
           filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
@@ -163,12 +163,12 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
 #                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
 #                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/"))
 
-system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp",
+system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/02_abnjs_filterdepth/abnj_02-epipelagic_global_moll_05deg_depth/abnj_02-epipelagic_global_moll_05deg_depth.shp",
                             province_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/mpas_v2018/mpas_v2018.shp", 
-                            prov_name = "Longhurst",
+                            prov_name = "mpas",
                             olayer = "epipelagic",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
-                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/"))
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_CSVs/"))
 
 
 
