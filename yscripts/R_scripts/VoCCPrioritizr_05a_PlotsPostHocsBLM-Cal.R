@@ -16,16 +16,15 @@ blm_sweet <- function(posthoc_csv, outdir) {
       dplyr::mutate(solution = as.factor(solution)) %>% 
       dplyr::mutate(BLM = as.factor(BLM))
     
-  # Plotting
-    ggplot() +
-      geom_point(data = rs_final, aes(x = perimeter_m, y = total_cost, colour = BLM), size = 3) +
-      ggtitle("Perimeter vc Total Cost") +
-      facet_wrap(~ scenario) +
-      ggsave(paste(outdir, "BLM_sweet-spot", ".pdf", sep = ""), width = 15, height = 15)
+  # # Plotting
+  #   ggplot() +
+  #     geom_point(data = rs_final, aes(x = perimeter_m, y = total_cost, colour = BLM), size = 3) +
+  #     ggtitle("Perimeter vc Total Cost") +
+  #     facet_wrap(~ scenario) +
+  #     ggsave(paste(outdir, "BLM_sweet-spot", ".pdf", sep = ""), width = 15, height = 15)
       
   # Looping
     scenarios <- unique(rs_final$scenario)
-    blm_list <- vector("list", length = length(scenarios))
     blm_list <- vector("list", length = length(scenarios))
     for(i in 1:length(scenarios)) {
       # Reading the file
@@ -48,7 +47,7 @@ blm_sweet <- function(posthoc_csv, outdir) {
   
 }
 
-blm_sweet(posthoc_csv = "prioritization_zblm-cal-test/PostHoc_Calibration_01.csv", 
+blm_sweet(posthoc_csv = "prioritization_zblm-cal/PostHoc_Calibration_0-1.csv", 
           outdir = "prioritization_zblm-cal/")
 
 
