@@ -83,14 +83,14 @@ posthoc_marxan <- function(path, outdir, proj.geo, spot) {
           data.frame %>% 
           dplyr::select(-geometry) %>% 
           dplyr::mutate(area = as.numeric(area), perimeter = as.numeric(perimeter)) %>% 
-          dplyr::rename(area_m2 = area, perimeter_m = perimeter) %>% 
-          dplyr::mutate(trade_off = ifelse(BLM == 0, "X", 
-                                           ifelse(BLM == 1, "Y", spot)))
+          dplyr::rename(area_m2 = area, perimeter_m = perimeter)
     # Final list object
       scenario_list[[i]] <- geom_list
       }
   # Final dataframe for all iterations-scenarios in directory path
     iteration_df <- do.call(rbind, scenario_list)
+    iteration_df <- iteration_df %>% 
+      dplyr::mutate(trade_off = ifelse(BLM == 0, "X", ifelse(BLM == 1, "Y", spot)))
     name.df <- paste("PostHoc_Calibration")
     write.csv(iteration_df, paste(outdir, name.df, ".csv", sep = ""), row.names = FALSE)  
   
