@@ -7,7 +7,7 @@
 # path: 
 
 
-posthoc_marxan <- function(path, outdir, proj.geo) { 
+posthoc_marxan <- function(path, outdir, proj.geo, spot) { 
   
   library(raster)
   library(sf)
@@ -37,7 +37,7 @@ posthoc_marxan <- function(path, outdir, proj.geo) {
             magrittr::set_colnames(ifelse(str_detect(var.names, "(?i).*id*"), "id", 
                                           ifelse(str_detect(var.names, "(?i)cost"), "cost", var.names)))
         # Begin the parallel structure
-          UseCores <- 24 #detectCores() -1
+          UseCores <- detectCores() -1#24
           cl <- makeCluster(UseCores)  
           registerDoParallel(cl)
           ls_geom <- list() # empty list to allocate results
@@ -82,10 +82,10 @@ posthoc_marxan <- function(path, outdir, proj.geo) {
         geom_list <- geom_list %>% 
           data.frame %>% 
           dplyr::select(-geometry) %>% 
-          mutate(area = as.numeric(area), 
-                 perimeter = as.numeric(perimeter)) %>% 
-          rename(area_m2 = area,
-                 perimeter_m = perimeter)
+          dplyr::mutate(area = as.numeric(area), perimeter = as.numeric(perimeter)) %>% 
+          dplyr::rename(area_m2 = area, perimeter_m = perimeter) %>% 
+          dplyr::mutate(trade_off = ifelse(BLM == 0, "X", 
+                                           ifelse(BLM == 1, "Y", spot)))
     # Final list object
       scenario_list[[i]] <- geom_list
       }
@@ -96,11 +96,12 @@ posthoc_marxan <- function(path, outdir, proj.geo) {
   
 }
 
-  system.time(posthoc_marxan(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal",
-                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/",
-                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-  
-  # system.time(posthoc_marxan(path = "prioritization_zblm-cal",
-  #                            outdir = "prioritization_zblm-cal/",
+  # system.time(posthoc_marxan(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal",
+  #                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal/",
   #                            proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+  
+  system.time(posthoc_marxan(path = "prioritization_zblm-cal",
+                             outdir = "prioritization_zblm-cal/",
+                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
+                             spot = "Z"))
 
