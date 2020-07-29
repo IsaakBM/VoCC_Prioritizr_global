@@ -14,7 +14,10 @@ blm_sweet <- function(posthoc_csv, outdir) {
     rs_final <- read.csv(posthoc_csv, stringsAsFactors = FALSE) %>% 
       # dplyr::mutate(scenario = as.factor(scenario)) %>% 
       dplyr::mutate(solution = as.factor(solution)) %>% 
-      dplyr::mutate(BLM = as.factor(BLM))
+      dplyr::mutate(BLM = as.factor(BLM)) %>% 
+      dplyr::group_by(scenario, trade_off) %>% 
+      dplyr::summarise(mean_cost = mean(total_cost, na.rm = TRUE), mean_perimeter = mean(perimeter_m , na.rm = TRUE)) %>% 
+      data.frame()
     
   # # Plotting
   #   ggplot() +
@@ -38,6 +41,23 @@ blm_sweet <- function(posthoc_csv, outdir) {
         bound_y <- mean(single$perimeter_m[single$BLM == 1], na.rm = TRUE)
       # Calculating the sweet spot
         blm_list[[i]] <- round(abs((cost_x - cost_y)/(bound_x - bound_y)), digits = 7)
+        
+        
+        # cost_X <- single$mean_cost[single$trade_off == "X"]
+        # cost_Y <- single$mean_cost[single$trade_off == "Y"]
+        # cost_Z <- single$mean_cost[single$trade_off == "Z"]
+        # 
+        # bound_X <- single$mean_perimeter[single$trade_off == "X"]
+        # bound_Y <- single$mean_perimeter[single$trade_off == "Y"]
+        # bound_Z <- single$mean_perimeter[single$trade_off == "Z"]
+        # 
+        # blm_b <- round(abs((cost_Z - cost_Y)/(bound_Z - bound_Y)), digits = 7)
+        # blm_c <- round(abs((cost_X - cost_Z)/(bound_X - bound_Z)), digits = 7)
+        # blm_list[[i]] <- cbind(blm_b, blm_c)  
+        
+        
+        
+        
     }
     names(blm_list) <- scenarios
     blm_df <- do.call(rbind, blm_list) %>% 
@@ -64,5 +84,8 @@ for(i in 1:length(prio_scenarios)) {
   
 }
 
-
+if(trade_off == "Z") {
+  
+  
+}
 
