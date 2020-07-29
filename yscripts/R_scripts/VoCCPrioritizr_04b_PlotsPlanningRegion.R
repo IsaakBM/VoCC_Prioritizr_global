@@ -30,6 +30,7 @@ plot_solutions <- function(path, outdir) {
         foreach(i = 1:length(files_solution), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
           # Some manipulation
             single <- read.csv(files_solution[i])
+            if(ncol(single) > 6) {
             sol_csv <- single %>% 
               dplyr::mutate(freq_sel = rowSums(single[, 6:ncol(single)])) %>% 
               dplyr::select(id, cost, freq_sel) %>% 
@@ -45,7 +46,7 @@ plot_solutions <- function(path, outdir) {
         # Define themes to plot 
           theme_opts2 <- list(theme(panel.grid.minor = element_blank(),
                                     panel.grid.major = element_blank(),
-                                    panel.background = element_rect(fill = "white", colour = "black"),
+                                    panel.background = element_blank(),
                                     plot.background = element_rect(fill = "white"),
                                     panel.border = element_blank(),
                                     axis.line = element_line(size = 1),
@@ -73,17 +74,18 @@ plot_solutions <- function(path, outdir) {
           scale_fill_manual(values = pal,
                             name = "Selection Frequency (%)",
                             labels = ranges) +
-          ggtitle(basename(files_solution[i])) +
+          ggtitle(basename(sub(pattern = "*.csv", "", files_solution[i]))) +
           theme_opts2 +
-          ggsave(paste(outdir, basename(files_solution[i]), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+          ggsave(paste(outdir, basename(sub(pattern = "*.csv", "", files_solution[i])), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+        }
     }
     stopCluster(cl)
   }
   
 }
 
-system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal-test", 
-                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal-test/"))
+system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal", 
+                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal"))
 
 # system.time(plot_solutions(path = "prioritization_zblm-cal-test", 
 #                            outdir = "prioritization_zblm-cal-test/"))
