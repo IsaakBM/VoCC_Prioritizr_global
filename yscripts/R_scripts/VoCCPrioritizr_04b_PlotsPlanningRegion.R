@@ -72,10 +72,12 @@ plot_solutions <- function(path, outdir) {
                                     legend.key.width = unit(1, "cm"),
                                     plot.tag = element_text(size = 30, face = "bold")))
       # Color Palette, World borders and Legend
-        rds <- brewer.pal(4, "YlOrRd")
+        rds <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "YlOrRd")
         pal <- c("#deebf7", rds)
         world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
-        ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
+        # ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
+        ranges <- as.character(sort(unique(best_freq_sol$freq_cat)))
+        
       # Plot
         ggplot() + 
           geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat), fill = as.factor(freq_cat)), color = NA) +
@@ -94,10 +96,10 @@ plot_solutions <- function(path, outdir) {
   
 }
 
-system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal", 
-                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal"))
+# system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal", 
+#                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal"))
 
-# system.time(plot_solutions(path = "prioritization_zblm-cal-test", 
-#                            outdir = "prioritization_zblm-cal-test/"))
+system.time(plot_solutions(path = "prioritization_zblm-cal",
+                           outdir = "prioritization_zblm-cal/"))
 
 
