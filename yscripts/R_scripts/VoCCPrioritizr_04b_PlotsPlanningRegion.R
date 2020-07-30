@@ -72,8 +72,9 @@ plot_solutions <- function(path, outdir) {
                                     legend.key.width = unit(1, "cm"),
                                     plot.tag = element_text(size = 30, face = "bold")))
       # Color Palette, World borders and Legend
-        rds <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "YlOrRd")
-        pal <- c("#deebf7", rds)
+        #pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "YlOrRd")
+        pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "Greens")
+        pal <- c("#deebf7", pal0)
         world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
         # ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
         ranges <- as.character(sort(unique(best_freq_sol$freq_cat)))
