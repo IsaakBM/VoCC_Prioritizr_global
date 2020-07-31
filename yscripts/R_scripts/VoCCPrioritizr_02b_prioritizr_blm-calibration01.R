@@ -43,9 +43,12 @@ pzr_function <- function(path, outdir, blm_df, n_blm, sol) {
       # Reading BLM file
         blm_df <- read.csv(blm_df)
       # Calibration BLM
-        min_blm <- 0
-        max_blm <- blm_df[kk, 2] * 2 # try with 1.5
-        blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 5)
+        min_blm <- round(seq(0, 0.5, length.out = n_blm), digits = 5)
+        max_blm <- round(seq(min_blm[length(min_blm)], 1, length.out = n_blm)[-1], digits = 5)
+        blm_cal <- round(c(min_blm, max_blm), digits = 5)
+        # min_blm <- 0
+        # max_blm <- blm_df[kk, 2] * 2 # try with 1.5
+        # blm_cal <- round(seq(min_blm, max_blm, length.out = n_blm), digits = 5)
         for(i in 1:length(blm_cal)) {
           # Establish the Problem
             mp1 <- marxan_problem(x = pu, spec = features, puvspr = rij, bound = bound, blm = blm_cal[i]) %>%
@@ -72,5 +75,5 @@ pzr_function <- function(path, outdir, blm_df, n_blm, sol) {
 system.time(pzr_function(path = "prioritization_ydatfiles_blm-vocc", 
                          outdir = "prioritization_zblm-cal/",
                          blm_df = "prioritization_zblm-cal/BLM_sweet.csv",
-                         n_blm = 20,
-                         sol = 10))
+                         n_blm = 10,
+                         sol = 3))

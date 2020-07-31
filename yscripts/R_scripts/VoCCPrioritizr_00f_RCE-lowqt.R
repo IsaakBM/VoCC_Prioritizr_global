@@ -38,5 +38,5 @@ rs_lower_qt <- function(path, outdir) {
 }
 
 
-system.time(rs_lower_qt(path = "climate-change_inputs/vocc_mag", 
-                        outdir = "climate-change_inputs/vocc_mag_25qt/"))
+system.time(rs_lower_qt(path = "climate-change_inputs/RCE", 
+                        outdir = "climate-change_inputs/RCE_25qt/"))
