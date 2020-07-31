@@ -20,7 +20,9 @@ plot_solutions <- function(path, outdir) {
   # Loop for every directory
     for(j in 1:length(dir.layers)) {
       # reading how many SOLUTIONS .csv files are per BLM calibration
-        files_solution <- list.files(path = dir.layers[j], pattern = ".csv", full.names = TRUE)
+        files_solution <- list.files(path = dir.layers[j], pattern = "*Layer_.*.csv$", full.names = TRUE)
+        provinces_csv <- read.csv(list.files(path = dir.layers[j], pattern = "*pus-.*.csv$", full.names = TRUE)) %>% 
+          dplyr::arrange(layer)
         pu_shpfile <- st_read(list.files(path = dir.layers[j], pattern = ".shp", full.names = TRUE))
       # Begin the parallel structure
       UseCores <- 24
@@ -43,6 +45,13 @@ plot_solutions <- function(path, outdir) {
         # Get the freq solutions from the corresponding planning unit shapefile
           best_freq_sol <- pu_shpfile[pu_shpfile$id %in% freq_base$id, ] %>% 
             mutate(freq_cat = freq_base$freq_cat2)
+        # Creating the PROVINCES shapefile based on ocean layer
+          provinces_shp <- pu_shpfile %>%
+            dplyr::mutate(provinces = provinces_csv$province) %>% 
+            base::transform(id = as.numeric(factor(provinces))) %>% 
+            dplyr::group_by(id) %>% 
+            dplyr::summarise(prov = sum(id, do_union = TRUE))
+          
         # Define themes to plot 
           theme_opts2 <- list(theme(panel.grid.minor = element_blank(),
                                     panel.grid.major = element_blank(),
@@ -63,13 +72,17 @@ plot_solutions <- function(path, outdir) {
                                     legend.key.width = unit(1, "cm"),
                                     plot.tag = element_text(size = 30, face = "bold")))
       # Color Palette, World borders and Legend
-        rds <- brewer.pal(4, "YlOrRd")
-        pal <- c("#deebf7", rds)
+        #pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "YlOrRd")
+        pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "Greens")
+        pal <- c("#deebf7", pal0)
         world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
-        ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
+        # ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
+        ranges <- as.character(sort(unique(best_freq_sol$freq_cat)))
+        
       # Plot
         ggplot() + 
           geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat), fill = as.factor(freq_cat)), color = NA) +
+          geom_sf(data = provinces_shp) +
           geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
           scale_fill_manual(values = pal,
                             name = "Selection Frequency (%)",
@@ -84,10 +97,10 @@ plot_solutions <- function(path, outdir) {
   
 }
 
-system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal", 
-                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal"))
+# system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal", 
+#                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal"))
 
-# system.time(plot_solutions(path = "prioritization_zblm-cal-test", 
-#                            outdir = "prioritization_zblm-cal-test/"))
+system.time(plot_solutions(path = "prioritization_zblm-cal",
+                           outdir = "prioritization_zblm-cal/"))
 
 
