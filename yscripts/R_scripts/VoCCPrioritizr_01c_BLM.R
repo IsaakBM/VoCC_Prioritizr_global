@@ -4,8 +4,8 @@ library(dplyr)
 library(sf)
 library(exactextractr)
 
-pu_vocc <- "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245/voccMag_04-bap_AEMean_ssp245_2020-2100.csv"
-bound <- "prioritization_ydatfiles/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245/bound_04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245.dat"
+pu_vocc <- "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/voccMag_04-bap_AEMean_ssp585_2020-2100.csv"
+bound <- "prioritization_ydatfiles/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/bound_04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585.dat"
 
 pus_vocc <- read.csv(pu_vocc)
 pus_vocc <- pus_vocc %>% 
@@ -31,7 +31,7 @@ a <- do.call(rbind, test)
 head(a)
 
 bound2 <- cbind(bound, a)
-head(bound2)
+head(bound2, n = 10)
 bound2$boundary_vocc <- (bound2$single1 + bound2$single2)/2
   head(bound2, n = 20)
   names(bound2)
@@ -40,6 +40,6 @@ names(final) <- c("id1", "id2", "boundary")
   head(final, n = 20)
 final <- final %>% na.omit()
 head(final, n = 20)
-write.table(final, "prioritization_ydatfiles/bound-vocc_04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp245.dat", row.names = FALSE, sep = ",", quote = FALSE)
+write.table(final, "prioritization_ydatfiles_blm-vocc/bound-vocc_03_MesopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585.dat", row.names = FALSE, sep = ",", quote = FALSE)
 
 rm(list = ls())
