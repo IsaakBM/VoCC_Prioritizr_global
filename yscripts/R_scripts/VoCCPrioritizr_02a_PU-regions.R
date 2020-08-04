@@ -106,7 +106,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
         single <- bioprovince %>% filter(wdpaid == prov_code[i])
           single_sp <- as(single, "Spatial")
             single_sp2 <- spTransform(single_sp, CRS(proj.geo))
-          single_buf <- gBuffer(single_sp2, width = -140)
+          #single_buf <- gBuffer(single_sp2, width = -140)
           if(is.null(single_buf) == FALSE) {
             single_sf <- st_as_sf(single_buf) %>% st_make_valid()
             dt1 <- st_intersection(pu_region, single_sf) %>% 

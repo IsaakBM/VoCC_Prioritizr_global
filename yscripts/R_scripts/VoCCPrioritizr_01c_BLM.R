@@ -36,10 +36,11 @@ bound2$boundary_vocc <- (bound2$single1 + bound2$single2)/2
   head(bound2, n = 20)
   names(bound2)
 final <- bound2[,c(1,2,6)]
+nrow(final)
 names(final) <- c("id1", "id2", "boundary")
   head(final, n = 20)
 final <- final %>% na.omit()
 head(final, n = 20)
-write.table(final, "prioritization_ydatfiles_blm-vocc/bound-vocc_03_MesopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585.dat", row.names = FALSE, sep = ",", quote = FALSE)
+write.table(final, "prioritization_ydatfiles_blm-vocc/bound-vocc_04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585.dat", row.names = FALSE, sep = ",", quote = FALSE)
 
 rm(list = ls())

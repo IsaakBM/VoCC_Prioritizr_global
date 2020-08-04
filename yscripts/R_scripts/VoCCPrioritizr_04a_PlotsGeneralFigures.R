@@ -85,22 +85,25 @@ vocc_csv_files <- lapply(files_vocc, function(x) {
   final$climate_feature <- ifelse(is.na(final$climate_feature), median(filter(final, final$climate_feature != 0)$climate_feature), final$climate_feature)
   final <- final})
 # Creating general files
-vocc_shp_ep_ssp126 <- vocc_shp_ep_ssp245 <- cost_shp_files[[1]]
-vocc_shp_mp_ssp126 <- vocc_shp_mp_ssp245 <- cost_shp_files[[2]]
-vocc_shp_bap_ssp126 <- vocc_shp_bap_ssp245 <- cost_shp_files[[3]]
+vocc_shp_ep_ssp126 <- vocc_shp_ep_ssp245 <- vocc_shp_ep_ssp585 <- cost_shp_files[[1]]
+vocc_shp_mp_ssp126 <- vocc_shp_mp_ssp245 <- vocc_shp_mp_ssp585 <- cost_shp_files[[2]]
+vocc_shp_bap_ssp126 <- vocc_shp_bap_ssp245 <- vocc_shp_bap_ssp585 <- cost_shp_files[[3]]
 # Epipelagic
 vocc_shp_ep_ssp126$vocc <- vocc_csv_files[[1]]$climate_feature
 vocc_shp_ep_ssp245$vocc <- vocc_csv_files[[2]]$climate_feature
+vocc_shp_ep_ssp585$vocc <- vocc_csv_files[[3]]$climate_feature
 # Mesopelagic
-vocc_shp_mp_ssp126$vocc <- vocc_csv_files[[3]]$climate_feature
-vocc_shp_mp_ssp245$vocc <- vocc_csv_files[[4]]$climate_feature
+vocc_shp_mp_ssp126$vocc <- vocc_csv_files[[5]]$climate_feature
+vocc_shp_mp_ssp245$vocc <- vocc_csv_files[[5]]$climate_feature
+vocc_shp_mp_ssp585$vocc <- vocc_csv_files[[6]]$climate_feature
 # Bathyabyssopelagic
-vocc_shp_bap_ssp126$vocc <- vocc_csv_files[[5]]$climate_feature
-vocc_shp_bap_ssp245$vocc <- vocc_csv_files[[6]]$climate_feature
+vocc_shp_bap_ssp126$vocc <- vocc_csv_files[[7]]$climate_feature
+vocc_shp_bap_ssp245$vocc <- vocc_csv_files[[8]]$climate_feature
+vocc_shp_bap_ssp585$vocc <- vocc_csv_files[[9]]$climate_feature
 
-vocc_shp_files <- list(vocc_shp_ep_ssp126, vocc_shp_ep_ssp245,
-                       vocc_shp_mp_ssp126, vocc_shp_mp_ssp245,
-                       vocc_shp_bap_ssp126, vocc_shp_bap_ssp245)
+vocc_shp_files <- list(vocc_shp_ep_ssp126, vocc_shp_ep_ssp245, vocc_shp_ep_ssp585,
+                       vocc_shp_mp_ssp126, vocc_shp_mp_ssp245, vocc_shp_mp_ssp585,
+                       vocc_shp_bap_ssp126, vocc_shp_bap_ssp245, vocc_shp_bap_ssp585)
 
 # ranges_vocc <- lapply(vocc_shp_files, function(x) {
 #   single <- x 
@@ -185,22 +188,25 @@ rce_csv_files <- lapply(files_rce, function(x) {
   final <- final})
 
 # Creating general files
-rce_shp_ep_ssp126 <- rce_shp_ep_ssp245 <- cost_shp_files[[1]]
-rce_shp_mp_ssp126 <- rce_shp_mp_ssp245 <- cost_shp_files[[2]]
-rce_shp_bap_ssp126 <- rce_shp_bap_ssp245 <- cost_shp_files[[3]]
+rce_shp_ep_ssp126 <- rce_shp_ep_ssp245 <- rce_shp_ep_ssp585 <- cost_shp_files[[1]]
+rce_shp_mp_ssp126 <- rce_shp_mp_ssp245 <- rce_shp_mp_ssp585 <- cost_shp_files[[2]]
+rce_shp_bap_ssp126 <- rce_shp_bap_ssp245 <- rce_shp_bap_ssp585 <- cost_shp_files[[3]]
 # Epipelagic
 rce_shp_ep_ssp126$rce <- rce_csv_files[[1]]$climate_feature
 rce_shp_ep_ssp245$rce <- rce_csv_files[[2]]$climate_feature
+rce_shp_ep_ssp585$rce <- rce_csv_files[[3]]$climate_feature
 # Mesopelagic
-rce_shp_mp_ssp126$rce <- rce_csv_files[[3]]$climate_feature
-rce_shp_mp_ssp245$rce <- rce_csv_files[[4]]$climate_feature
+rce_shp_mp_ssp126$rce <- rce_csv_files[[4]]$climate_feature
+rce_shp_mp_ssp245$rce <- rce_csv_files[[5]]$climate_feature
+rce_shp_mp_ssp585$rce <- rce_csv_files[[6]]$climate_feature
 # Bathyabyssopelagic
-rce_shp_bap_ssp126$rce <- rce_csv_files[[5]]$climate_feature
-rce_shp_bap_ssp245$rce <- rce_csv_files[[6]]$climate_feature
+rce_shp_bap_ssp126$rce <- rce_csv_files[[7]]$climate_feature
+rce_shp_bap_ssp245$rce <- rce_csv_files[[8]]$climate_feature
+rce_shp_bap_ssp585$rce <- rce_csv_files[[9]]$climate_feature
 
-rce_shp_files <- list(rce_shp_ep_ssp126, rce_shp_ep_ssp245,
-                       rce_shp_mp_ssp126, rce_shp_mp_ssp245,
-                       rce_shp_bap_ssp126, rce_shp_bap_ssp245)
+rce_shp_files <- list(rce_shp_ep_ssp126, rce_shp_ep_ssp245, rce_shp_ep_ssp585,
+                       rce_shp_mp_ssp126, rce_shp_mp_ssp245, rce_shp_mp_ssp585,
+                       rce_shp_bap_ssp126, rce_shp_bap_ssp245, rce_shp_bap_ssp585)
 
 ranges_rce <- lapply(rce_shp_files, function(x) {
   single <- x

@@ -51,17 +51,18 @@ csvs_pus_provinces <- function(csv_olayer_prov, csv_olayer_species, olayer, min_
     fwrite(dt_testing, paste(outdir, ns2, ".csv", sep = ""), row.names = FALSE)
 }
 
-csvs_pus_provinces(csv_olayer_prov = "features_CSVs/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/pus-epipelagic_Longhurst_.csv", 
-                   csv_olayer_species = "features_CSVs/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/epipelagic_sps-rce.csv", 
-                   olayer = "epipelagic", 
+csvs_pus_provinces(csv_olayer_prov = "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/pus-bathyabyssopelagic_Glasgow_.csv", 
+                   csv_olayer_species = "features_CSVs/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/bathyabyssopelagic_sps-rce-vocc.csv", 
+                   olayer = "bathyabyssopelagic", 
                    min_target = 0.1, 
                    max_target = 0.3, 
-                   outdir = "features_CSVs/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/")
-
+                   outdir = "prioritization_scenarios_rce-vocc/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/")
+rm(list = ls())
 # SETTING 0.20 TARGETS FOR LOW QT RCE
 library(stringr)
-test <- read.csv("features_CSVs/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/sps_epipelagic_targets.csv")
+test <- read.csv("prioritization_scenarios_rce-vocc/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/sps_bathyabyssopelagic_targets.csv")
 test$targets[str_detect(string = test$feature_names_prov, pattern = "RCE") == TRUE] = 0.20
-write.csv(test, "features_CSVs/02_EpipelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/sps_epipelagic_targets_rce020.csv", row.names = FALSE)
-
+test$targets[str_detect(string = test$feature_names_prov, pattern = "VoCC") == TRUE] = 0.20
+write.csv(test, "prioritization_scenarios_rce-vocc/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/sps_bathyabyssopelagic_targets_rce-vocc020.csv", row.names = FALSE)
+rm(list = ls())
 
