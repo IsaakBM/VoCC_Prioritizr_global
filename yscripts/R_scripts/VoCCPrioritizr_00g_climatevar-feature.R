@@ -16,7 +16,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
     dir.scenarios <- paste(list.dirs(path = rs_path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
     dir.olayers <- paste(list.dirs(path = dir.scenarios, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory per ocean layer
     dir.shpfile <- paste(list.dirs(path = shp_path, full.names = TRUE, recursive = FALSE), sep = "/") # Planning unit realm per depth
-      dir.shpfile <- c(dir.shpfile, dir.shpfile) # add one more for ssp585 [and for bottom :-)]
+      dir.shpfile <- c(dir.shpfile, dir.shpfile, dir.shpfile)
   # Begin the parallel structure      
     cores  <-  3
     cl <- makeCluster(cores)
