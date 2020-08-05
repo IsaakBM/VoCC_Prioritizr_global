@@ -71,6 +71,7 @@ plot_solutions <- function(path, outdir) {
                                     legend.key.height = unit(1.5, "cm"),
                                     legend.key.width = unit(1, "cm"),
                                     plot.tag = element_text(size = 30, face = "bold")))
+          
       # Color Palette, World borders and Legend
         #pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "YlOrRd")
         pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "Greens")
