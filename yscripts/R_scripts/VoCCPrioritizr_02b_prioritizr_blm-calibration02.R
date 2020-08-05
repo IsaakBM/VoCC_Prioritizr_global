@@ -49,7 +49,8 @@ posthoc_marxan <- function(path, outdir, proj.geo, spot) {
                   name <- basename(out_files[j])
                   name <- sub(pattern = "*.csv", "", name)
                     ns <- unlist(strsplit(x = name, split = "_"))
-                    ns_scenario <- paste(ns[1], ns[2], ns[3], ns[4], ns[5], ns[length(ns)-2], sep = "_")
+                    # ns_scenario <- paste(ns[1], ns[2], ns[3], ns[4], ns[5], ns[length(ns)-2], sep = "_")
+                    ns_scenario <- paste(ns[1:(length(ns)-2)], collapse = "_")
                     ns_blm <- unlist(strsplit(x = name, split = "_"))[length(ns)-1]
                 # Split dataframe in solutions and ids/cost
                   dt_idcost <- dt[,1:2]
