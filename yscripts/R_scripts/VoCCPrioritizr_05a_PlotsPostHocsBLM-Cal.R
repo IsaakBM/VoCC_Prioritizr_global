@@ -19,12 +19,12 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
       dplyr::summarise(mean_cost = mean(total_cost, na.rm = TRUE), mean_perimeter = mean(perimeter_m , na.rm = TRUE)) %>% 
       data.frame()
     
-  # # Plotting
-  #   ggplot() +
-  #     geom_point(data = rs_final, aes(x = perimeter_m, y = total_cost, colour = BLM), size = 3) +
-  #     ggtitle("Perimeter vc Total Cost") +
-  #     facet_wrap(~ scenario) +
-  #     ggsave(paste(outdir, "BLM_sweet-spot", ".pdf", sep = ""), width = 15, height = 15)
+  # Plotting
+    ggplot() +
+      geom_point(data = rs_final, aes(x = mean_perimeter, y = mean_cost, colour = trade_off), size = 3) +
+      ggtitle("Perimeter vc Total Cost") +
+      facet_wrap(~ scenario) +
+      ggsave(paste(outdir, "BLM_sweet-spot", ".pdf", sep = ""), width = 15, height = 15)
       
   # Looping
     scenarios <- unique(rs_final$scenario)
@@ -54,11 +54,9 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
             bound_Y <- single$mean_perimeter[single$trade_off == "Y"]
             bound_Z <- single$mean_perimeter[single$trade_off == "Z"]
           # Calculating the sweet spot
-            blm_b <- round(abs((cost_Z - cost_Y)/(bound_Z - bound_Y)), digits = 7)
-            blm_b <- round(abs((cost_Z - cost_Y)/(bound_Z - bound_Y)), digits = 7)
+            blm_b <- round(abs((cost_Z - cost_Y)/(bound_Z - bound_Y)), digits = 7) 
             blm_c <- round(abs((cost_X - cost_Z)/(bound_X - bound_Z)), digits = 7)
               blm_list[[i]] <- cbind(blm_b, blm_c)
-          
         }
     }
     names(blm_list) <- scenarios
@@ -69,9 +67,9 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
   
 }
 
-blm_sweet(posthoc_csv = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc_feature/PostHoc_Calibration_0-1.csv", 
+blm_sweet(posthoc_csv = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc_feature/PostHoc_Calibration.csv", 
           outdir = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc_feature/", 
-          spot = "Z")
+          spot = "b-c")
 
 
 
