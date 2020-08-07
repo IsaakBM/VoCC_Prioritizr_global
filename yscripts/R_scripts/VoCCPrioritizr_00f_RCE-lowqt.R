@@ -38,5 +38,8 @@ rs_lower_qt <- function(path, outdir) {
 }
 
 
-system.time(rs_lower_qt(path = "climate-change_inputs/RCE", 
-                        outdir = "climate-change_inputs/RCE_25qt/"))
+# system.time(rs_lower_qt(path = "climate-change_inputs/RCE", 
+#                         outdir = "climate-change_inputs/RCE_25qt/"))
+
+system.time(rs_lower_qt(path = "/QRISdata/Q1216/BritoMorales/Project05b_Rosa/climate-change_inputs/RCE", 
+                        outdir = "/QRISdata/Q1216/BritoMorales/Project05b_Rosa/climate-change_inputs/RCE_25qt/"))

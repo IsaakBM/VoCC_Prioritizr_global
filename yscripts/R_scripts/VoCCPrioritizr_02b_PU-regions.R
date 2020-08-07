@@ -61,8 +61,8 @@ rm(list = ls())
 # SETTING 0.20 TARGETS FOR LOW QT RCE
 library(stringr)
 test <- read.csv("prioritization_scenarios_rce-vocc/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/sps_bathyabyssopelagic_targets.csv")
-test$targets[str_detect(string = test$feature_names_prov, pattern = "RCE") == TRUE] = 0.20
-test$targets[str_detect(string = test$feature_names_prov, pattern = "VoCC") == TRUE] = 0.20
-write.csv(test, "prioritization_scenarios_rce-vocc/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/sps_bathyabyssopelagic_targets_rce-vocc020.csv", row.names = FALSE)
+test$targets[str_detect(string = test$feature_names_prov, pattern = "RCE") == TRUE] = 0.75 #0.20 #0.80
+test$targets[str_detect(string = test$feature_names_prov, pattern = "VoCC") == TRUE] = 0.75 #0.20 #0.80
+write.csv(test, "prioritization_scenarios_rce-vocc/04_BathyAbyssopelagicLayer_cost-fish_feat-sps-rce_blm-vocc_ssp585/sps_bathyabyssopelagic_targets_rce-vocc075.csv", row.names = FALSE)
 rm(list = ls())
 
