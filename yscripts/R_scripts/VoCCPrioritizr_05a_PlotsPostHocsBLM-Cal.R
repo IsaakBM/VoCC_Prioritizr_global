@@ -57,6 +57,39 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
             blm_b <- round(abs((cost_Z - cost_Y)/(bound_Z - bound_Y)), digits = 7) 
             blm_c <- round(abs((cost_X - cost_Z)/(bound_X - bound_Z)), digits = 7)
               blm_list[[i]] <- cbind(blm_b, blm_c)
+        } else if (spot == "d-e") {
+          # Getting the numetaros index for the Sweet spot
+            cost_X <- single$mean_cost[single$trade_off == "X"]
+            cost_Y <- single$mean_cost[single$trade_off == "Y"]
+            cost_Z <- single$mean_cost[single$trade_off == "Z"]
+            cost_b <- single$mean_cost[single$trade_off == "b"]
+            cost_c <- single$mean_cost[single$trade_off == "c"]
+          # Getting the denominator index for the Sweet spot 
+            bound_X <- single$mean_perimeter[single$trade_off == "X"]
+            bound_Y <- single$mean_perimeter[single$trade_off == "Y"]
+            bound_Z <- single$mean_perimeter[single$trade_off == "Z"]
+            bound_b <- single$mean_perimeter[single$trade_off == "b"]
+            bound_c <- single$mean_perimeter[single$trade_off == "c"]
+          # Calculating the sweet spot
+            blm_d <- round(abs((cost_b - cost_Y)/(bound_b - bound_Y)), digits = 7) 
+            blm_e <- round(abs((cost_X - cost_c)/(bound_X - bound_c)), digits = 7)
+              blm_list[[i]] <- cbind(blm_d, blm_e)
+        } else if (spot == "f-g") {
+          # Getting the numetaros index for the Sweet spot
+            cost_b <- single$mean_cost[single$trade_off == "b"]
+            cost_c <- single$mean_cost[single$trade_off == "c"]
+            cost_d <- single$mean_cost[single$trade_off == "d"]
+            cost_e <- single$mean_cost[single$trade_off == "e"]
+          # Getting the denominator index for the Sweet spot 
+            bound_b <- single$mean_perimeter[single$trade_off == "b"]
+            bound_c <- single$mean_perimeter[single$trade_off == "c"]
+            bound_d <- single$mean_perimeter[single$trade_off == "d"]
+            bound_e <- single$mean_perimeter[single$trade_off == "e"]
+          # Calculating the sweet spot
+            blm_f <- round(abs((cost_b - cost_d)/(bound_b - bound_d)), digits = 7) 
+            blm_g <- round(abs((cost_e - cost_c)/(bound_e - bound_c)), digits = 7)
+              blm_list[[i]] <- cbind(blm_f, blm_g)
+          
         }
     }
     names(blm_list) <- scenarios
@@ -67,9 +100,9 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
   
 }
 
-blm_sweet(posthoc_csv = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc_feature/PostHoc_Calibration.csv", 
-          outdir = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc_feature/", 
-          spot = "b-c")
+blm_sweet(posthoc_csv = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc080_feature/PostHoc_Calibration_0-1.csv", 
+          outdir = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc080_feature/", 
+          spot = "Z")
 
 
 
