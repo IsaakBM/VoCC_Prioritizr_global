@@ -16,7 +16,7 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
       dplyr::mutate(solution = as.factor(solution)) %>% 
       dplyr::mutate(BLM = as.factor(BLM)) %>% 
       dplyr::group_by(scenario, trade_off) %>% 
-      dplyr::summarise(mean_cost = mean(total_cost, na.rm = TRUE), mean_perimeter = mean(perimeter_m , na.rm = TRUE)) %>% 
+      dplyr::summarise(mean_cost = mean(total_cost, na.rm = TRUE), mean_perimeter = mean(perimeter_m , na.rm = TRUE)) %>%
       data.frame()
     
   # Plotting
@@ -54,7 +54,7 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
             bound_Y <- single$mean_perimeter[single$trade_off == "Y"]
             bound_Z <- single$mean_perimeter[single$trade_off == "Z"]
           # Calculating the sweet spot
-            blm_b <- round(abs((cost_Z - cost_Y)/(bound_Z - bound_Y)), digits = 7) 
+            blm_b <- round(abs((cost_Z - cost_Y)/(bound_Z - bound_Y)), digits = 7)
             blm_c <- round(abs((cost_X - cost_Z)/(bound_X - bound_Z)), digits = 7)
               blm_list[[i]] <- cbind(blm_b, blm_c)
         } else if (spot == "d-e") {
@@ -100,26 +100,7 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
   
 }
 
-blm_sweet(posthoc_csv = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc080_feature/PostHoc_Calibration_0-1.csv", 
-          outdir = "Project05b_Rosa/prioritization_zblm-cal_rce-vocc080_feature/", 
-          spot = "Z")
-
-
-
-prio_scenarios <- unique(rs_final$scenario)
-for(i in 1:length(prio_scenarios)) {
-  
-  single <- rs_final %>% 
-    dplyr::filter(scenario == prio_scenarios[i])
-  ggplot() +
-    geom_point(data = single, aes(x = perimeter_m, y = total_cost, colour = BLM), size = 3) +
-    ggtitle("Perimeter vc Total Cost") +
-    ggsave(paste(outdir, prio_scenarios[i], ".pdf", sep = ""), width = 15, height = 10)
-  
-}
-
-if(trade_off == "Z") {
-  
-  
-}
+blm_sweet(posthoc_csv = "Project05b_Rosa/PostHoc_Calibration_0-1-Z.csv", 
+          outdir = "Project05b_Rosa/", 
+          spot = "b-c")
 

@@ -83,7 +83,7 @@ plot_solutions <- function(path, outdir) {
       # Plot
         ggplot() + 
           geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat), fill = as.factor(freq_cat)), color = NA) +
-          geom_sf(data = provinces_shp) +
+          geom_sf(data = provinces_shp, fill = NA) +
           geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
           scale_fill_manual(values = pal,
                             name = "Selection Frequency (%)",

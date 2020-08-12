@@ -9,6 +9,8 @@
 csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
   library(data.table)
   library(dplyr)
+  library(doParallel)
+  library(foreach)
   
   # List of directories
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
@@ -178,7 +180,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
     stopCluster(cl)
 }
 
-csvs_pus_provinces(path = "Project05b_Rosa/features_CSVs2",
-                   min_target = 0.1, 
-                   max_target = 0.3,
-                   clim_target = 0.75)
+csvs_pus_provinces(path = "Project05b_Rosa/features_CSV030",
+                   min_target = 0.10, 
+                   max_target = 0.30,
+                   clim_target = 0.30)
