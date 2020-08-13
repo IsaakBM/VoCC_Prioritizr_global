@@ -1,3 +1,8 @@
+# This code was written by Isaac Brito-Morales (i.britomorales@uq.edu.au)
+# Please do not distribute this code without permission.
+# NO GUARANTEES THAT CODE IS CORRECT
+# Caveat Emptor!
+
 library(sf)
 library(raster)
 library(dplyr)
@@ -7,7 +12,7 @@ library(rnaturalearthdata)
 library(RColorBrewer)
 library(patchwork)
 
-path = "Project05b_Rosa/wgeneral_figs"
+path = "Project05b_Rosa/w_climatic-plots_figures"
 
 # sps_csv <- list.files(path = path, pattern = paste0(c(paste0("*lagic*", ".*.csv$")), collapse = "|"), full.names = TRUE) 
 slp_csv <- list.files(path = path, pattern = paste0(c(paste0("*slp*", ".*.csv$")), collapse = "|"), full.names = TRUE)
