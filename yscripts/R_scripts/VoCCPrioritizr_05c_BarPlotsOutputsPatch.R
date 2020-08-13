@@ -2,11 +2,11 @@
 
 path = "Project05b_Rosa"
 data <- list.files(path = path, pattern = paste0(c(paste0("*Calibration_*", ".*.csv$")), collapse = "|"), full.names = TRUE)
-df <- read.csv(data) %>% 
+  df <- read.csv(data) %>% 
   dplyr::filter(trade_off == "Z") %>% 
   dplyr::select(-BLM) %>% 
   dplyr::group_by(scenario) %>% 
-  dplyr::summarise(mean_cost = mean(total_cost), sd_cost = sd(total_cost))
+  dplyr::summarise(mean_cost = mean(total_cost), sd_cost = sd(total_cost), mean_area = mean(log10(area_m2)), sd_area = sd(log10(area_m2)))
 
 
 theme_bar <- list(theme(panel.grid.minor = element_blank(),
@@ -45,6 +45,23 @@ p1 <- ggplot(data = df, aes(x = scenario, y = mean_cost)) +
   labs(y = expression(Total~average~cost~(log[10]~USD~kg^-1))) +
   scale_fill_manual(values = c("#bdbdbd")) +
   theme_bar
+
+# p2 <- ggplot(data = df, aes(x = scenario, y = mean_area)) +
+#   geom_bar(aes(x = scenario, y = mean_area, fill = "#bdbdbd"), colour = "black", stat = "identity", position = position_dodge()) +
+#   geom_errorbar(aes(x = scenario, ymin = mean_area, ymax = mean_area + sd_area), width = 0.1, position = position_dodge(0.9)) +
+#   geom_hline(yintercept = as.numeric(df[1,4]), linetype = "dashed", color = "#f03b20", size = 1.5) +
+#   scale_x_discrete(limits = c("02_EpipelagicLayer_cost-fish_feat-sps-rce-vocc", 
+#                               "02_EpipelagicLayer_cost-fish_feat-sps-rce-vocc_ssp126",
+#                               "02_EpipelagicLayer_cost-fish_feat-sps-rce-vocc_ssp245",
+#                               "02_EpipelagicLayer_cost-fish_feat-sps-rce-vocc_ssp585"), 
+#                    labels = c("Base", 
+#                               "SSP126",
+#                               "SSP245",
+#                               "SSP585")) +
+#   # scale_y_continuous(breaks = seq(0, 5000, 1000), limits = c(0, 5000), expand = c(0, 0)) + # remove white space of x axis
+#   labs(y = expression(Total~average~cost~(log[10]~USD~kg^-1))) +
+#   scale_fill_manual(values = c("#bdbdbd")) +
+#   theme_bar
 
 p0_final2 <- p1 +
   plot_annotation(tag_prefix = "",
