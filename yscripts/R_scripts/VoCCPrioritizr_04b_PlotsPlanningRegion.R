@@ -39,9 +39,9 @@ plot_solutions <- function(path, outdir) {
               dplyr::mutate(freq_cat = (freq_sel)/(length(6:ncol(single)))*100)
             freq_base <- sol_csv %>% 
               mutate(freq_cat2 = ifelse(freq_cat == 0, 1, 
-                                       ifelse(freq_cat > 0 & freq_cat <= 2, 2,
-                                              ifelse(freq_cat > 2 & freq_cat <= 5, 3, 
-                                                     ifelse(freq_cat > 5 & freq_cat <= 7, 4, 5))))) # categories needs to be based on max length columns
+                                       ifelse(freq_cat > 0 & freq_cat <= 25, 2,
+                                              ifelse(freq_cat > 25 & freq_cat <= 50, 3, 
+                                                     ifelse(freq_cat > 50 & freq_cat <= 75, 4, 5))))) # categories needs to be based on max length columns
         # Get the freq solutions from the corresponding planning unit shapefile
           best_freq_sol <- pu_shpfile[pu_shpfile$id %in% freq_base$id, ] %>% 
             mutate(freq_cat = freq_base$freq_cat2)
@@ -77,8 +77,8 @@ plot_solutions <- function(path, outdir) {
         pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "Greens")
         pal <- c("#deebf7", pal0)
         world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
-        # ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
-        ranges <- as.character(sort(unique(best_freq_sol$freq_cat)))
+        ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
+        # ranges <- as.character(sort(unique(best_freq_sol$freq_cat)))
         
       # Plot
         ggplot() + 
