@@ -100,7 +100,7 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
   
 }
 
-blm_sweet(posthoc_csv = "Project05b_Rosa/PostHoc_Calibration_0-1-Z.csv", 
+blm_sweet(posthoc_csv = "Project05b_Rosa/PostHoc_Calibration_0-1.csv", 
           outdir = "Project05b_Rosa/", 
-          spot = "b-c")
+          spot = "Z")
 

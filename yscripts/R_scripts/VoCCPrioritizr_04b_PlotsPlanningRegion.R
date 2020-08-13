@@ -36,7 +36,7 @@ plot_solutions <- function(path, outdir) {
             sol_csv <- single %>% 
               dplyr::mutate(freq_sel = rowSums(single[, 6:ncol(single)])) %>% 
               dplyr::select(id, cost, freq_sel) %>% 
-              dplyr::mutate(freq_cat = (freq_sel)/(length(6:ncol(single)))*10)
+              dplyr::mutate(freq_cat = (freq_sel)/(length(6:ncol(single)))*100)
             freq_base <- sol_csv %>% 
               mutate(freq_cat2 = ifelse(freq_cat == 0, 1, 
                                        ifelse(freq_cat > 0 & freq_cat <= 2, 2,
