@@ -18,13 +18,34 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
       dplyr::group_by(scenario, trade_off) %>% 
       dplyr::summarise(mean_cost = mean(total_cost, na.rm = TRUE), mean_perimeter = mean(perimeter_m , na.rm = TRUE)) %>%
       data.frame()
-    
+  # Defining theme
+    theme_bar <- list(theme(panel.grid.minor = element_blank(),
+                            panel.grid.major = element_blank(),
+                            panel.background = element_rect(fill = "white", colour = "black"),
+                            plot.background = element_rect(fill = "white"),
+                            panel.border = element_blank(),
+                            axis.line = element_line(size = 1),
+                            axis.text.x = element_text(size = rel(2), angle = 0),
+                            axis.text.y = element_text(size = rel(2), angle = 0),
+                            axis.ticks = element_line(size = 1.5),
+                            axis.ticks.length = unit(.25, "cm"), 
+                            axis.title.x = element_text(size = rel(2), angle = 0),
+                            axis.title.y = element_text(size = rel(2), angle = 90),
+                            plot.title = element_text(face = "bold", size = 30, hjust = 0.5),
+                            legend.title = element_text(colour = "black", face = "bold", size = 20),
+                            legend.text = element_text(colour = "black", face = "bold", size = 15), 
+                            legend.key.height = unit(1.9, "cm"),
+                            legend.key.width = unit(1, "cm"),
+                            plot.tag = element_text(size = 25, face = "bold")))
   # Plotting
     ggplot() +
       geom_point(data = rs_final, aes(x = mean_perimeter, y = mean_cost, colour = trade_off), size = 3) +
       ggtitle("Perimeter vc Total Cost") +
-      facet_wrap(~ scenario) +
-      ggsave(paste(outdir, "BLM_sweet-spot", ".pdf", sep = ""), width = 15, height = 15)
+      facet_wrap(~ scenario, labeller = labeller(c("Base", "SSP126", "SSP245", "SSP585"))) +
+      labs(y = expression(Total~average~cost~(log[10]~USD)), x = expression(Average~perimeter~(m^2))) +
+      theme_bar +
+      ggsave(paste(outdir, "BLM_sweet-spot", ".png", sep = ""), width = 15, height = 15)
+      
       
   # Looping
     scenarios <- unique(rs_final$scenario)
@@ -100,7 +121,7 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
   
 }
 
-blm_sweet(posthoc_csv = "Project05b_Rosa/PostHoc_Calibration_0-1-Z.csv", 
+blm_sweet(posthoc_csv = "Project05b_Rosa/PostHoc_Calibration_0-1-Z-b-c-d-e-f-g.csv", 
           outdir = "Project05b_Rosa/", 
-          spot = "b-c")
+          spot = "f-g")
 

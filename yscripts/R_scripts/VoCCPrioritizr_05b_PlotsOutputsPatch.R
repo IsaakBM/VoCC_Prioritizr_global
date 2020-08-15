@@ -15,8 +15,8 @@ library(stringr)
 library(irr)
 library(psych)
 
-path = "Project05b_Rosa/w_results-outputs_figures"
-# path = "Project05b_Rosa/w_results-outputs_figures _testing"
+# path = "Project05b_Rosa/w_results-outputs_figures"
+path = "Project05b_Rosa/w_results-outputs_figures _final-g-blm"
 # Identifing different files
   sol_csv <- list.files(path = path, pattern = paste0(c(paste0("*vocc_*", ".*.csv$")), collapse = "|"), full.names = TRUE)
   prov_csv <- list.files(path = path, pattern = paste0(c(paste0("*Longhurst*", ".*.csv$"), paste0("*Glasgow*", ".*.csv$"), paste0("*GOODS*", ".*.csv$")) , collapse = "|"), full.names = TRUE)
@@ -99,8 +99,8 @@ path = "Project05b_Rosa/w_results-outputs_figures"
                     tag_levels = "A",
                     tag_suffix = ".",) +
     theme_opts3 +
-    ggsave("Project05b_Rosa/w_results-outputs_figures/test5.pdf", width = 25, height = 20, dpi = 300)
-    # ggsave("Project05b_Rosa/w_results-outputs_figures _testing/test5.pdf", width = 25, height = 20, dpi = 300)
+    # ggsave("Project05b_Rosa/w_results-outputs_figures/test5.pdf", width = 25, height = 20, dpi = 300)
+    ggsave("Project05b_Rosa/w_results-outputs_figures _final-g-blm/BLM-sol-30_final.png", width = 25, height = 20, dpi = 300)
   
 # Getting the frequency to calculate Kappa
   sol_freq <- lapply(sol_csv, function(x) {
@@ -117,7 +117,7 @@ path = "Project05b_Rosa/w_results-outputs_figures"
                                               ifelse(freq_cat > 50 & freq_cat <= 75, 4, 5)))))})
   
   # Calculating Kappa
-    df3 <- cbind(sol_freq[[1]]$freq_cat2, sol_freq[[4]]$freq_cat2)
+    df3 <- cbind(sol_freq[[3]]$freq_cat, sol_freq[[4]]$freq_cat)
     # irr::kappa2(df3)
     unlist(cohen.kappa(x = df3))[1]
 
@@ -200,9 +200,9 @@ path = "Project05b_Rosa/w_results-outputs_figures"
                         tag_levels = "A",
                         tag_suffix = ".",) +
         theme_opts3 +
-        ggsave("Project05b_Rosa/w_results-outputs_figures/noregret_01.pdf", width = 20, height = 15, dpi = 300)
-    
-  
+        # ggsave("Project05b_Rosa/w_results-outputs_figures/noregret_01.pdf", width = 20, height = 15, dpi = 300)
+        ggsave("Project05b_Rosa/w_results-outputs_figures _final-g-blm/noregret_01.png", width = 20, height = 15, dpi = 300)
+      
   
   
   

@@ -1,9 +1,9 @@
 
 
-path = "Project05b_Rosa"
+path = "Project05b_Rosa/w_results-outputs_figures _final-g-blm"
 data <- list.files(path = path, pattern = paste0(c(paste0("*Calibration_*", ".*.csv$")), collapse = "|"), full.names = TRUE)
   df <- read.csv(data) %>% 
-  dplyr::filter(trade_off == "Z") %>% 
+  dplyr::filter(trade_off == "g") %>% 
   dplyr::select(-BLM) %>% 
   dplyr::group_by(scenario) %>% 
   dplyr::summarise(mean_cost = mean(total_cost), sd_cost = sd(total_cost), mean_area = mean(log10(area_m2)), sd_area = sd(log10(area_m2)))
@@ -42,7 +42,7 @@ p1 <- ggplot(data = df, aes(x = scenario, y = mean_cost)) +
                               "SSP245",
                               "SSP585")) +
   scale_y_continuous(breaks = seq(0, 5000, 1000), limits = c(0, 5000), expand = c(0, 0)) + # remove white space of x axis
-  labs(y = expression(Total~average~cost~(log[10]~USD~kg^-1))) +
+  labs(y = expression(Total~average~cost~(log[10]~USD))) +
   scale_fill_manual(values = c("#bdbdbd")) +
   theme_bar
 
@@ -68,5 +68,5 @@ p0_final2 <- p1 +
                   tag_levels = "A", 
                   tag_suffix = ".",) +
   theme_bar +
-  ggsave("Project05b_Rosa/barplot_test.pdf", width = 8, height = 6, dpi = 300)
+  ggsave("Project05b_Rosa/w_results-outputs_figures _final-g-blm/barplot_cost.png", width = 8, height = 6, dpi = 300)
 

@@ -261,5 +261,5 @@ p0_final2 <- ((slp_shp[[1]] + slp_shp[[2]] + slp_shp[[3]])/(rce_shp[[1]] + rce_s
                   tag_levels = "A",
                   tag_suffix = ".",) +
   theme_opts3 +
-  ggsave("Project05b_Rosa/wgeneral_figs/test4.pdf", width = 25, height = 20, dpi = 300) # try 20,15
+  ggsave("Project05b_Rosa/w_climatic-plots_figures/Figure_1_climatic-variables.png", width = 25, height = 20, dpi = 300)
 
