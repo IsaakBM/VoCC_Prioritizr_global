@@ -111,7 +111,7 @@ plot_solutions <- function(path, outdir) {
               # Define themes to plot 
                 theme_opts2 <- list(theme(panel.grid.minor = element_blank(),
                                           panel.grid.major = element_blank(),
-                                          panel.background = element_rect(fill = "white", colour = "black"),
+                                          panel.background = element_blank(),
                                           plot.background = element_rect(fill = "white"),
                                           panel.border = element_blank(),
                                           axis.line = element_line(size = 1),
