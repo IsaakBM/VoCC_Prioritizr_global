@@ -87,7 +87,8 @@ marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
             df_targets <- fread(targets_csv)
             spec$prop <- df_targets$targets[match(spec$name, df_targets$feature_names_prov)] # matching the targets with the generic spec file
             spec <- spec %>% 
-              mutate(spf = round((prop)/(max(prop)), digits = 2))
+              mutate(spf = ifelse(str_detect(string = name, pattern = paste0(c(paste0("RCE"), paste0("VoCC")), collapse = "|")), 1.2, round((prop)/(max(0.30)), digits = 2)))
+            
             # Write the file
               spec_name <- paste("spec", basename(dir.scenarios[i]), sep = "_")
               write.table(spec, file = paste(outdir, spec_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
