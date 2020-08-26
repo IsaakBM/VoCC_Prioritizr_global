@@ -11,6 +11,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
   library(dplyr)
   library(doParallel)
   library(foreach)
+  library(stringr)
   
   # List of directories
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
@@ -73,7 +74,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
                 mutate(feature_names_prov = ifelse(is.na(province), paste("non-categ", prov_name, sep = "_"),
                                                    paste(feature_names, province, sep = "_")))
           
-          # Defining targets ans creating .csv species targets file [BUT NOT WRITING UNTIL THE END]
+          # Defining targets and creating .csv species targets file [BUT NOT WRITING UNTIL THE END]
             provinces_bypu <- unique(file_olayer_pus$province) # provinces for loop
             dt_final <- list()
             for(i in 1:length(provinces_bypu)) {
@@ -139,6 +140,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
                 dplyr::arrange(pu) %>% 
                 dplyr::select(-climate_feature)
           
+          # identifying low VoCC/RCE with specie every 
           # Writing the FINAL FEATURES FILES WITH SPECIES, VOCC25QT, RCE25QT ALL BY PROVINCES 
             features_final <- rbind(file_olayer_species, vocc_prov_final, rce_prov_final)
               ns1 <- unlist(strsplit(x = basename(dir.scenarios[j]), split = "_"))[2]
@@ -147,29 +149,29 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
           
           # Defining Targets for RCE and VoCC
             # Targets VoCC
-            provinces_bypu_vocc <- unique(vocc_prov_final$province) # provinces for loop
-            target_vocc <- vector("list", length = length(provinces_bypu_vocc))
-            for(m in 1:length(provinces_bypu_vocc)) {
-              dt2 <- vocc_prov_final %>% 
-                filter(province == provinces_bypu_vocc[m]) %>%  
-                group_by(feature_names_prov) %>% 
-                summarise(cells = n()) %>% 
-                mutate(targets = clim_target)
-              target_vocc[[m]] <- dt2
-              }
-            target_vocc_final <- do.call(rbind, target_vocc)
+              provinces_bypu_vocc <- unique(vocc_prov_final$province) # provinces for loop
+              target_vocc <- vector("list", length = length(provinces_bypu_vocc))
+              for(m in 1:length(provinces_bypu_vocc)) {
+                dt2 <- vocc_prov_final %>% 
+                  filter(province == provinces_bypu_vocc[m]) %>%  
+                  group_by(feature_names_prov) %>% 
+                  summarise(cells = n()) %>% 
+                  mutate(targets = clim_target)
+                target_vocc[[m]] <- dt2
+                }
+              target_vocc_final <- do.call(rbind, target_vocc)
             # Targets RCE
-            provinces_bypu_rce <- unique(rce_prov_final$province) # provinces for loop
-            target_rce <- vector("list", length = length(provinces_bypu_rce))
-            for(a in 1:length(provinces_bypu_rce)) {
-              dt2 <- rce_prov_final %>% 
-                filter(province == provinces_bypu_rce[a]) %>%  
-                group_by(feature_names_prov) %>% 
-                summarise(cells = n()) %>% 
-                mutate(targets = clim_target)
-              target_rce[[a]] <- dt2
-              }
-            target_rce_final <- do.call(rbind, target_rce)
+              provinces_bypu_rce <- unique(rce_prov_final$province) # provinces for loop
+              target_rce <- vector("list", length = length(provinces_bypu_rce))
+              for(a in 1:length(provinces_bypu_rce)) {
+                dt2 <- rce_prov_final %>% 
+                  filter(province == provinces_bypu_rce[a]) %>%  
+                  group_by(feature_names_prov) %>% 
+                  summarise(cells = n()) %>% 
+                  mutate(targets = clim_target)
+                target_rce[[a]] <- dt2
+                }
+              target_rce_final <- do.call(rbind, target_rce)
           
           # Writing the FINAL TARGET FILE WITH SPECIES, VOCC25QT, RCE25QT ALL BY PROVINCES 
             targets_final <- rbind(dt_testing, target_vocc_final, target_rce_final)

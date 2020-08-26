@@ -163,12 +163,12 @@ marxan_dat_files <- function(path, outdir, cost_type, proj.geo) {
     stopCluster(cl)
 }
 
-# system.time(marxan_dat_files(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_scenarios", 
-#                              outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_ydatfiles/", 
+system.time(marxan_dat_files(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_scenarios",
+                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_ydatfiles/",
+                             cost_type = "Raster",
+                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+
+# system.time(marxan_dat_files(path = "Project05b_Rosa/prioritization_scenarios_rce-vocc", 
+#                              outdir = "Project05b_Rosa/prioritization_ydatfiles_rce-vocc_feature/", 
 #                              cost_type = "Raster", 
 #                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
-
-system.time(marxan_dat_files(path = "Project05b_Rosa/prioritization_scenarios_rce-vocc", 
-                             outdir = "Project05b_Rosa/prioritization_ydatfiles_rce-vocc_feature/", 
-                             cost_type = "Raster", 
-                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))

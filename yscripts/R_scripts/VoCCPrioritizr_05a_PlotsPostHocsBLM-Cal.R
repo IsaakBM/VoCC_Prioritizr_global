@@ -121,7 +121,7 @@ blm_sweet <- function(posthoc_csv, outdir, spot) {
   
 }
 
-blm_sweet(posthoc_csv = "prioritization_zblm-cal_rce-vocc_feature/PostHoc_Calibration_0-1-Z-b-c.csv", 
-          outdir = "prioritization_zblm-cal_rce-vocc_feature/", 
-          spot = "d-e")
+blm_sweet(posthoc_csv = "prioritization_zblm-cal_rce-vocc040/PostHoc_Calibration_0-1.csv", 
+          outdir = "prioritization_zblm-cal_rce-vocc040/", 
+          spot = "Z")
 
