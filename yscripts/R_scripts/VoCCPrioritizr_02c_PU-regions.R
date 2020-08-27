@@ -205,7 +205,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
               target_rce_species <- vector("list", length = length(provinces_bypu_rce_species))
               for(ll in 1:length(provinces_bypu_rce_species)) {
                 dt2 <- file_olayer_species_rce %>% 
-                  filter(province == provinces_bypu_rce_species[n]) %>%  
+                  filter(province == provinces_bypu_rce_species[ll]) %>%  
                   group_by(feature_names_prov) %>% 
                   summarise(cells = n()) %>% 
                   mutate(targets = clim_target)
@@ -222,7 +222,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
     stopCluster(cl)
 }
 
-csvs_pus_provinces(path = "Project05b_Rosa/features_CSV030",
+csvs_pus_provinces(path = "features_CSV040",
                    min_target = 0.10, 
                    max_target = 0.30,
                    clim_target = 0.30)
