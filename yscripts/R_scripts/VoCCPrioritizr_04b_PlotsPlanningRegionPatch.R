@@ -73,8 +73,8 @@ plot_solutions <- function(path, outdir) {
                                       axis.ticks = element_blank(),
                                       axis.ticks.length = unit(.25, "cm"), 
                                       axis.title.x = element_blank(),
-                                      axis.title.y = element_text(face = "bold", size = 20, angle = 90),
-                                      plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+                                      axis.title.y = element_text(face = "plain", size = 25, angle = 90),
+                                      plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
                                       legend.title = element_text(colour = "black", face = "bold", size = 15),
                                       legend.text = element_text(colour = "black", face = "bold", size = 10), 
                                       legend.key.height = unit(2, "cm"),
@@ -129,8 +129,8 @@ plot_solutions <- function(path, outdir) {
                                           axis.ticks = element_blank(),
                                           axis.ticks.length = unit(.25, "cm"), 
                                           axis.title.x = element_blank(),
-                                          axis.title.y = element_text(face = "bold", size = 20, angle = 90),
-                                          plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+                                          axis.title.y = element_text(face = "plain", size = 25, angle = 90),
+                                          plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
                                           legend.title = element_text(colour = "black", face = "bold", size = 15),
                                           legend.text = element_text(colour = "black", face = "bold", size = 10), 
                                           legend.key.height = unit(2, "cm"),
@@ -167,8 +167,8 @@ plot_solutions <- function(path, outdir) {
                                     axis.ticks = element_blank(),
                                     axis.ticks.length = unit(.25, "cm"),
                                     axis.title.x = element_blank(),
-                                    axis.title.y = element_text(face = "bold", size = 20, angle = 90),
-                                    plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+                                    axis.title.y = element_text(face = "plain", size = 25, angle = 90),
+                                    plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
                                     legend.title = element_text(colour = "black", face = "bold", size = 15),
                                     legend.text = element_text(colour = "black", face = "bold", size = 10),
                                     legend.key.height = unit(2, "cm"),
@@ -187,10 +187,7 @@ plot_solutions <- function(path, outdir) {
               ggsave(paste(outdir, paste("calibration-solutions", ".pdf", sep = ""), sep = ""), width = 40, height = 20, dpi = 300)
 }
 
-# system.time(test <- plot_solutions(path = "prioritization_zblm-cal_rce-vocc040",
-#                                    outdir = "prioritization_zblm-cal_rce-vocc040/"))
-
-system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal_rce-vocc050_logcost",
-                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal_rce-vocc050_logcost/"))
+system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zfinal-sol_rce-vocc040",
+                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zfinal-sol_rce-vocc040/"))
 
 
