@@ -65,7 +65,7 @@ kappa_correlation <- function(path, shp, outdir) {
       colnames(final) <- names(single_csv)
       rownames(final) <- names(single_csv)
       # Writing the object
-        write.csv(final, paste(outdir, paste(path, ".csv", sep = ""), sep = ""))
+        write.csv(final, paste(outdir, paste("Kappa_", basename(path), ".csv", sep = ""), sep = ""))
     
     # Reshaping the matrix for plotting
       final_reshape <- reshape::melt(final)
@@ -110,16 +110,17 @@ kappa_correlation <- function(path, shp, outdir) {
     
       ggheatmap +
         theme_opts1 +
-        ggsave(paste(outdir, paste(path, ".pdf", sep = ""), sep = ""), width = 10, height = 10, dpi = 300)
+        ggsave(paste(outdir, paste("Kappa_", basename(path), ".pdf", sep = ""), sep = ""), width = 10, height = 10, dpi = 300)
   }
 }
 
-system.time(kappa_correlation(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs/ublm-cal_0520rce-vocc020_targets-mix", 
-                              shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth", 
-                              outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs/ublm-cal_0520rce-vocc020_targets-mix/"))
+system.time(kappa_correlation(path = "ublm-cal_0520rce-vocc040_targets-mix", 
+                              shp = "shapefiles_rasters/01_abnjs_nofilterdepth", 
+                              outdir = "ublm-cal_0520rce-vocc040_targets-mix/"))
 
-# system.time(kappa_correlation(path = "ublm-cal_0520rce-vocc040_targets-mix", 
-#                               shp = "shapefiles_rasters/01_abnjs_nofilterdepth", 
-#                               outdir = "ublm-cal_0520rce-vocc040_targets-mix/"))
+# system.time(kappa_correlation(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs/ublm-cal_0520rce-vocc020_targets-mix", 
+#                               shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth", 
+#                               outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs/ublm-cal_0520rce-vocc020_targets-mix/"))
+
 
 
