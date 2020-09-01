@@ -13,6 +13,10 @@ kappa_stats <- function(path1, path2, ...) {
     # Load packages
       lapply(list.of.packages, require, character.only = TRUE)
   
+  # 
+    
+      
+      
   # think about what would be the output....
   # comparison no-vocc against scenarios
   # comparison the different approaches against each other
