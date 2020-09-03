@@ -107,7 +107,12 @@ summary_priotitizr <- function(path, outdir, proj.geo, spot) {
       write.csv(iteration_df, paste(outdir, name.df, ".csv", sep = ""), row.names = FALSE)  
 }
 
-system.time(summary_priotitizr(path = "vfinal-sol_figs_test/ublm-cal_0520rce-vocc040_targets-mix", 
-                               outdir = "vfinal-sol_figs_test/ublm-cal_0520rce-vocc040_targets-mix/", 
-                               proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
+system.time(summary_priotitizr(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_sum-stat/ublm-cal_0520rce-vocc020_targets-mix",
+                               outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_sum-stat/ublm-cal_0520rce-vocc020_targets-mix/",
+                               proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
                                spot = ""))
+
+# system.time(summary_priotitizr(path = "vfinal-sol_figs_test/ublm-cal_0520rce-vocc040_targets-mix",
+#                                outdir = "vfinal-sol_figs_test/ublm-cal_0520rce-vocc040_targets-mix/",
+#                                proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
+#                                spot = ""))
