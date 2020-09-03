@@ -12,6 +12,7 @@ kappa_correlation <- function(path, shp, outdir) {
   library(irr)
   library(ggplot2)
   library(RColorBrewer)
+  library(reshape)
   
   # Kappa function to avoid double for loop
     kappa_function <- function(data, col_n) {
@@ -85,7 +86,9 @@ kappa_correlation <- function(path, shp, outdir) {
       y_labs <- c("BathyAbyssopelagic SSP585", "BathyAbyssopelagic SSP245", "BathyAbyssopelagic SSP126", "BathyAbyssopelagic Base",
                   "Mesopelagic SSP585", "Mesopelagic SSP245", "Mesopelagic SSP126", "Mesopelagic Base",
                   "Epipelagic SSP585", "Epipelagic SSP245", "Epipelagic SSP126", "Epipelagic Base")
-    
+    # Defining generalities
+      # pal1 <- brewer.pal(6, "RdPu")
+      # cv <- c("0", "", "0.2", "", "", "0.5", "", "", "0.8", "", "1")
     # Defining themes
       theme_opts1 <- list(theme(plot.margin = margin(0, 0, 0, 0, "cm"),
                                 axis.title.x = element_blank(),
@@ -98,9 +101,15 @@ kappa_correlation <- function(path, shp, outdir) {
       ggheatmap <- ggplot(data = final_reshape, aes(x = X1, y = X2, fill = value)) + 
         geom_tile(color = "white") + 
         geom_text(aes(X2, X1, label = round(value, digits = 2)), color = "black", size = 4) +
-        scale_fill_gradient2(low = "blue", high = "red", mid = "yellow",
+        scale_fill_gradient2(low = "#deebf7", high = "#08519c", mid = "#4292c6",
                              midpoint = 0.5, limit = c(0,1), space = "Lab", 
-                             name="Kappa\nCorrelation") +
+                             name = "Kappa\nCorrelation") +
+        # scale_fill_gradientn(name = "Kappa\nCorrelation",
+        #                      colours = pal1,
+        #                      limits = c(0, 1),
+        #                      breaks = seq(0, 1, 0.1),
+        #                      labels = cv, 
+        #                      space = "Lab") +
         scale_x_discrete(limits = x_scenarios, labels = x_labs) +
         scale_y_discrete(limits = y_scenarios, labels = y_labs) +
         theme_minimal() + 
