@@ -103,7 +103,7 @@ summary_priotitizr <- function(path, outdir, proj.geo, spot) {
     # Final dataframe
       iteration_df<- geom_list %>% 
         dplyr::mutate(trade_off = ifelse(BLM == 0, "X", ifelse(BLM == 1, "Y", spot)))
-      name.df <- paste("PostHoc-Calibration", basename(path), sep = "_")
+      name.df <- paste("Summ-Stats", basename(path), sep = "_")
       write.csv(iteration_df, paste(outdir, name.df, ".csv", sep = ""), row.names = FALSE)  
 }
 
