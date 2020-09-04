@@ -387,6 +387,6 @@ system.time(general_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/wgener
                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/wgeneral_figs/"))
 
 
-
+# panel.grid.major = element_line(colour = "lightgrey”)
 
     
