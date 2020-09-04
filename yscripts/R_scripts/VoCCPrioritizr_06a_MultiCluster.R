@@ -27,7 +27,8 @@ test <- vegdist(dt_final, method = "jaccard")
 testClust <- hclust(test, method = "average")
 plot(testClust, cex = 0.5)
 
-
+path = "ublm-cal_0520rce-vocc040_targets-mix"
+shp = "shapefiles_rasters/01_abnjs_nofilterdepth"
 # List of directories with appropiate file
 dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
 dir.shp <- paste(list.dirs(path = shp, full.names = TRUE, recursive = FALSE), sep = "/")
@@ -35,3 +36,36 @@ csvs <- list.files(path = dir.scenarios, pattern = "*_cost.*.csv$", full.names =
 shps <- list.files(path = dir.shp, pattern = "*.shp$", full.names = TRUE)
 single_csv <- lapply(csvs, function(x) {final <- read.csv(x)})
 single_shp <- lapply(shps, function(x) {final <- st_read(x)})
+# Bettwr names for files
+ns <- lapply(csvs, function(x) {
+  olayer <- unlist(strsplit(basename(x), split = "_"))[2]
+  scenario <- ifelse(str_detect(string = basename(x), pattern = "ssp"), 
+                     unlist(strsplit(basename(x), split = "_"))[5], "Base")
+  final <- paste(olayer, scenario, sep = "_")})
+names(single_csv) <- ns
+names(single_shp) <- basename(shps)
+
+# Extract the solution for every Layer/SSP scenario
+df_list <- vector("list", length = length(single_csv))
+for(i in 1:length(single_csv)) {
+  if(str_detect(string = names(single_csv[i]), pattern = "Epi") == TRUE) {
+    df_list[[i]] <- single_csv[[i]]$solution_1[match(single_shp[[1]]$layer, single_csv[[i]]$id)]
+  } else if(str_detect(string = names(single_csv[i]), pattern = "Meso") == TRUE) {
+    df_list[[i]] <- single_csv[[i]]$solution_1[match(single_shp[[2]]$layer, single_csv[[i]]$id)]
+  } else if(str_detect(string = names(single_csv[i]), pattern = "Bathy") == TRUE) {
+    df_list[[i]] <- single_csv[[i]]$solution_1[match(single_shp[[3]]$layer, single_csv[[i]]$id)]
+  }
+}
+
+# Creating a matrix for every climatic scenario
+df_final <- do.call(rbind, df_list)
+df_final[is.na(df_final)] <- 0 # just in case :-)
+rownames(df_final) <- names(single_csv)
+colnames(df_final) <- single_csv[[1]]$id
+
+test <- vegdist(df_final, method = "jaccard")
+testClust <- hclust(test, method = "average")
+
+pdf("ublm-cal_0520rce-vocc040_targets-mix/ublm-cal_0520rce-vocc040_targets-mix.pdf", width = 20, height = 10)
+plot(testClust, cex = 1)
+dev.off()
