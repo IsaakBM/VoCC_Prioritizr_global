@@ -57,15 +57,34 @@ for(i in 1:length(single_csv)) {
   }
 }
 
-# Creating a matrix for every climatic scenario
-df_final <- do.call(rbind, df_list)
-df_final[is.na(df_final)] <- 0 # just in case :-)
-rownames(df_final) <- names(single_csv)
-colnames(df_final) <- single_csv[[1]]$id
-
-test <- vegdist(df_final, method = "jaccard")
-testClust <- hclust(test, method = "average")
+# Creating the resemblance matrix 
+  df_final <- do.call(rbind, df_list)
+  df_final[is.na(df_final)] <- 0 # just in case :-)
+  rownames(df_final) <- names(single_csv)
+  colnames(df_final) <- single_csv[[1]]$id
+# 
+  test <- vegdist(df_final, method = "jaccard")
+  testClust <- hclust(test, method = "average")
+  dendo.test <- as.dendrogram(testClust)
+  ddata <- dendro_data(dendo.test, type = "rectangle")
+  
+  p <- ggplot(segment(ddata)) + 
+    geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) + 
+    geom_text(data = ddata$labels, aes(x, y, label = label),
+              hjust = 0, angle = 0, size = 3)+
+    coord_flip() + 
+    scale_y_reverse(expand = c(0.2, 0))
 
 pdf("ublm-cal_0520rce-vocc040_targets-mix/ublm-cal_0520rce-vocc040_targets-mix.pdf", width = 20, height = 10)
 plot(testClust, cex = 1)
 dev.off()
+
+
+test_mds <- metaMDS(test, distance = "jaccard", trymax = 100)
+str(test_mds)
+plot(test_mds)
+
+row.names(test_mds$points)
+text(test_mds, pos = 3, offset = 1)
+
+
