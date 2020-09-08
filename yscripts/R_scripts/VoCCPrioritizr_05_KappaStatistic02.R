@@ -33,7 +33,7 @@ kappa_correlation <- function(path, shp, outdir) {
     shps <- list.files(path = dir.shp, pattern = "*.shp$", full.names = TRUE)
     single_csv <- lapply(csvs, function(x) {final <- read.csv(x)})
     single_shp <- lapply(shps, function(x) {final <- st_read(x)})
-    # Bettwr names for files
+    # Better names for files
       ns <- lapply(csvs, function(x) {
         olayer <- unlist(strsplit(basename(x), split = "_"))[2]
         scenario <- ifelse(str_detect(string = basename(x), pattern = "ssp"), 
