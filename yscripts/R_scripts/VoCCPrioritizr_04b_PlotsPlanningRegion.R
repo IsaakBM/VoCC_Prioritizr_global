@@ -9,6 +9,7 @@ plot_solutions <- function(path, outdir) {
   library(raster)
   library(dplyr)
   library(ggplot2)
+  library(patchwork)
   library(rnaturalearth)
   library(rnaturalearthdata)
   library(RColorBrewer)
@@ -18,20 +19,20 @@ plot_solutions <- function(path, outdir) {
   # Which directories for climate prioritization scenarios?
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
   # Loop for every directory
-    for(j in 1:length(dir.layers)) {
-      # reading how many SOLUTIONS .csv files are per BLM calibration
-        files_solution <- list.files(path = dir.layers[j], pattern = "*Layer_.*.csv$", full.names = TRUE)
-        provinces_csv <- read.csv(list.files(path = dir.layers[j], pattern = "*pus-.*.csv$", full.names = TRUE)) %>% 
-          dplyr::arrange(layer)
-        pu_shpfile <- st_read(list.files(path = dir.layers[j], pattern = ".shp", full.names = TRUE))
-      # Begin the parallel structure
-      UseCores <- 24
+    # Begin the parallel structure
+      UseCores <- 3 #24
       cl <- makeCluster(UseCores)  
       registerDoParallel(cl)
+      gglits <- vector("list", length = length(dir.layers))
       # Parallel Loop
-        foreach(i = 1:length(files_solution), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
+        plots_list <- foreach(i = 1:length(dir.layers), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
+          # 
+            files_solution <- list.files(path = dir.layers[i], pattern = "*Layer_.*.csv$", full.names = TRUE)
+            provinces_csv <- read.csv(list.files(path = dir.layers[i], pattern = "*pus-.*.csv$", full.names = TRUE)) %>% 
+              dplyr::arrange(layer)
+            pu_shpfile <- st_read(list.files(path = dir.layers[i], pattern = ".shp", full.names = TRUE))
           # Some manipulation
-            single <- read.csv(files_solution[i])
+            single <- read.csv(files_solution)
             if(ncol(single) > 6) { # more than 1 solution == freq selection
             sol_csv <- single %>% 
               dplyr::mutate(freq_sel = rowSums(single[, 6:ncol(single)])) %>% 
@@ -54,31 +55,31 @@ plot_solutions <- function(path, outdir) {
               dplyr::summarise(prov = sum(id, do_union = TRUE))
             
           # Define themes to plot 
-            theme_opts2 <- list(theme(panel.grid.minor = element_blank(),
+            theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
                                       panel.grid.major = element_blank(),
-                                      panel.background = element_rect(fill = "white", colour = "black"),
+                                      panel.background = element_blank(),
                                       plot.background = element_rect(fill = "white"),
                                       panel.border = element_blank(),
-                                      axis.line = element_line(size = 1),
-                                      axis.text.x = element_text(size = rel(2), angle = 0),
-                                      axis.text.y = element_text(size = rel(2), angle = 0),
-                                      axis.ticks = element_line(size = 1.5),
+                                      axis.line = element_blank(),
+                                      axis.text.x = element_blank(),
+                                      axis.text.y = element_blank(),
+                                      axis.ticks = element_blank(),
                                       axis.ticks.length = unit(.25, "cm"), 
                                       axis.title.x = element_blank(),
                                       axis.title.y = element_blank(),
-                                      plot.title = element_text(face = "bold", size = 22, hjust = 0.5),
-                                      legend.title = element_text(colour = "black", face = "bold", size = 20),
-                                      legend.text = element_text(colour = "black", face = "bold", size = 20), 
-                                      legend.key.height = unit(1.5, "cm"),
-                                      legend.key.width = unit(1, "cm"),
-                                      plot.tag = element_text(size = 30, face = "bold")))
+                                      plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                                      legend.title = element_text(colour = "black", face = "bold", size = 15),
+                                      legend.text = element_text(colour = "black", face = "bold", size = 10), 
+                                      legend.key.height = unit(2, "cm"),
+                                      legend.key.width = unit(0.9, "cm"),
+                                      plot.tag = element_text(size = 25, face = "bold")))
           # Color Palette, World borders and Legend
             pal0 <- brewer.pal(length(unique(best_freq_sol$freq_cat)) - 1, "Greens")
             pal <- c("#deebf7", pal0)
             world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
             ranges <- c("0", "< 25", "25 - 50", "50 - 75", "> 75")
           # Plot
-            ggplot() + 
+            gglits[[i]] <- ggplot() + 
               geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat), fill = as.factor(freq_cat)), color = NA) +
               geom_sf(data = provinces_shp, fill = NA) +
               geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
@@ -86,8 +87,7 @@ plot_solutions <- function(path, outdir) {
                                 name = "Selection Frequency (%)",
                                 labels = ranges) +
               ggtitle(basename(sub(pattern = "*.csv", "", files_solution[i]))) +
-              theme_opts2 +
-              ggsave(paste(outdir, basename(sub(pattern = "*.csv", "", files_solution[i])), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+              theme_opts3
             
             } else { # one solution == yes or no
               
@@ -109,30 +109,31 @@ plot_solutions <- function(path, outdir) {
                   dplyr::summarise(prov = sum(id, do_union = TRUE))
               
               # Define themes to plot 
-                theme_opts2 <- list(theme(panel.grid.minor = element_blank(),
+                # Defining themes
+                theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
                                           panel.grid.major = element_blank(),
                                           panel.background = element_blank(),
                                           plot.background = element_rect(fill = "white"),
                                           panel.border = element_blank(),
-                                          axis.line = element_line(size = 1),
-                                          axis.text.x = element_text(size = rel(2), angle = 0),
-                                          axis.text.y = element_text(size = rel(2), angle = 0),
-                                          axis.ticks = element_line(size = 1.5),
+                                          axis.line = element_blank(),
+                                          axis.text.x = element_blank(),
+                                          axis.text.y = element_blank(),
+                                          axis.ticks = element_blank(),
                                           axis.ticks.length = unit(.25, "cm"), 
                                           axis.title.x = element_blank(),
                                           axis.title.y = element_blank(),
-                                          plot.title = element_text(face = "bold", size = 22, hjust = 0.5),
-                                          legend.title = element_text(colour = "black", face = "bold", size = 20),
-                                          legend.text = element_text(colour = "black", face = "bold", size = 20), 
-                                          legend.key.height = unit(1.5, "cm"),
-                                          legend.key.width = unit(1, "cm"),
-                                          plot.tag = element_text(size = 30, face = "bold")))
+                                          plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                                          legend.title = element_text(colour = "black", face = "bold", size = 15),
+                                          legend.text = element_text(colour = "black", face = "bold", size = 10), 
+                                          legend.key.height = unit(2, "cm"),
+                                          legend.key.width = unit(0.9, "cm"),
+                                          plot.tag = element_text(size = 25, face = "bold")))
               # Color Palette, World borders and Legend
                 pal <- c("#deebf7", "#31a354")
                 world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
                 ranges <- c("0", "1")
               # Plot
-                ggplot() + 
+                gglits[[i]] <- ggplot() + 
                   geom_sf(data = best_freq_sol, aes(group = as.factor(freq_cat), fill = as.factor(freq_cat)), color = NA) +
                   geom_sf(data = provinces_shp, fill = NA) +
                   geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
@@ -140,16 +141,48 @@ plot_solutions <- function(path, outdir) {
                                     name = "Selection",
                                     labels = ranges) +
                   ggtitle(basename(sub(pattern = "*.csv", "", files_solution[i]))) +
-                  theme_opts2 +
-                  ggsave(paste(outdir, basename(sub(pattern = "*.csv", "", files_solution[i])), ".pdf", sep = ""), width = 22, height = 10, dpi = 300)
+                  theme_opts3
             }
         }
         stopCluster(cl)
-    }
+        # Plotting the FINAL FIGURES
+          # Defining themes
+          theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                                    panel.grid.major = element_blank(),
+                                    panel.background = element_blank(),
+                                    plot.background = element_rect(fill = "white"),
+                                    panel.border = element_blank(),
+                                    axis.line = element_blank(),
+                                    axis.text.x = element_blank(),
+                                    axis.text.y = element_blank(),
+                                    axis.ticks = element_blank(),
+                                    axis.ticks.length = unit(.25, "cm"),
+                                    axis.title.x = element_blank(),
+                                    axis.title.y = element_blank(),
+                                    plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                                    legend.title = element_text(colour = "black", face = "bold", size = 15),
+                                    legend.text = element_text(colour = "black", face = "bold", size = 10),
+                                    legend.key.height = unit(2, "cm"),
+                                    legend.key.width = unit(0.9, "cm"),
+                                    plot.tag = element_text(size = 25, face = "bold")))
+          # CALIBRATION PLOTS
+            p3 <-   ((plots_list[[1]] / plots_list[[5]] / plots_list[[9]]) |
+                     (plots_list[[2]] / plots_list[[6]] / plots_list[[10]]) |
+                     (plots_list[[3]] / plots_list[[7]] / plots_list[[11]]) |
+                     (plots_list[[4]] / plots_list[[8]] / plots_list[[12]])) +
+              plot_layout(guides = "collect") +
+              plot_annotation(tag_prefix = "",
+                              tag_levels = "A",
+                              tag_suffix = ".",) +
+              theme_opts3 +
+              ggsave(paste(outdir, paste("calibration-solutions", ".pdf", sep = ""), sep = ""), width = 40, height = 20, dpi = 300)
 }
 
-system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal_rce-vocc050_logcost", 
-                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal_rce-vocc050_logcost/"))
+system.time(test <- plot_solutions(path = "prioritization_zblm-cal_rce-vocc040",
+                                   outdir = "prioritization_zblm-cal_rce-vocc040/"))
+
+# system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal_rce-vocc050_logcost", 
+#                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/prioritization_zblm-cal_rce-vocc050_logcost/"))
 
 
 
