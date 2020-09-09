@@ -3,9 +3,18 @@
 # NO GUARANTEES THAT CODE IS CORRECT
 # Caveat Emptor!
 
-# moll_global <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
-# robin_global <- "+proj=robin +lon_0=0 +datum=WGS84 +units=m +no_defs"
-# size of squares, in units of the CRS (115473.4 for 1deg) (55000 for ~0.5deg)
+# proj_type = moll_global <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
+# proj_type = robin_global <- "+proj=robin +lon_0=0 +datum=WGS84 +units=m +no_defs"
+
+# size of hexagons: 
+# resolution 0.25 deg == grid_spacing(26860)
+# resolution 0.5 deg == grid_spacing(53730)
+# resolution 1 deg == grid_spacing(119300)
+
+# size of squares: 
+# resolution 0.25 deg == grid_spacing(25000)
+# resolution 0.5 deg == grid_spacing(50000)
+# resolution 1 deg == grid_spacing(111000)
 
 pu_grid <- function(path, outdir, proj_type, pu_shape, resolution, name) {
   
@@ -22,7 +31,8 @@ pu_grid <- function(path, outdir, proj_type, pu_shape, resolution, name) {
     # Size of the grid
       grid_spacing <- resolution  
     # the grid, covering bounding box
-      pus_shp <- st_make_grid(shp, square = ifelse(pu_shape == "square", TRUE, ifelse(pu_shape == "hexagon", FALSE)), cellsize = c(grid_spacing, grid_spacing)) %>% # the grid, covering bounding box
+      pus_shp <- st_make_grid(shp, square = ifelse(pu_shape == "square", TRUE, ifelse(pu_shape == "hexagon", FALSE)), 
+                              cellsize = c(grid_spacing, grid_spacing)) %>% # the grid, covering bounding box
         st_sf() # not really required, but makes the grid nicer to work with later
       pus_final <- pus_shp %>%
         dplyr::mutate(layer = as.numeric(seq(1,nrow(pus_shp)))) %>% 
@@ -32,17 +42,10 @@ pu_grid <- function(path, outdir, proj_type, pu_shape, resolution, name) {
   
 }
 
-# system.time(pu_grid(path = "features_shapefiles/SAEEZ_shapefile", 
-#                     outdir = "features_shapefiles/SAEEZ_shapefile/", 
-#                     proj_type = "+proj=robin +lon_0=0 +datum=WGS84 +units=m +no_defs", 
-#                     pu_shape = "hexagon", 
-#                     resolution = 55000, 
-#                     name = "PUs_SA_moll_05deg"))
-
 system.time(pu_grid(path = "/QRISdata/Q1216/BritoMorales/Project05a_Rafaela/features_shapefiles/SAEEZ_shapefile", 
                     outdir = "/QRISdata/Q1216/BritoMorales/Project05a_Rafaela/features_shapefiles/SAEEZ_pus/", 
                     proj_type = "+proj=robin +lon_0=0 +datum=WGS84 +units=m +no_defs", 
                     pu_shape = "hexagon", 
-                    resolution = 55000, 
+                    resolution = 53730, 
                     name ="PUs_SA_moll_05deg"))
 
