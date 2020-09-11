@@ -110,8 +110,8 @@ general_plots <- function(path, outdir, figure) {
                                  limits = c(1, 5),
                                  breaks = seq(1, 5, 1),
                                  labels = cv_rich) +
-            ggtitle(cost_main_tittles[indexing]) +
-            labs(y = cost_y_axis[indexing]) +
+            ggtitle(rich_main_tittles[indexing]) +
+            labs(y = rich_y_axis[indexing]) +
             theme_opts3})
 
       # Creating the COST PLOTS
@@ -176,8 +176,8 @@ general_plots <- function(path, outdir, figure) {
                                    limits = c(1, 6),
                                    breaks = seq(1, 6, 1),
                                    labels = cv_cost) +
-              ggtitle(rich_main_tittles[indexing]) +
-              labs(y = rich_y_axis[indexing]) +
+              ggtitle(cost_main_tittles[indexing]) +
+              labs(y = cost_y_axis[indexing]) +
               theme_opts3})
         
         # Plotting the FINAL FIGURES
