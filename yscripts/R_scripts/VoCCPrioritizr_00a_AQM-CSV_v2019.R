@@ -75,13 +75,13 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
     
   # Filtering by layers before loops
   if(olayer == "surface") {
-      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 0 & DepthPrefMin < 200 & DepthPrefMax >= 0 & DepthPrefMax < 200)
+      hspen_v2 <- hspen %>% filter(DepthPrefMin <= 200 | DepthPrefMax <= 200)
     } else if (olayer == "mesopelagic") {
-      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 200 & DepthPrefMin < 1000 & DepthPrefMax >= 200 & DepthPrefMax < 1000)
+      hspen_v2 <- hspen %>% filter(DepthPrefMin > 200 & DepthPrefMin <= 1000 | DepthPrefMax > 200 & DepthPrefMax <= 1000)
     } else if (olayer == "bathyabyssopelagic") {
-      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 1000 & DepthPrefMax >= 1000)
+      hspen_v2 <- hspen %>% filter(DepthPrefMin > 1000 | DepthPrefMax > 1000)
     } else if (olayer == "all") {
-      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 0 & DepthPrefMax >= 0)
+      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 0 | DepthPrefMax >= 0)
     } else {
       hspen_v2 <- hspen
     }
