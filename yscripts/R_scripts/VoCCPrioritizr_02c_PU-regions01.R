@@ -417,7 +417,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
 }
 
 csvs_pus_provinces(path = "features_0520CSV040_targets-mix_vocc",
-                   min_target = 0.10, 
+                   min_target = 0.10,
                    max_target = 0.20,
                    clim_target = 0.40)
 
