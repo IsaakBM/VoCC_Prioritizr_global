@@ -61,15 +61,15 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
 }
 
 
-# climatevar_feature(rs_path = "/QRISdata/Q1216/BritoMorales/Project04b/climate-change_inputs/vocc_mag_nobottom", 
-#                    shp_path = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/02_abnjs_filterdepth", 
-#                    outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_CSVs/", 
-#                    var_name = "VoCC", 
-#                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
-
-climatevar_feature(rs_path = "climate-change_inputs/vocc_mag_nobottom",
-                   shp_path = "shapefiles_rasters/02_abnjs_filterdepth",
-                   outdir = "features_CSVs/",
+climatevar_feature(rs_path = "/QRISdata/Q1216/BritoMorales/Project04b/climate-change_inputs/vocc_mag_nobottom",
+                   shp_path = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/02_abnjs_filterdepth",
+                   outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_CSVs/",
                    var_name = "VoCC",
                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
+
+# climatevar_feature(rs_path = "climate-change_inputs/vocc_mag_nobottom",
+#                    shp_path = "shapefiles_rasters/02_abnjs_filterdepth",
+#                    outdir = "features_CSVs/",
+#                    var_name = "VoCC",
+#                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
 
