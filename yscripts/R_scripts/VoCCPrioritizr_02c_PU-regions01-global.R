@@ -17,7 +17,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
     pattern1 <-  c(paste0("*Longhurst*", ".*.csv$"), paste0("*Glasgow*", ".*.csv$"), paste0("*GOODS*", ".*.csv$")) # the different provinces
   # Begin the parallel structure      
-    cores  <-  12
+    cores  <-  3
     cl <- makeCluster(cores)
     registerDoParallel(cl)
     foreach(j = 1:length(dir.scenarios), .packages = c("dplyr", "stringr", "data.table")) %dopar% {
@@ -55,7 +55,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
               ns2.name <- paste("sps", ns1, "targets", sep = "_")
               fwrite(global_trg, paste(paste(dir.scenarios[j], "/", sep = ""), ns2.name, ".csv", sep = ""), row.names = FALSE)
           
-        } else if (length(rce_csv) == 0 & length(vocc_csv) == 0) {
+        } else if (length(rce_csv) != 0 & length(vocc_csv) != 0) {
           # Calculating Species by Provinces and Setting targets for each prov-species
             file_olayer_pus <- fread(csv_olayer_prov) %>% 
               arrange(layer)
@@ -388,10 +388,10 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_target) {
     stopCluster(cl)
 }
 
-csvs_pus_provinces(path = "features_0520CSV040_targets-mix_vocc",
+csvs_pus_provinces(path = "features_0520CSV020_targets-mix",
                    min_target = 0.10,
                    max_target = 0.20,
-                   clim_target = 0.40)
+                   clim_target = 0.30)
 
 # csvs_pus_provinces(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_0520CSV040_targets-mix_vocc",
 #                    min_target = 0.05, 
