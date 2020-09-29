@@ -4,7 +4,7 @@
 # Caveat Emptor!
 
 
-iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_target) { 
+iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_target, clim_target) { 
   
   library(data.table)
   library(dplyr)
@@ -50,33 +50,34 @@ iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_target) {
             dplyr::select(speciesID, targets)
         
       # Loop every row to match species ID with the "original target df" and changing the target
-        features <- as.character(csv_targets$feature_names_prov)
-        final_list <- vector("list", length = length(features))
-        for(i in 1:length(features)) {
-          df <- csv_targets %>% 
-            dplyr::filter(feature_names_prov == features[i]) %>% 
-            dplyr::mutate(speciesID = unlist(strsplit(as.character(feature_names_prov), split = "_"))[1])
-          df$targets <- ifelse(is.na(final$targets[match(df$speciesID, final$speciesID)]), df$targets, final$targets[match(df$speciesID, final$speciesID)])
-          final_list[[i]] <- df
-        }
-        df2 <- do.call(rbind, final_list) %>% 
-          dplyr::select(-speciesID)
+        df2 <- csv_targets %>% 
+          dplyr::group_by(feature_names_prov) %>% 
+          dplyr::mutate(speciesID = unlist(strsplit(as.character(feature_names_prov), split = "_"))[1]) %>% 
+          dplyr::mutate(targets2 = ifelse(is.na(final$targets[match(speciesID, final$speciesID)]), targets, final$targets[match(speciesID, final$speciesID)])) %>%
+          dplyr::select(feature_names_prov, cells, targets2) %>%
+          dplyr::rename(targets = targets2)
+        # Define the climatic targets (again!) in case of any error 
+          df3 <- df2 %>% 
+            dplyr::mutate(targets2 = ifelse(str_detect(string = feature_names_prov, pattern = "VoCC|RCE") == TRUE, clim_target, targets)) %>% 
+            dplyr::select(feature_names_prov, cells, targets2) %>%
+            dplyr::rename(targets = targets2)
         
         # Writing the final object
           ns2.name <- sub(pattern = "*.csv", "", basename(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)))
-          fwrite(df2, paste(paste(dir.scenarios[j], "/", sep = ""), paste(ns2.name, "iucn", sep = "-"), ".csv", sep = ""), row.names = FALSE)
+          fwrite(df3, paste(paste(dir.scenarios[j], "/", sep = ""), paste(ns2.name, "iucn", sep = "-"), ".csv", sep = ""), row.names = FALSE)
     }
     stopCluster(cl)
   }
 
-system.time(iucn_targets(path = "features_0520CSV040_targets-mix_vocc", 
-                         aquamaps_data = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccursum.csv", 
-                         iucn_data = "features_0520CSV040_targets-mix_vocc/IUCN_REDLIST_2020.csv", 
-                         iucn_target = 0.30))
+system.time(iucn_targets(path = "features_0520CSV040_targets-mix_vocc",
+                         aquamaps_data = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccursum.csv",
+                         iucn_data = "features_0520CSV040_targets-mix_vocc/IUCN_REDLIST_2020.csv",
+                         iucn_target = 0.30,
+                         clim_target = 0.40))
 
-# system.time(iucn_targets(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_0520CSV040_targets-mix", 
-#                          aquamaps_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/speciesoccursum.csv", 
-#                          iucn_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/IUCN_REDLIST_2020.csv", 
+# system.time(iucn_targets(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_0520CSV040_targets-mix",
+#                          aquamaps_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/speciesoccursum.csv",
+#                          iucn_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_d`ataframe/IUCN_REDLIST_2020.csv",
 #                          iucn_target = 0.30))
 
 
