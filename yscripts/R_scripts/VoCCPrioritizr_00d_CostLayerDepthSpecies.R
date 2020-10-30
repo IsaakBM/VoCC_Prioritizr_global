@@ -10,7 +10,7 @@ ns_species <- names(species)
 ns_species2 <- stringr::str_replace_all(string = ns_species, pattern = "[.]", replacement = " ")
 
 depth2 <- list()
-for (s in 1:length(ns_species2)){
+for(s in 1:length(ns_species2)){
   depth2[[s]] <- rfishbase::species(ns_species2[s], fields = c("DepthRangeShallow", "DepthRangeDeep"))}
 
 names(depth2) <- ns_species2 # better to 
@@ -52,7 +52,7 @@ mp <- depth4 %>%
 nrow(mp) #322 species
 bap <- depth4 %>% 
   filter(DepthRangeShallow >= 1000 | DepthRangeDeep >= 1000)
-nrow(bap)#108
+nrow(bap)#118
 
 names(species) <- str_replace_all(string = depth4$Species, pattern = " ", replacement = ".")
 
