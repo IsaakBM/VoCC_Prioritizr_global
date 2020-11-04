@@ -69,11 +69,11 @@ iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_target, clim_targe
     stopCluster(cl)
   }
 
-system.time(iucn_targets(path = "features_0520CSV040_targets-mix_vocc",
+system.time(iucn_targets(path = "features_0520CSV050_targets-mix_test",
                          aquamaps_data = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccursum.csv",
                          iucn_data = "features_0520CSV040_targets-mix_vocc/IUCN_REDLIST_2020.csv",
                          iucn_target = 0.30,
-                         clim_target = 0.40))
+                         clim_target = 0.50))
 
 # system.time(iucn_targets(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_0520CSV040_targets-mix",
 #                          aquamaps_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/speciesoccursum.csv",
