@@ -27,7 +27,11 @@ iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_target, clim_targe
         csv_iucn <- fread(iucn_data)
       
       # Getting species' code from targets' file
-        df1 <- strsplit(as.character(csv_targets_noclim$feature_names_prov), split = "_")
+        if(nrow(csv_targets_noclim) == 0) {
+          df1 <- strsplit(as.character(csv_targets$feature_names_prov), split = "_")
+        } else {
+          df1 <- strsplit(as.character(csv_targets_noclim$feature_names_prov), split = "_")
+        }
         df2 <- lapply(df1, function(x) {x[1]})
         speciesID <- do.call(rbind, df2)
       # Read the AquaMaps data (species occur .csv) and extract species' name according to the code
@@ -64,7 +68,7 @@ iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_target, clim_targe
         
         # Writing the final object
           ns2.name <- sub(pattern = "*.csv", "", basename(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)))
-          fwrite(df3, paste(paste(dir.scenarios[j], "/", sep = ""), paste(ns2.name, "iucn", sep = "-"), ".csv", sep = ""), row.names = FALSE)
+          fwrite(df2, paste(paste(dir.scenarios[j], "/", sep = ""), paste(ns2.name, "iucn", sep = "-"), ".csv", sep = ""), row.names = FALSE)
     }
     stopCluster(cl)
   }
