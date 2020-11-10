@@ -110,6 +110,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
         # the sizes of the geometries are reduced by half (* 0.5)
         # each object’s centroid is moved back to the input data coordinates (+ single_centroid_sfc).
         single_scale  <- (single_sfc - single_centroid_sfc) * 0.5 + single_centroid_sfc
+        st_crs(single_scale) <-  proj.geo
         dt1 <- st_intersection(pu_region, single_scale) %>% 
           filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
         if(nrow(dt1) > 0) { 
