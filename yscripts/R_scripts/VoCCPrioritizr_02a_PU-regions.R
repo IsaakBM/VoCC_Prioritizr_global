@@ -105,7 +105,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "rgeos", "rgdal")) %dopar% {
         single <- bioprovince %>% filter(wdpaid == prov_code[i])
         single_sfc  <-  st_geometry(single)
-        single_centroid_sfc  <-  st_centroid(single)
+        single_centroid_sfc  <-  st_centroid(single_sfc)
         # each object is firstly shifted in a way that its center has coordinates of 0, 0 (single_sfc - single_centroid_sfc)
         # the sizes of the geometries are reduced by half (* 0.5)
         # each object’s centroid is moved back to the input data coordinates (+ single_centroid_sfc).
@@ -184,6 +184,8 @@ system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/s
                             olayer = "epipelagic",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_lowCC_02"))
+
+
 
 
 
