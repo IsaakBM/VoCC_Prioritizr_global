@@ -24,7 +24,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
   # Match 
   if(prov_name == "Longhurst") {
     # Set up parallel structure
-      ncores <- 21 
+      ncores <- 24
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
     # Get the indicator for the provinces
@@ -49,7 +49,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
     
   } else if (prov_name == "Glasgow") {
     # Set up parallel structure
-      ncores <- 21 
+      ncores <- 24
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
     # Get the indicator for the provinces
@@ -74,7 +74,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       
   } else if (prov_name == "GOODS") { # this is for the seafloor
     # Set up parallel structure
-      ncores <- 3 
+      ncores <- 24
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
     # Get the indicator for the provinces
@@ -104,17 +104,17 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       prov_list <- list() # to allocate results
       prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "rgeos", "rgdal")) %dopar% {
         single <- bioprovince %>% filter(wdpaid == prov_code[i])
-          single_sp <- as(single, "Spatial")
-            single_sp2 <- spTransform(single_sp, CRS(proj.geo))
-          #single_buf <- gBuffer(single_sp2, width = -140)
-          if(is.null(single_buf) == FALSE) {
-            single_sf <- st_as_sf(single_buf) %>% st_make_valid()
-            dt1 <- st_intersection(pu_region, single_sf) %>% 
-              filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
-            if(nrow(dt1) > 0) { 
-              prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
-            }
-          }
+        single_sfc  <-  st_geometry(single)
+        single_centroid_sfc  <-  st_centroid(single)
+        # each object is firstly shifted in a way that its center has coordinates of 0, 0 (single_sfc - single_centroid_sfc)
+        # the sizes of the geometries are reduced by half (* 0.5)
+        # each object’s centroid is moved back to the input data coordinates (+ single_centroid_sfc).
+        single_scale  <- (single_sfc - single_centroid_sfc) * 0.5 + single_centroid_sfc
+        dt1 <- st_intersection(pu_region, single_scale) %>% 
+          filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
+        if(nrow(dt1) > 0) { 
+          prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output            
+        }
       }
       stopCluster(cl)
     # Merge all the output
@@ -126,7 +126,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
                                    paste(pu_region$province, prov_name, sep = "_"))
   } else if (prov_name == "VMEs") {
     # Set up parallel structure
-      ncores <- 21 
+      ncores <- 24
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
     # Get the indicator for the provinces
@@ -148,27 +148,42 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
       pu_region$province <- ifelse(is.na(pu_region$province), 
                                    paste("non-categ", prov_name, sep = "_"), 
                                    paste(pu_region$province, prov_name, sep = "_"))
+  } else if (prov_name == "ecoregions") {
+    # Set up parallel structure
+      ncores <- 24
+      cl <- makeCluster(ncores)
+      registerDoParallel(cl)
+    # Get the indicator for the provinces
+      prov_code <- as.character(bioprovince$ECO_CODE)
+      prov_list <- list() # to allocate results
+      prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "lwgeom")) %dopar% { 
+        single <- bioprovince %>% filter(ECO_CODE == prov_code[i])
+        dt1 <- st_intersection(pu_region, single) %>% 
+          filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
+        if(nrow(dt1) > 0) { 
+          prov_list[[i]] <- dt1 %>% mutate(province = prov_code[i]) # save the output    
+        }
+      }
+      stopCluster(cl)
+    # Merge all the output
+      pus_prov <- do.call(rbind, prov_par) %>% arrange(layer)
+    # Match and establish categories
+      pu_region$province <- pus_prov$province[match(pu_region$layer, pus_prov$layer)]
+      pu_region$province <- ifelse(is.na(pu_region$province), 
+                                   paste("non-categ", prov_name, sep = "_"), 
+                                   paste(pu_region$province, prov_name, sep = "_"))
   }
   pu_region <- as.data.frame(pu_region)
   pu_csv <- paste(paste("pus", olayer, sep = "-"), prov_name, ".csv", sep = "_")
   fwrite(dplyr::select(pu_region, -geometry), paste(outdir, pu_csv, sep = ""))
 }
 
-
-
-# system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/XXXXX",
-#                             province_file = "/data/Q1216/BritoMorales/Project04b/shapefiles_rasters/GOODSprovinces/GOODSprovinces_bathyal.shp",
-#                             prov_name = "GOODS",
-#                             olayer = "seafloor",
-#                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-#                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/"))
-
 system.time(pu_by_provinces(pu_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/02_abnjs_filterdepth/abnj_02-epipelagic_global_moll_05deg_depth/abnj_02-epipelagic_global_moll_05deg_depth.shp",
                             province_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/mpas_v2018/mpas_v2018.shp", 
                             prov_name = "mpas",
                             olayer = "epipelagic",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs", 
-                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_CSVs/"))
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/features_lowCC_02"))
 
 
 
