@@ -203,7 +203,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                 legend.key.width = unit(0.9, "cm"),
                                 plot.tag = element_text(size = 25, face = "bold")))
       # CALIBRATION PLOTS
-      p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | no_regret_all) +
+      p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | (no_regret_all / no_regret_all / no_regret_all)) +
         plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
                         tag_levels = "A",
