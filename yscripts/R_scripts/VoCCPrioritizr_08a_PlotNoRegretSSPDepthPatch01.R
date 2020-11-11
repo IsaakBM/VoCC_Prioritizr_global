@@ -51,7 +51,8 @@ no_regret_plots <- function(path, outdir, shp) {
               dplyr::select(id, cost, freq_sel) %>% 
               dplyr::arrange(id)})
         # 
-          no_regret <- solutions_csv[[1]][,3]*solutions_csv[[2]][,3]*solutions_csv[[3]][,3]*solutions_csv[[4]][,3]
+          # no_regret <- solutions_csv[[1]][,3]*solutions_csv[[2]][,3]*solutions_csv[[3]][,3]*solutions_csv[[4]][,3]
+          no_regret <- solutions_csv[[1]][,3]*solutions_csv[[2]][,3]*solutions_csv[[3]][,3]
           no_regret_csv <- solutions_csv[[4]] %>% # [[4]] is the "base" dataframe solution but does not matter in this case
             dplyr::mutate(no_regret = no_regret) %>% 
             dplyr::select(id, no_regret) %>% 
@@ -138,16 +139,21 @@ no_regret_plots <- function(path, outdir, shp) {
       }
       stopCluster(cl)
   # Getting no regrets from original shapefiles
-    single_shp <- lapply(shps, function(x) {final <- st_read(x)})
-    first <- sf_list[[1]]$no_regret[match(single_shp[[1]]$layer, sf_list[[1]]$id)]
-      first <- ifelse(is.na(first), 0, first) # some NAs due depth
-    second <- sf_list[[2]]$no_regret[match(single_shp[[2]]$layer, sf_list[[2]]$id)]
-      second <- ifelse(is.na(second), 0, second) # some NAs due depth
-    third <- sf_list[[3]]$no_regret[match(single_shp[[3]]$layer, sf_list[[3]]$id)]
-      third <- ifelse(is.na(third), 0, third) # some NAs due depth
-    # Creating the file to plot
-      sf_list[[1]]$no_regret_all <- first*second*third
-      # Define themes to plot 
+      single_shp <- lapply(shps, function(x) {final <- st_read(x)})
+      first <- sf_list[[1]]$no_regret[match(single_shp[[1]]$layer, sf_list[[1]]$id)]
+        first <- ifelse(is.na(first), 0, ifelse(first == 1, 4, first)) # some NAs due depth
+      second <- sf_list[[2]]$no_regret[match(single_shp[[2]]$layer, sf_list[[2]]$id)]
+        second <- ifelse(is.na(second), 0, ifelse(second == 1, 5, second)) # some NAs due depth
+      third <- sf_list[[3]]$no_regret[match(single_shp[[3]]$layer, sf_list[[3]]$id)]
+        third <- ifelse(is.na(third), 0, ifelse(third == 1, 6, third)) # some NAs due depth
+      # Adding elements to get values
+        sf_list[[1]]$no_regret_all <- first+second+third
+      # Leaving all important layers
+        no_regrets01 <- sf_list[[1]] %>% 
+          mutate(no_regret_all = ifelse(no_regret_all == 4, 0, 
+                                        ifelse(no_regret_all == 5, 0, 
+                                               ifelse(no_regret_all == 6, 0, no_regret_all))))
+      # Define themes to plot
         # Defining themes
           theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
                                     panel.grid.major = element_blank(),
@@ -163,20 +169,20 @@ no_regret_plots <- function(path, outdir, shp) {
                                     axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                     plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
                                     legend.title = element_text(colour = "black", face = "bold", size = 15),
-                                    legend.text = element_text(colour = "black", face = "bold", size = 10), 
+                                    legend.text = element_text(colour = "black", face = "bold", size = 13), 
                                     legend.key.height = unit(2, "cm"),
-                                    legend.key.width = unit(0.9, "cm"),
+                                    legend.key.width = unit(2, "cm"),
                                     plot.tag = element_text(size = 25, face = "bold")))
         # Color Palette, World borders and Legend
-          pal <- c("#deebf7", "#31a354")
+          pal <- c("#deebf7", "#984ea3", "#4daf4a", "#377eb8", "#e41a1c")
           world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
-          ranges <- c("0", "1")
+          ranges <- c("None", "Epipelagic and Mesopelagic", "Epipelagic and Bathyabyssopelagic", "Mesopelagic and Bathyabyssopelagic", "All")
         # Plot
           no_regret_all <- ggplot() + 
-            geom_sf(data = sf_list[[1]], aes(group = as.factor(no_regret_all), fill = as.factor(no_regret_all)), color = NA) +
+            geom_sf(data = no_regrets01, aes(group = as.factor(no_regret_all), fill = as.factor(no_regret_all)), color = NA) +
             geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
             scale_fill_manual(values = pal,
-                              name = "Selection",
+                              name = "Coherence\n across layers",
                               labels = ranges) +
             # ggtitle(main_tittles[i]) +
             # labs(y = y_axis[i]) +
@@ -198,9 +204,9 @@ no_regret_plots <- function(path, outdir, shp) {
                                 axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                 plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
                                 legend.title = element_text(colour = "black", face = "bold", size = 15),
-                                legend.text = element_text(colour = "black", face = "bold", size = 10),
-                                legend.key.height = unit(2, "cm"),
-                                legend.key.width = unit(0.9, "cm"),
+                                legend.text = element_text(colour = "black", face = "bold", size = 15),
+                                legend.key.height = unit(2.5, "cm"),
+                                legend.key.width = unit(2.5, "cm"),
                                 plot.tag = element_text(size = 25, face = "bold")))
       # CALIBRATION PLOTS
       p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | (no_regret_all / no_regret_all / no_regret_all)) +
