@@ -83,10 +83,11 @@ no_regret_plots <- function(path, outdir, shp) {
                                       axis.title.x = element_blank(),
                                       axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                       plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                      legend.title = element_text(colour = "black", face = "bold", size = 15),
-                                      legend.text = element_text(colour = "black", face = "bold", size = 10), 
-                                      legend.key.height = unit(2, "cm"),
-                                      legend.key.width = unit(0.9, "cm"),
+                                      legend.title = element_text(colour = "black", face = "bold", size = 16),
+                                      legend.text = element_text(colour = "black", face = "plain", size = 15), 
+                                      legend.key.height = unit(1.5, "cm"),
+                                      legend.key.width = unit(1.5, "cm"),
+                                      legend.position = "none", 
                                       plot.tag = element_text(size = 25, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#31a354")
@@ -102,7 +103,8 @@ no_regret_plots <- function(path, outdir, shp) {
                                 labels = ranges) +
               # ggtitle(main_tittles[i]) +
               labs(y = y_axis[i]) +
-              theme_opts3
+              theme_opts3 +
+              theme(legend.position = "none")
         
       }
       stopCluster(cl)
@@ -153,6 +155,25 @@ no_regret_plots <- function(path, outdir, shp) {
           mutate(no_regret_all = ifelse(no_regret_all == 4, 0, 
                                         ifelse(no_regret_all == 5, 0, 
                                                ifelse(no_regret_all == 6, 0, no_regret_all))))
+    # Creating the final data frame with % per depth among all depth + climate scenarios
+        df_sum1 <- data.frame(Epipelagic = round(sum(first == 4)/90065, digits = 2), 
+                              Mesopelagic = round(sum(second == 5)/88528, digits = 2),
+                              Bathy = round(sum(third == 6)/87170, digits = 2),
+                              EpiMeso = round((sum(no_regrets01$no_regret_all == 9))/(90065+88528+87170), digits = 3), 
+                              EpiBathy = round((sum(no_regrets01$no_regret_all == 10))/(90065+88528+87170), digits = 3), 
+                              MesoBathy = round((sum(no_regrets01$no_regret_all == 11))/(90065+88528+87170), digits = 3), 
+                              All = round((sum(no_regrets01$no_regret_all == 15))/(90065+88528+87170), digits = 3))
+        df_sum2 <- data.frame(Epipelagic = round(sum(first == 4)/90065, digits = 2), 
+                              Mesopelagic = round(sum(second == 5)/88528, digits = 2),
+                              Bathy = round(sum(third == 6)/87170, digits = 2),
+                              EpiMeso = round((sum(no_regrets01$no_regret_all == 9))/(90065+88528), digits = 3), 
+                              EpiBathy = round((sum(no_regrets01$no_regret_all == 10))/(90065+87170), digits = 3), 
+                              MesoBathy = round((sum(no_regrets01$no_regret_all == 11))/(88528+87170), digits = 3), 
+                              All = round((sum(no_regrets01$no_regret_all == 15))/(90065+88528+87170), digits = 3))
+        
+        df_final <- rbind(df_sum1, df_sum2)
+        write.csv(df_final, paste(outdir, paste("no-regrets-all", ".csv", sep = ""), sep = ""))  
+        
       # Define themes to plot
         # Defining themes
           theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
@@ -168,15 +189,15 @@ no_regret_plots <- function(path, outdir, shp) {
                                     axis.title.x = element_blank(),
                                     axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                     plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                    legend.title = element_text(colour = "black", face = "bold", size = 15),
-                                    legend.text = element_text(colour = "black", face = "bold", size = 13), 
-                                    legend.key.height = unit(2, "cm"),
-                                    legend.key.width = unit(2, "cm"),
+                                    legend.title = element_text(colour = "black", face = "bold", size = 16),
+                                    legend.text = element_text(colour = "black", face = "plain", size = 15), 
+                                    legend.key.height = unit(1.5, "cm"),
+                                    legend.key.width = unit(1.5, "cm"),
                                     plot.tag = element_text(size = 25, face = "bold")))
         # Color Palette, World borders and Legend
-          pal <- c("#deebf7", "#984ea3", "#4daf4a", "#377eb8", "#e41a1c")
+          pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
           world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
-          ranges <- c("None", "Epipelagic and Mesopelagic", "Epipelagic and Bathyabyssopelagic", "Mesopelagic and Bathyabyssopelagic", "All")
+          ranges <- c("Not selected", "Epipelagic and Mesopelagic", "Epipelagic and Bathyabyssopelagic", "Mesopelagic and Bathyabyssopelagic", "All")
         # Plot
           no_regret_all <- ggplot() + 
             geom_sf(data = no_regrets01, aes(group = as.factor(no_regret_all), fill = as.factor(no_regret_all)), color = NA) +
@@ -203,24 +224,24 @@ no_regret_plots <- function(path, outdir, shp) {
                                 axis.title.x = element_blank(),
                                 axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                 plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                legend.title = element_text(colour = "black", face = "bold", size = 15),
-                                legend.text = element_text(colour = "black", face = "bold", size = 15),
-                                legend.key.height = unit(2.5, "cm"),
-                                legend.key.width = unit(2.5, "cm"),
+                                legend.title = element_text(colour = "black", face = "bold", size = 16),
+                                legend.text = element_text(colour = "black", face = "plain", size = 15),
+                                legend.key.height = unit(1.5, "cm"),
+                                legend.key.width = unit(1.5, "cm"),
                                 plot.tag = element_text(size = 25, face = "bold")))
       # CALIBRATION PLOTS
-      p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | (no_regret_all / no_regret_all / no_regret_all)) +
-        plot_layout(guides = "collect") +
+      p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | ((no_regret_all / no_regret_all / no_regret_all) + theme_opts3)) +
+        # plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
                         tag_levels = "A",
                         tag_suffix = ".",) +
-        theme_opts3 +
+        # theme_opts3 +
         ggsave(paste(outdir, paste("no-regrets-all", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
 }
 
-system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_02/ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates",
-                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_02/ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/",
-                           shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth"))
+system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_0520rce-vocc0520_targets-mix_rawcost_noduplicates",
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_0520rce-vocc0520_targets-mix_rawcost_noduplicates/",
+                            shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth"))
 
 
 ###############################
