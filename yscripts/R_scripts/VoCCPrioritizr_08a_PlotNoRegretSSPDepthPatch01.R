@@ -341,9 +341,14 @@ no_regret_plots <- function(path, outdir, shp) {
         second <- ifelse(is.na(second), 0, ifelse(second == 1, 5, second)) # some NAs due depth
       third <- sf_list[[3]]$no_regret[match(single_shp[[3]]$layer, sf_list[[3]]$id)]
         third <- ifelse(is.na(third), 0, ifelse(third == 1, 6, third)) # some NAs due depth
+        
       # Adding elements to get values
         sf_list[[1]]$no_regret_all <- first+second+third
       # Leaving all important layers
+        mpas_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+          dplyr::filter(province != "non-categ_mpas")
+        vmes_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+          dplyr::filter(province != "non-categ_VMEs")
         no_regrets01 <- sf_list[[1]] %>% 
           mutate(no_regret_all = ifelse(no_regret_all == 4, 0, 
                                         ifelse(no_regret_all == 5, 0, 
