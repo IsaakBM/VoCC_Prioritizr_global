@@ -211,9 +211,9 @@ no_regret_plots <- function(path, outdir, shp) {
       p3 <-   ((plots_list02[[1]] / plots_list02[[2]] / plots_list02[[3]]) | ((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3)) +
         # plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
-                        tag_levels = "A",
+                        tag_levels = "a",
                         tag_suffix = ".",) +
-        ggsave(paste(outdir, paste("no-regrets-scenarios", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
+        ggsave(paste(outdir, paste("no-regret-scenarios", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
 
   # NO REGRETS ALL [original figure 3]
     # Begin the parallel structure
@@ -226,9 +226,9 @@ no_regret_plots <- function(path, outdir, shp) {
           files_solution <- list.files(path = olayers_list[[l]], pattern = "*Layer_.*.csv$", full.names = TRUE)
           provinces_csv <- read.csv(list.files(path = olayers_list[[l]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::arrange(layer) # the same for every ocean layer so that's why [1]
-          mpas_csv <- read.csv(list.files(path = olayers_list[[kk]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+          mpas_csv <- read.csv(list.files(path = olayers_list[[l]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::filter(province != "non-categ_mpas")
-          vmes_csv <- read.csv(list.files(path = olayers_list[[kk]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+          vmes_csv <- read.csv(list.files(path = olayers_list[[l]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::filter(province != "non-categ_VMEs")
           pu_shpfile <- st_read(list.files(path = olayers_list[[l]], pattern = ".shp", full.names = TRUE)[1]) # # the same for every ocean layer so that's why [1]
         
@@ -426,7 +426,7 @@ no_regret_plots <- function(path, outdir, shp) {
       p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | ((no_regret_all / no_regret_all / no_regret_all) + theme_opts3)) +
         # plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
-                        tag_levels = "A",
+                        tag_levels = "a",
                         tag_suffix = ".",) +
         # theme_opts3 +
         ggsave(paste(outdir, paste("no-regrets-all", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
