@@ -4,7 +4,7 @@
 # Caveat Emptor!
 
 
-iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_noclimw_target, iucn_clim_target) { 
+iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_noclim_target, iucn_clim_target) { 
   
   library(data.table)
   library(dplyr)
@@ -15,19 +15,21 @@ iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_noclimw_target, iu
   # List of directories
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
     pattern1 <-  paste0("*targets*", ".*.csv$")
-    if(str_detect(string = dir.scenarios, pattern = "ssp") == FALSE) {
+    
       # Begin the parallel structure      
       cores  <-  5
       cl <- makeCluster(cores)
       registerDoParallel(cl)
       foreach(j = 1:length(dir.scenarios), .packages = c("dplyr", "stringr", "data.table")) %dopar% {
-        # Read files
+        
+        if(str_detect(string = dir.scenarios[j], pattern = "ssp") == FALSE) {
+          # Read files
           csv_targets <- fread(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)) # all (species + clim + species&clim layers)
           csv_targets_noclim <- fread(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)) %>% 
             dplyr::filter(str_detect(string = feature_names_prov, pattern = "VoCC|RCE") == FALSE) # just species
           csv_iucn <- fread(iucn_data)
-        
-        # Getting species' code from targets' file
+          
+          # Getting species' code from targets' file
           if(nrow(csv_targets_noclim) == 0) {
             df1 <- strsplit(as.character(csv_targets$feature_names_prov), split = "_")
           } else {
@@ -35,94 +37,87 @@ iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_noclimw_target, iu
           }
           df2 <- lapply(df1, function(x) {x[1]})
           speciesID <- do.call(rbind, df2)
-        # Read the AquaMaps data (species occur .csv) and extract species' name according to the code
+          # Read the AquaMaps data (species occur .csv) and extract species' name according to the code
           aqm <- fread(aquamaps_data, stringsAsFactors = FALSE) %>% 
             dplyr::select(speciesID, genus, species) %>% 
             dplyr::mutate(scientific_name = paste(genus, species, sep = " ")) %>% 
             dplyr::select(speciesID, scientific_name)
-        # Merging two data frames
+          # Merging two data frames
           species_targets <- dplyr::left_join(x = data.frame(speciesID, stringsAsFactors = FALSE), y = aqm,  by = "speciesID")
-        
-        # Reading IUCN .csv and filtering by Threatened categories (Vulberable[VU], Endangered[EN], Critically Endangered[CR])
+          
+          # Reading IUCN .csv and filtering by Threatened categories (Vulberable[VU], Endangered[EN], Critically Endangered[CR])
           iucn <- fread(iucn_data, stringsAsFactors = FALSE, fill = TRUE) %>% 
             dplyr::select(scientific_name, category) %>% 
             dplyr::filter(category %in%  c("CR", "EN", "VU")) # VU????
-        
-        # Merging species_targets df and iucn df
+          
+          # Merging species_targets df and iucn df
           final <- left_join(x = species_targets, y = iucn,  by = "scientific_name") %>% 
             na.omit() %>% 
-            dplyr::mutate(targets = iucn_noclimw_target) %>% 
+            dplyr::mutate(targets = iucn_noclim_target) %>% 
             dplyr::select(speciesID, targets)
-        
-        # Loop every row to match species ID with the "original target df" and changing the target
+          
+          # Loop every row to match species ID with the "original target df" and changing the target
           df2 <- csv_targets %>% 
             dplyr::group_by(feature_names_prov) %>% 
             dplyr::mutate(speciesID = unlist(strsplit(as.character(feature_names_prov), split = "_"))[1]) %>% 
             dplyr::mutate(targets2 = ifelse(is.na(final$targets[match(speciesID, final$speciesID)]), targets, final$targets[match(speciesID, final$speciesID)])) %>%
             dplyr::select(feature_names_prov, cells, targets2) %>%
             dplyr::rename(targets = targets2)
-        # Writing the final object
+          # Writing the final object
           ns2.name <- sub(pattern = "*.csv", "", basename(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)))
           fwrite(df2, paste(paste(dir.scenarios[j], "/", sep = ""), paste(ns2.name, "iucn", sep = "-"), ".csv", sep = ""), row.names = FALSE)
-      }
-      stopCluster(cl)
-
-    } else {
-      # Begin the parallel structure      
-        cores  <-  5
-        cl <- makeCluster(cores)
-        registerDoParallel(cl)
-        foreach(j = 1:length(dir.scenarios), .packages = c("dplyr", "stringr", "data.table")) %dopar% {
+          
+        } else if (str_detect(string = dir.scenarios[j], pattern = "ssp") == TRUE) {
+          
           # Read files
-            csv_targets <- fread(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)) # all (species + clim + species&clim layers)
-            csv_targets_noclim <- fread(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)) %>% 
-              dplyr::filter(str_detect(string = feature_names_prov, pattern = "VoCC|RCE") == FALSE) # just species
-            csv_iucn <- fread(iucn_data)
-        
+          csv_targets <- fread(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)) # all (species + clim + species&clim layers)
+          csv_targets_noclim <- fread(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)) %>% 
+            dplyr::filter(str_detect(string = feature_names_prov, pattern = "VoCC|RCE") == FALSE) # just species
+          csv_iucn <- fread(iucn_data)
+          
           # Getting species' code from targets' file
-            if(nrow(csv_targets_noclim) == 0) {
-              df1 <- strsplit(as.character(csv_targets$feature_names_prov), split = "_")
-            } else {
-              df1 <- strsplit(as.character(csv_targets_noclim$feature_names_prov), split = "_")
-            }
-            df2 <- lapply(df1, function(x) {x[1]})
-            speciesID <- do.call(rbind, df2)
+          if(nrow(csv_targets_noclim) == 0) {
+            df1 <- strsplit(as.character(csv_targets$feature_names_prov), split = "_")
+          } else {
+            df1 <- strsplit(as.character(csv_targets_noclim$feature_names_prov), split = "_")
+          }
+          df2 <- lapply(df1, function(x) {x[1]})
+          speciesID <- do.call(rbind, df2)
           # Read the AquaMaps data (species occur .csv) and extract species' name according to the code
-            aqm <- fread(aquamaps_data, stringsAsFactors = FALSE) %>% 
-              dplyr::select(speciesID, genus, species) %>% 
-              dplyr::mutate(scientific_name = paste(genus, species, sep = " ")) %>% 
-              dplyr::select(speciesID, scientific_name)
+          aqm <- fread(aquamaps_data, stringsAsFactors = FALSE) %>% 
+            dplyr::select(speciesID, genus, species) %>% 
+            dplyr::mutate(scientific_name = paste(genus, species, sep = " ")) %>% 
+            dplyr::select(speciesID, scientific_name)
           # Merging two data frames
-            species_targets <- dplyr::left_join(x = data.frame(speciesID, stringsAsFactors = FALSE), y = aqm,  by = "speciesID")
-        
+          species_targets <- dplyr::left_join(x = data.frame(speciesID, stringsAsFactors = FALSE), y = aqm,  by = "speciesID")
+          
           # Reading IUCN .csv and filtering by Threatened categories (Vulberable[VU], Endangered[EN], Critically Endangered[CR])
-            iucn <- fread(iucn_data, stringsAsFactors = FALSE, fill = TRUE) %>% 
-              dplyr::select(scientific_name, category) %>% 
-              dplyr::filter(category %in%  c("CR", "EN", "VU")) # VU????
-        
+          iucn <- fread(iucn_data, stringsAsFactors = FALSE, fill = TRUE) %>% 
+            dplyr::select(scientific_name, category) %>% 
+            dplyr::filter(category %in%  c("CR", "EN", "VU")) # VU????
+          
           # Merging species_targets df and iucn df
-            final <- left_join(x = species_targets, y = iucn,  by = "scientific_name") %>% 
-              na.omit() %>% 
-              dplyr::mutate(targets = iucn_clim_target) %>% 
-              dplyr::select(speciesID, targets)
-        
+          final <- left_join(x = species_targets, y = iucn,  by = "scientific_name") %>% 
+            na.omit() %>% 
+            dplyr::mutate(targets = iucn_clim_target) %>% 
+            dplyr::select(speciesID, targets)
+          
           # Loop every row to match species ID with the "original target df" and changing the target
-            df2 <- csv_targets %>% 
-              dplyr::group_by(feature_names_prov) %>% 
-              dplyr::mutate(speciesID = unlist(strsplit(as.character(feature_names_prov), split = "_"))[1]) %>% 
-              dplyr::mutate(targets2 = ifelse(is.na(final$targets[match(speciesID, final$speciesID)]), targets, final$targets[match(speciesID, final$speciesID)])) %>%
-              dplyr::select(feature_names_prov, cells, targets2) %>%
-              dplyr::rename(targets = targets2)
-            # Writing the final object
-              ns2.name <- sub(pattern = "*.csv", "", basename(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)))
-              fwrite(df2, paste(paste(dir.scenarios[j], "/", sep = ""), paste(ns2.name, "iucn", sep = "-"), ".csv", sep = ""), row.names = FALSE)
-      }
-      stopCluster(cl)
+          df2 <- csv_targets %>% 
+            dplyr::group_by(feature_names_prov) %>% 
+            dplyr::mutate(speciesID = unlist(strsplit(as.character(feature_names_prov), split = "_"))[1]) %>% 
+            dplyr::mutate(targets2 = ifelse(is.na(final$targets[match(speciesID, final$speciesID)]), targets, final$targets[match(speciesID, final$speciesID)])) %>%
+            dplyr::select(feature_names_prov, cells, targets2) %>%
+            dplyr::rename(targets = targets2)
+          # Writing the final object
+          ns2.name <- sub(pattern = "*.csv", "", basename(list.files(path = dir.scenarios[j], pattern = pattern1, full.names = TRUE)))
+          fwrite(df2, paste(paste(dir.scenarios[j], "/", sep = ""), paste(ns2.name, "iucn", sep = "-"), ".csv", sep = ""), row.names = FALSE)
+        }
     }
-  }
+}
 
 system.time(iucn_targets(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_lowCC_02/features_1020CSV1050_targets-mix_noduplicates",
                          aquamaps_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/speciesoccursum.csv",
                          iucn_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/IUCN_REDLIST_2020.csv",
-                         iucn_noclimw_target = 0.30, 
+                         iucn_noclim_target = 0.30, 
                          iucn_clim_target = 1))
