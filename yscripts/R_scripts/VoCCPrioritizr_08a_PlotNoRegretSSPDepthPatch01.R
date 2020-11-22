@@ -37,14 +37,14 @@ no_regret_plots <- function(path, outdir, shp) {
       gglist01 <- vector("list", length = length(olayers_list))
       plots_list01 <- foreach(i = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
         #
-          files_solution <- list.files(path = olayers_list[[1]], pattern = "*Layer_.*.csv$", full.names = TRUE)
-          provinces_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
+          files_solution <- list.files(path = olayers_list[[i]], pattern = "*Layer_.*.csv$", full.names = TRUE)
+          provinces_csv <- read.csv(list.files(path = olayers_list[[i]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::arrange(layer)
-          mpas_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+          mpas_csv <- read.csv(list.files(path = olayers_list[[i]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::filter(province != "non-categ_mpas")
-          vmes_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+          vmes_csv <- read.csv(list.files(path = olayers_list[[i]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::filter(province != "non-categ_VMEs")
-          pu_shpfile <- st_read(list.files(path = olayers_list[[1]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
+          pu_shpfile <- st_read(list.files(path = olayers_list[[i]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
           
         # 
           solutions_csv <- lapply(files_solution, function(x) {
@@ -98,6 +98,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                       plot.tag = element_text(size = 25, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
+            pal2 <- c("#e5f5f9", "#43a2ca", "#8856a7", "#fa9fb5", "#e41a1c")
             world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
             ranges <- c("Not selected", "SSP1-2.6 and SSP2-4.5", "SSP1-2.6 and SSP5-8.5", "SSP2-4.5 and SSP5-8.5", "All")
           # Plot
@@ -105,7 +106,7 @@ no_regret_plots <- function(path, outdir, shp) {
               geom_sf(data = no_regrets01, aes(group = as.factor(no_regret_all), fill = as.factor(no_regret_all)), color = NA) +
               geom_sf(data = provinces_shp, fill = NA) +
               geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-              scale_fill_manual(values = pal,
+              scale_fill_manual(values = pal2,
                                 name = "Coherence\n across climate scenarios",
                                 labels = ranges) +
               # ggtitle(main_tittles[i]) +
@@ -148,9 +149,9 @@ no_regret_plots <- function(path, outdir, shp) {
             dplyr::mutate(no_regret_all = ssp126$solution1+ssp245$solution1+ssp585$solution1) %>% 
             dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
           # 
-          dflist01[[a]] <- data.frame(ssp126 = round(sum(no_regrets02$no_regret_all == 4)/90065, digits = 4)*100, 
-                                     ssp245 = round(sum(no_regrets02$no_regret_all == 5)/88528, digits = 4)*100,
-                                     ssp585 = round(sum(no_regrets02$no_regret_all == 6)/87170, digits = 4)*100,
+          dflist01[[a]] <- data.frame(ssp126 = round(sum(ssp126$solution1 == 4)/90065, digits = 4)*100, 
+                                     ssp245 = round(sum(ssp245$solution1 == 5)/88528, digits = 4)*100,
+                                     ssp585 = round(sum(ssp585$solution1 == 6)/87170, digits = 4)*100,
                                      ssp126_ssp245 = round((sum(no_regrets02$no_regret_all == 9))/(90065), digits = 4)*100, 
                                      ssp126_ssp585 = round((sum(no_regrets02$no_regret_all == 10))/(90065), digits = 4)*100, 
                                      ssp245_ssp585 = round((sum(no_regrets02$no_regret_all == 11))/(90065), digits = 4)*100, 
@@ -217,6 +218,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                       plot.tag = element_text(size = 25, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#31a354")
+            pal2 <- c("#e5f5f9", "#31a354")
             world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
             ranges <- c("0", "1")
           # Plot
@@ -224,7 +226,7 @@ no_regret_plots <- function(path, outdir, shp) {
               geom_sf(data = no_cc, aes(group = as.factor(freq_sel), fill = as.factor(freq_sel)), color = NA) +
               geom_sf(data = provinces_shp, fill = NA) +
               geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-              scale_fill_manual(values = pal,
+              scale_fill_manual(values = pal2,
                                 name = "Selection",
                                 labels = ranges) +
               # ggtitle(main_tittles[kk]) +
@@ -360,6 +362,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                       plot.tag = element_text(size = 25, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#31a354")
+            pal2 <- c("#e5f5f9", "#31a354")
             world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
             ranges <- c("0", "1")
           # Plot
@@ -367,7 +370,7 @@ no_regret_plots <- function(path, outdir, shp) {
               geom_sf(data = best_freq_sol, aes(group = as.factor(no_regret), fill = as.factor(no_regret)), color = NA) +
               geom_sf(data = provinces_shp, fill = NA) +
               geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-              scale_fill_manual(values = pal,
+              scale_fill_manual(values = pal2,
                                 name = "Selection",
                                 labels = ranges) +
               # ggtitle(main_tittles[l]) +
@@ -447,10 +450,10 @@ no_regret_plots <- function(path, outdir, shp) {
                           EpiBathy = round((sum(no_regrets01$no_regret_all == 10, na.rm = TRUE))/(90065), digits = 4)*100, 
                           MesoBathy = round((sum(no_regrets01$no_regret_all == 11, na.rm = TRUE))/(90065), digits = 4)*100, 
                           All = round((sum(no_regrets01$no_regret_all == 15, na.rm = TRUE))/(90065), digits = 4)*100)
-    write.csv(df_final, paste(outdir, paste("no-regrets-all", ".csv", sep = ""), sep = ""))  
+    write.csv(df_sum1, paste(outdir, paste("no-regrets-all", ".csv", sep = ""), sep = ""))  
     
     no_regrets02 <- no_regrets01 %>% 
-      dplyr::mutate(no_regret_all2 = ifelse(is.na(no_regrets01$no_regret_all), 0, 
+      dplyr::mutate(no_regret_all2 = ifelse(is.na(no_regret_all), 0, 
                                             ifelse(no_regret_all == 4, 0, 
                                                    ifelse(no_regret_all == 5, 0, 
                                                           ifelse(no_regret_all == 6, 0, no_regret_all))))) %>% 
@@ -478,13 +481,14 @@ no_regret_plots <- function(path, outdir, shp) {
                                     plot.tag = element_text(size = 25, face = "bold")))
         # Color Palette, World borders and Legend
           pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
+          pal2 <- c("#deebf7", "#fc8d59", "#df65b0", "#bae4bc", "#e41a1c")
           world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
           ranges <- c("Not selected", "Epipelagic and Mesopelagic", "Epipelagic and Bathyabyssopelagic", "Mesopelagic and Bathyabyssopelagic", "All")
         # Plot
           no_regret_all <- ggplot() + 
             geom_sf(data = no_regrets02, aes(group = as.factor(no_regret_all2), fill = as.factor(no_regret_all2)), color = NA) +
             geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-            scale_fill_manual(values = pal,
+            scale_fill_manual(values = pal2,
                               name = "Coherence\n across layers",
                               labels = ranges) +
             theme_opts3
@@ -519,8 +523,8 @@ no_regret_plots <- function(path, outdir, shp) {
         ggsave(paste(outdir, paste("no-regrets-all", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
 }
 
-system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_0520rce-vocc0520_targets-mix_rawcost_noduplicates",
-                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_0520rce-vocc0520_targets-mix_rawcost_noduplicates/",
+system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/",
                             shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth"))
 
 # system.time(no_regret_plots(path = "ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates",
