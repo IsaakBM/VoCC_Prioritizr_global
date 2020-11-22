@@ -37,14 +37,14 @@ no_regret_plots <- function(path, outdir, shp) {
       gglist01 <- vector("list", length = length(olayers_list))
       plots_list01 <- foreach(i = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
         #
-          files_solution <- list.files(path = olayers_list[[i]], pattern = "*Layer_.*.csv$", full.names = TRUE)
-          provinces_csv <- read.csv(list.files(path = olayers_list[[i]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
+          files_solution <- list.files(path = olayers_list[[1]], pattern = "*Layer_.*.csv$", full.names = TRUE)
+          provinces_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::arrange(layer)
-          mpas_csv <- read.csv(list.files(path = olayers_list[[i]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+          mpas_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::filter(province != "non-categ_mpas")
-          vmes_csv <- read.csv(list.files(path = olayers_list[[i]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+          vmes_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
             dplyr::filter(province != "non-categ_VMEs")
-          pu_shpfile <- st_read(list.files(path = olayers_list[[i]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
+          pu_shpfile <- st_read(list.files(path = olayers_list[[1]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
           
         # 
           solutions_csv <- lapply(files_solution, function(x) {
@@ -68,6 +68,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                                  ifelse(no_regret_all == 5, 0, 
                                                         ifelse(no_regret_all == 6, 0, no_regret_all)))) %>% 
             dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
+
         # Creating the PROVINCES shapefile based on ocean layer
           provinces_shp <- pu_shpfile %>%
             dplyr::mutate(provinces = provinces_csv$province) %>% 
@@ -112,6 +113,52 @@ no_regret_plots <- function(path, outdir, shp) {
               theme_opts3
       }
       stopCluster(cl)
+      
+      # Getting data frame information for CLIMATE SCENARIOS
+        UseCores <- 5
+        cl <- makeCluster(UseCores)  
+        registerDoParallel(cl)
+        dflist01 <- vector("list", length = length(olayers_list))
+        df_list01 <- foreach(a = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
+          #
+            files_solution <- list.files(path = olayers_list[[a]], pattern = "*Layer_.*.csv$", full.names = TRUE)
+            provinces_csv <- read.csv(list.files(path = olayers_list[[a]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::arrange(layer)
+            mpas_csv <- read.csv(list.files(path = olayers_list[[a]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::filter(province != "non-categ_mpas")
+            vmes_csv <- read.csv(list.files(path = olayers_list[[a]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::filter(province != "non-categ_VMEs")
+            pu_shpfile <- st_read(list.files(path = olayers_list[[a]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
+          # 
+          solutions_csv <- lapply(files_solution, function(x) {
+            single <- read.csv(x)
+            sol_csv <- single %>% 
+              dplyr::mutate(freq_sel = single[, 6]) %>% 
+              dplyr::select(id, cost, freq_sel) %>% 
+              dplyr::arrange(id)})
+          # 
+          ssp126 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[1]],  by = "id") %>% 
+            dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 4, freq_sel)))
+          ssp245 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[2]],  by = "id") %>% 
+            dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 5, freq_sel)))
+          ssp585 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[3]],  by = "id") %>% 
+            dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 6, freq_sel)))
+          
+          no_regrets02 <- pu_shpfile %>% 
+            dplyr::mutate(no_regret_all = ssp126$solution1+ssp245$solution1+ssp585$solution1) %>% 
+            dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
+          # 
+          dflist01[[a]] <- data.frame(ssp126 = round(sum(no_regrets02$no_regret_all == 4)/90065, digits = 4)*100, 
+                                     ssp245 = round(sum(no_regrets02$no_regret_all == 5)/88528, digits = 4)*100,
+                                     ssp585 = round(sum(no_regrets02$no_regret_all == 6)/87170, digits = 4)*100,
+                                     ssp126_ssp245 = round((sum(no_regrets02$no_regret_all == 9))/(90065), digits = 4)*100, 
+                                     ssp126_ssp585 = round((sum(no_regrets02$no_regret_all == 10))/(90065), digits = 4)*100, 
+                                     ssp245_ssp585 = round((sum(no_regrets02$no_regret_all == 11))/(90065), digits = 4)*100, 
+                                     All_ssp = round((sum(no_regrets02$no_regret_all == 15))/(90065), digits = 4)*100)
+        }
+        stopCluster(cl)
+        dflist01_final <- do.call(rbind, df_list01)
+        rownames(dflist01_final) <- y_axis
       
   # Loop for every directory for NON CLIMATE SOLUTIONS FIGURE BY DEPTH LAYER
     # Begin the parallel structure
@@ -186,6 +233,38 @@ no_regret_plots <- function(path, outdir, shp) {
               theme(legend.position = "none")
       }
       stopCluster(cl)
+      
+      # Getting data frame information for NON CLIMATE SCENARIOS
+        UseCores <- 5
+        cl <- makeCluster(UseCores)  
+        registerDoParallel(cl)
+        dflist02 <- vector("list", length = length(olayers_list))
+        df_list02 <- foreach(b = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
+          #
+            files_solution <- list.files(path = olayers_list[[b]], pattern = "*Layer_.*.csv$", full.names = TRUE)
+            provinces_csv <- read.csv(list.files(path = olayers_list[[b]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::arrange(layer)
+            mpas_csv <- read.csv(list.files(path = olayers_list[[b]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::filter(province != "non-categ_mpas")
+            vmes_csv <- read.csv(list.files(path = olayers_list[[b]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::filter(province != "non-categ_VMEs")
+            pu_shpfile <- st_read(list.files(path = olayers_list[[b]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
+          # 
+            solutions_csv <- lapply(files_solution, function(x) {
+              single <- read.csv(x)
+              sol_csv <- single %>% 
+                dplyr::mutate(freq_sel = single[, 6]) %>% 
+                dplyr::select(id, cost, freq_sel) %>% 
+                dplyr::arrange(id)}) 
+          # 
+            no_cc <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[4]],  by = "id") %>% 
+              dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
+            dflist02[[b]] <- data.frame(no_cc = round(sum(no_cc$freq_sel == 1)/90065, digits = 4)*100)
+        }
+        stopCluster(cl)
+        dflist02_final <- do.call(rbind, df_list02)
+        rownames(dflist02_final) <- y_axis
+        write.csv(cbind(dflist01_final, dflist02_final), paste(outdir, paste("no-regrets-scenario", ".csv", sep = ""), sep = ""))  
       
   # Plotting the FINAL FIGURE AMONG SCENARIOS
     # Defining themes
@@ -321,58 +400,61 @@ no_regret_plots <- function(path, outdir, shp) {
             dplyr::select(id, cost, freq_sel) %>% 
             dplyr::arrange(id)})
       # 
-        no_regret <- solutions_csv[[1]][,3]*solutions_csv[[2]][,3]*solutions_csv[[3]][,3]
-        no_regret_csv <- solutions_csv[[4]] %>% # [[4]] is the "base" dataframe solution but does not matter in this case
-          dplyr::mutate(no_regret = no_regret) %>% 
-          dplyr::select(id, no_regret) %>% 
-          dplyr::arrange(id)
-        
-      # Get the solutions from the corresponding planning unit shapefile (not sure if this is useful but worth to check later)
-        best_freq_sol <- pu_shpfile[pu_shpfile$id %in% no_regret_csv$id, ] %>% 
-          mutate(no_regret = no_regret_csv$no_regret)
-        sflits[[j]] <- best_freq_sol
+        ssp126 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[1]],  by = "id") %>% 
+          dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 4, freq_sel)))
+        ssp245 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[2]],  by = "id") %>% 
+          dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 5, freq_sel)))
+        ssp585 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[3]],  by = "id") %>% 
+          dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 6, freq_sel)))
+      # 
+        no_regrets02 <- pu_shpfile %>% 
+          dplyr::mutate(no_regret_all = ssp126$solution1+ssp245$solution1+ssp585$solution1) %>% 
+          dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer))) %>% 
+          data.frame %>% 
+          dplyr::select(id, depth, cost, no_regret_all)
       }
       stopCluster(cl)
   # Getting no regrets from original shapefiles
-      single_shp <- lapply(shps, function(x) {final <- st_read(x)})
-      first <- sf_list[[1]]$no_regret[match(single_shp[[1]]$layer, sf_list[[1]]$id)]
-        first <- ifelse(is.na(first), 0, ifelse(first == 1, 4, first)) # some NAs due depth
-      second <- sf_list[[2]]$no_regret[match(single_shp[[2]]$layer, sf_list[[2]]$id)]
-        second <- ifelse(is.na(second), 0, ifelse(second == 1, 5, second)) # some NAs due depth
-      third <- sf_list[[3]]$no_regret[match(single_shp[[3]]$layer, sf_list[[3]]$id)]
-        third <- ifelse(is.na(third), 0, ifelse(third == 1, 6, third)) # some NAs due depth
+    single_shp <- lapply(shps, function(x) {
+      single <- st_read(x) %>% 
+        dplyr::rename(id = layer)})
+    
+    ep <- dplyr::left_join(x = single_shp[[1]], y = sf_list[[1]],  by = "id") %>% 
+      dplyr::mutate(no_regret_all2 = ifelse(no_regret_all != 15, 0, no_regret_all)) %>% 
+      dplyr::mutate(no_regret_all2 = ifelse(no_regret_all == 15, 4, no_regret_all2))
+    mp <- dplyr::left_join(x = single_shp[[2]], y = sf_list[[2]],  by = "id") %>% 
+      dplyr::mutate(no_regret_all2 = ifelse(no_regret_all != 15, 0, no_regret_all)) %>% 
+      dplyr::mutate(no_regret_all2 = ifelse(no_regret_all == 15, 5, no_regret_all2))
+    bap <- dplyr::left_join(x = single_shp[[3]], y = sf_list[[3]],  by = "id") %>% 
+      dplyr::mutate(no_regret_all2 = ifelse(no_regret_all != 15, 0, no_regret_all)) %>% 
+      dplyr::mutate(no_regret_all2 = ifelse(no_regret_all == 15, 6, no_regret_all2))
+      
+  # Leaving all important layers
+    mpas_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+      dplyr::filter(province != "non-categ_mpas")
+    vmes_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+      dplyr::filter(province != "non-categ_VMEs")
         
-      # Adding elements to get values
-        sf_list[[1]]$no_regret_all <- first+second+third
-      # Leaving all important layers
-        mpas_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
-          dplyr::filter(province != "non-categ_mpas")
-        vmes_csv <- read.csv(list.files(path = olayers_list[[1]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
-          dplyr::filter(province != "non-categ_VMEs")
-        no_regrets01 <- sf_list[[1]] %>% 
-          mutate(no_regret_all = ifelse(no_regret_all == 4, 0, 
-                                        ifelse(no_regret_all == 5, 0, 
-                                               ifelse(no_regret_all == 6, 0, no_regret_all)))) %>% 
-          dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
-  
-    # Creating the final data frame with % per depth among all depth + climate scenarios
-        df_sum1 <- data.frame(Epipelagic = round(sum(first == 4)/90065, digits = 2), 
-                              Mesopelagic = round(sum(second == 5)/88528, digits = 2),
-                              Bathy = round(sum(third == 6)/87170, digits = 2),
-                              EpiMeso = round((sum(no_regrets01$no_regret_all == 9))/(90065+88528+87170), digits = 3), 
-                              EpiBathy = round((sum(no_regrets01$no_regret_all == 10))/(90065+88528+87170), digits = 3), 
-                              MesoBathy = round((sum(no_regrets01$no_regret_all == 11))/(90065+88528+87170), digits = 3), 
-                              All = round((sum(no_regrets01$no_regret_all == 15))/(90065+88528+87170), digits = 3))
-        df_sum2 <- data.frame(Epipelagic = round(sum(first == 4)/90065, digits = 2), 
-                              Mesopelagic = round(sum(second == 5)/88528, digits = 2),
-                              Bathy = round(sum(third == 6)/87170, digits = 2),
-                              EpiMeso = round((sum(no_regrets01$no_regret_all == 9))/(90065+88528), digits = 3), 
-                              EpiBathy = round((sum(no_regrets01$no_regret_all == 10))/(90065+87170), digits = 3), 
-                              MesoBathy = round((sum(no_regrets01$no_regret_all == 11))/(88528+87170), digits = 3), 
-                              All = round((sum(no_regrets01$no_regret_all == 15))/(90065+88528+87170), digits = 3))
-        
-        df_final <- rbind(df_sum1, df_sum2)
-        write.csv(df_final, paste(outdir, paste("no-regrets-all", ".csv", sep = ""), sep = ""))  
+  # Adding elements to get values
+    no_regrets01 <- single_shp[[1]] %>% 
+      dplyr::mutate(no_regret_all = ep$no_regret_all2 + mp$no_regret_all2 + bap$no_regret_all2) %>% 
+      dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
+    
+    df_sum1 <- data.frame(Epipelagic = round((sum(ep$no_regret_all2 == 4, na.rm = TRUE))/(90065), digits = 4)*100, 
+                          Mesopelagic = round((sum(mp$no_regret_all2 == 5, na.rm = TRUE))/(88528), digits = 4)*100,
+                          Bathy = round((sum(bap$no_regret_all2 == 6, na.rm = TRUE))/(87170), digits = 4)*100,
+                          EpiMeso = round((sum(no_regrets01$no_regret_all == 9, na.rm = TRUE))/(90065), digits = 4)*100, 
+                          EpiBathy = round((sum(no_regrets01$no_regret_all == 10, na.rm = TRUE))/(90065), digits = 4)*100, 
+                          MesoBathy = round((sum(no_regrets01$no_regret_all == 11, na.rm = TRUE))/(90065), digits = 4)*100, 
+                          All = round((sum(no_regrets01$no_regret_all == 15, na.rm = TRUE))/(90065), digits = 4)*100)
+    write.csv(df_final, paste(outdir, paste("no-regrets-all", ".csv", sep = ""), sep = ""))  
+    
+    no_regrets02 <- no_regrets01 %>% 
+      dplyr::mutate(no_regret_all2 = ifelse(is.na(no_regrets01$no_regret_all), 0, 
+                                            ifelse(no_regret_all == 4, 0, 
+                                                   ifelse(no_regret_all == 5, 0, 
+                                                          ifelse(no_regret_all == 6, 0, no_regret_all))))) %>% 
+      dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
         
       # Define themes to plot
         # Defining themes
@@ -400,7 +482,7 @@ no_regret_plots <- function(path, outdir, shp) {
           ranges <- c("Not selected", "Epipelagic and Mesopelagic", "Epipelagic and Bathyabyssopelagic", "Mesopelagic and Bathyabyssopelagic", "All")
         # Plot
           no_regret_all <- ggplot() + 
-            geom_sf(data = no_regrets01, aes(group = as.factor(no_regret_all), fill = as.factor(no_regret_all)), color = NA) +
+            geom_sf(data = no_regrets02, aes(group = as.factor(no_regret_all2), fill = as.factor(no_regret_all2)), color = NA) +
             geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
             scale_fill_manual(values = pal,
                               name = "Coherence\n across layers",
