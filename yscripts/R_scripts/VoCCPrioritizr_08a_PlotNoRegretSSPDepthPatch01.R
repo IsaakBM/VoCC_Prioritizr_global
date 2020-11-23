@@ -98,7 +98,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                       plot.tag = element_text(size = 25, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
-            pal2 <- c("#e5f5f9", "#43a2ca", "#8856a7", "#fa9fb5", "#e41a1c")
+            pal2 <- c("#e5f5f9", "#41b6c4", "#8856a7", "#fa9fb5", "#253494")
             world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
             ranges <- c("Not selected", "SSP1-2.6 and SSP2-4.5", "SSP1-2.6 and SSP5-8.5", "SSP2-4.5 and SSP5-8.5", "All")
           # Plot
@@ -481,7 +481,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                     plot.tag = element_text(size = 25, face = "bold")))
         # Color Palette, World borders and Legend
           pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
-          pal2 <- c("#deebf7", "#fc8d59", "#df65b0", "#bae4bc", "#e41a1c")
+          pal2 <- c("#deebf7", "#fc8d59", "#df65b0", "#bae4bc", "#253494")
           world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
           ranges <- c("Not selected", "Epipelagic and Mesopelagic", "Epipelagic and Bathyabyssopelagic", "Mesopelagic and Bathyabyssopelagic", "All")
         # Plot
