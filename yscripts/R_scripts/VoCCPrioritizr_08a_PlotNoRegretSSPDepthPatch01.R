@@ -28,6 +28,8 @@ no_regret_plots <- function(path, outdir, shp) {
       olayers_list <- list(ep_dir, mp_dir, bap_dir)
     # 
       y_axis <- c("Epipelagic", "Mesopelagic", "Bathyabyssopelagic")
+      main_tittles1 <- c("No Climate Change", "", "")
+      main_tittles2 <- c("Climate-smart network", "", "")
       
   # Loop for every directory for CLIMATE SMART AMONG SOLUTIONS FIGURE BY DEPTH LAYER [original figure 2]
     # Begin the parallel structure
@@ -98,7 +100,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                       plot.tag = element_text(size = 25, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
-            pal2 <- c("#e5f5f9", "#41b6c4", "#8856a7", "#fa9fb5", "#253494")
+            pal2 <- c("#e5f5f9", "#41b6c4", "#8856a7", "#fa9fb5", "#2c7fb8")
             world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
             ranges <- c("Not selected", "SSP1-2.6 and SSP2-4.5", "SSP1-2.6 and SSP5-8.5", "SSP2-4.5 and SSP5-8.5", "All")
           # Plot
@@ -109,7 +111,7 @@ no_regret_plots <- function(path, outdir, shp) {
               scale_fill_manual(values = pal2,
                                 name = "Coherence\n across climate scenarios",
                                 labels = ranges) +
-              # ggtitle(main_tittles[i]) +
+              ggtitle(main_tittles2[i]) +
               # labs(y = y_axis[i]) +
               theme_opts3
       }
@@ -229,7 +231,7 @@ no_regret_plots <- function(path, outdir, shp) {
               scale_fill_manual(values = pal2,
                                 name = "Selection",
                                 labels = ranges) +
-              # ggtitle(main_tittles[kk]) +
+              ggtitle(main_tittles1[kk]) +
               labs(y = y_axis[kk]) +
               theme_opts3 +
               theme(legend.position = "none")
@@ -290,7 +292,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                 plot.tag = element_text(size = 25, face = "bold")))
     # CALIBRATION PLOTS
       p3 <-   ((plots_list02[[1]] / plots_list02[[2]] / plots_list02[[3]]) | ((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3)) +
-        # plot_layout(guides = "collect") +
+        plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
                         tag_levels = "a",
                         tag_suffix = ".",) +
@@ -373,7 +375,7 @@ no_regret_plots <- function(path, outdir, shp) {
               scale_fill_manual(values = pal2,
                                 name = "Selection",
                                 labels = ranges) +
-              # ggtitle(main_tittles[l]) +
+              ggtitle(main_tittles2[l]) +
               labs(y = y_axis[l]) +
               theme_opts3 +
               theme(legend.position = "none")
@@ -481,7 +483,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                     plot.tag = element_text(size = 25, face = "bold")))
         # Color Palette, World borders and Legend
           pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
-          pal2 <- c("#deebf7", "#fc8d59", "#df65b0", "#bae4bc", "#253494")
+          pal2 <- c("#deebf7", "#fc8d59", "#df65b0", "#bae4bc", "#2c7fb8")
           world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
           ranges <- c("Not selected", "Epipelagic and Mesopelagic", "Epipelagic and Bathyabyssopelagic", "Mesopelagic and Bathyabyssopelagic", "All")
         # Plot
@@ -491,7 +493,8 @@ no_regret_plots <- function(path, outdir, shp) {
             scale_fill_manual(values = pal2,
                               name = "Coherence\n across layers",
                               labels = ranges) +
-            theme_opts3
+            theme_opts3 +
+            ggtitle("Vertical climate-smart network")
 
   # Plotting the FINAL FIGURE
     # Defining themes
@@ -515,12 +518,23 @@ no_regret_plots <- function(path, outdir, shp) {
                                 plot.tag = element_text(size = 25, face = "bold")))
       # CALIBRATION PLOTS
       p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | ((no_regret_all / no_regret_all / no_regret_all) + theme_opts3)) +
-        # plot_layout(guides = "collect") +
+        plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
                         tag_levels = "a",
                         tag_suffix = ".",) +
         # theme_opts3 +
         ggsave(paste(outdir, paste("no-regrets-all", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
+      
+      
+      # CALIBRATION PLOTS
+      p4 <-   ((plots_list02[[1]] / plots_list02[[2]] / plots_list02[[3]]) | 
+                 ((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3) |
+                 ((no_regret_all / no_regret_all / no_regret_all) + theme_opts3)) +
+        # plot_layout(guides = "collect") +
+        plot_annotation(tag_prefix = "",
+                        tag_levels = "a",
+                        tag_suffix = ".",) +
+        ggsave(paste(outdir, paste("no-regret-FinalAll", ".pdf", sep = ""), sep = ""), width = 48, height = 20, dpi = 300)
 }
 
 system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
