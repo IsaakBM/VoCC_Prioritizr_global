@@ -446,8 +446,8 @@ no_regret_plots <- function(path, outdir, shp) {
       dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
     
     df_sum1 <- data.frame(Epipelagic = round((sum(ep$no_regret_all2 == 4, na.rm = TRUE))/(90065), digits = 4)*100, 
-                          Mesopelagic = round((sum(mp$no_regret_all2 == 5, na.rm = TRUE))/(88528), digits = 4)*100,
-                          Bathy = round((sum(bap$no_regret_all2 == 6, na.rm = TRUE))/(87170), digits = 4)*100,
+                          Mesopelagic = round((sum(mp$no_regret_all2 == 5, na.rm = TRUE))/(90065), digits = 4)*100,
+                          Bathy = round((sum(bap$no_regret_all2 == 6, na.rm = TRUE))/(90065), digits = 4)*100,
                           EpiMeso = round((sum(no_regrets01$no_regret_all == 9, na.rm = TRUE))/(90065), digits = 4)*100, 
                           EpiBathy = round((sum(no_regrets01$no_regret_all == 10, na.rm = TRUE))/(90065), digits = 4)*100, 
                           MesoBathy = round((sum(no_regrets01$no_regret_all == 11, na.rm = TRUE))/(90065), digits = 4)*100, 
