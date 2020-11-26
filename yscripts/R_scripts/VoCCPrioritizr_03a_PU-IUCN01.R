@@ -116,8 +116,20 @@ iucn_targets <- function(path, aquamaps_data, iucn_data, iucn_noclim_target, iuc
     }
 }
 
-system.time(iucn_targets(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_lowCC_02/features_1020CSV1050_targets-mix_noduplicates",
-                         aquamaps_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/speciesoccursum.csv",
-                         iucn_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/IUCN_REDLIST_2020.csv",
+# system.time(iucn_targets(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_lowCC_02/features_1020CSV1050_targets-mix_noduplicates",
+#                          aquamaps_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/speciesoccursum.csv",
+#                          iucn_data = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps-iucn_dataframe/IUCN_REDLIST_2020.csv",
+#                          iucn_noclim_target = 0.30, 
+#                          iucn_clim_target = 1))
+
+system.time(iucn_targets(path = "features_1020CSV10100_targets-mix_noduplicates",
+                         aquamaps_data = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccursum.csv",
+                         iucn_data = "features_1020CSV10100_targets-mix_noduplicates/IUCN_REDLIST_2020.csv",
                          iucn_noclim_target = 0.30, 
                          iucn_clim_target = 1))
+
+
+
+
+
+
