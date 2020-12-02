@@ -151,9 +151,9 @@ no_regret_plots <- function(path, outdir, shp) {
             dplyr::mutate(no_regret_all = ssp126$solution1+ssp245$solution1+ssp585$solution1) %>% 
             dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
           # 
-          dflist01[[a]] <- data.frame(ssp126 = round(sum(ssp126$solution1 == 4)/90065, digits = 4)*100, 
-                                     ssp245 = round(sum(ssp245$solution1 == 5)/88528, digits = 4)*100,
-                                     ssp585 = round(sum(ssp585$solution1 == 6)/87170, digits = 4)*100,
+          dflist01[[a]] <- data.frame(ssp126 = round(sum(ssp126$solution1 == 4)/length(unique(pu_shpfile$id)), digits = 4)*100, 
+                                     ssp245 = round(sum(ssp245$solution1 == 5)/length(unique(pu_shpfile$id)), digits = 4)*100,
+                                     ssp585 = round(sum(ssp585$solution1 == 6)/length(unique(pu_shpfile$id)), digits = 4)*100,
                                      ssp126_ssp245 = round((sum(no_regrets02$no_regret_all == 9))/(90065), digits = 4)*100, 
                                      ssp126_ssp585 = round((sum(no_regrets02$no_regret_all == 10))/(90065), digits = 4)*100, 
                                      ssp245_ssp585 = round((sum(no_regrets02$no_regret_all == 11))/(90065), digits = 4)*100, 
@@ -263,13 +263,55 @@ no_regret_plots <- function(path, outdir, shp) {
           # 
             no_cc <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[4]],  by = "id") %>% 
               dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
-            dflist02[[b]] <- data.frame(no_cc = round(sum(no_cc$freq_sel == 1)/90065, digits = 4)*100)
+            dflist02[[b]] <- data.frame(no_cc = round(sum(no_cc$freq_sel == 1)/length(unique(pu_shpfile$id)), digits = 4)*100) #change this
         }
         stopCluster(cl)
         dflist02_final <- do.call(rbind, df_list02)
         rownames(dflist02_final) <- y_axis
         write.csv(cbind(dflist01_final, dflist02_final), paste(outdir, paste("no-regrets-scenario", ".csv", sep = ""), sep = ""))  
-      
+        
+        # Getting planning units informatio for no regret areas to later get Species Information 
+          UseCores <- 5
+          cl <- makeCluster(UseCores)  
+          registerDoParallel(cl)
+          dflist01 <- vector("list", length = length(olayers_list))
+          df_list01 <- foreach(e = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
+            #
+            files_solution <- list.files(path = olayers_list[[e]], pattern = "*Layer_.*.csv$", full.names = TRUE)
+            provinces_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::arrange(layer)
+            mpas_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::filter(province != "non-categ_mpas")
+            vmes_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+              dplyr::filter(province != "non-categ_VMEs")
+            pu_shpfile <- st_read(list.files(path = olayers_list[[e]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
+            # 
+            solutions_csv <- lapply(files_solution, function(x) {
+              single <- read.csv(x)
+              sol_csv <- single %>% 
+                dplyr::mutate(freq_sel = single[, 6]) %>% 
+                dplyr::select(id, cost, freq_sel) %>% 
+                dplyr::arrange(id)})
+            # 
+            ssp126 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[1]],  by = "id") %>% 
+              dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 4, freq_sel)))
+            ssp245 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[2]],  by = "id") %>% 
+              dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 5, freq_sel)))
+            ssp585 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[3]],  by = "id") %>% 
+              dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 6, freq_sel)))
+            
+            no_regrets02 <- pu_shpfile %>% 
+              dplyr::mutate(no_regret_all = ssp126$solution1+ssp245$solution1+ssp585$solution1) %>% 
+              dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer))) %>% 
+              dplyr::filter(no_regret_all == 15) %>% 
+              dplyr::mutate(olayer = y_axis[e]) %>% 
+              data.frame() %>% 
+              dplyr::select(id, olayer)
+            
+            write.csv(no_regrets02, paste(outdir, paste(paste0(y_axis[e], "_","sps"), ".csv", sep = ""), sep = ""))  
+          }
+          stopCluster(cl)
+
   # Plotting the FINAL FIGURE AMONG SCENARIOS
     # Defining themes
       theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
@@ -460,6 +502,15 @@ no_regret_plots <- function(path, outdir, shp) {
                                                    ifelse(no_regret_all == 5, 0, 
                                                           ifelse(no_regret_all == 6, 0, no_regret_all))))) %>% 
       dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
+    
+      # Getting planning units information for no-regret areas to later get Species Information 
+        no_regrets03 <- data.frame(cbind(ep$id, ep$no_regret_all2, mp$id, mp$no_regret_all2, bap$id, bap$no_regret_all2))
+        no_regrets03 <- no_regrets03 %>% 
+          dplyr::mutate(vertical_all = X2+X6+X4) %>% 
+          dplyr::filter(vertical_all == 15) %>% 
+          dplyr::mutate(olayer = "all") %>% 
+          dplyr::rename(ep_id = X1, ep_value = X2, mp_id = X3, mp_value = X4, bap_id = X5, bap_value = X6)
+        write.csv(no_regrets03, paste(outdir, paste("Vertical_sps", ".csv", sep = ""), sep = ""))  
         
       # Define themes to plot
         # Defining themes
