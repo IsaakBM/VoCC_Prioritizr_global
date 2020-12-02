@@ -444,7 +444,7 @@ general_plots <- function(path, outdir, figure) {
                    (vocc_shp_plots[[3]] / vocc_shp_plots[[6]] / vocc_shp_plots[[9]])) +
             plot_layout(guides = "collect") +
             plot_annotation(tag_prefix = "",
-                            tag_levels = "A",
+                            tag_levels = "a",
                             tag_suffix = ".",) +
             theme_opts3 +
             ggsave(paste(outdir, paste("VOCC-general", ".pdf", sep = ""), sep = ""), width = 35, height = 20, dpi = 300)

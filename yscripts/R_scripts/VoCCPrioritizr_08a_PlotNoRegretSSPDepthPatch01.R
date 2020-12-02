@@ -93,11 +93,11 @@ no_regret_plots <- function(path, outdir, shp) {
                                       axis.title.x = element_blank(),
                                       axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                       plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                      legend.title = element_text(colour = "black", face = "bold", size = 16),
-                                      legend.text = element_text(colour = "black", face = "plain", size = 15), 
-                                      legend.key.height = unit(1.5, "cm"),
-                                      legend.key.width = unit(1.5, "cm"),
-                                      plot.tag = element_text(size = 25, face = "bold")))
+                                      legend.title = element_text(colour = "black", face = "bold", size = 18),
+                                      legend.text = element_text(colour = "black", face = "plain", size = 16), 
+                                      legend.key.height = unit(2.7, "cm"),
+                                      legend.key.width = unit(1.6, "cm"),
+                                      plot.tag = element_text(size = 35, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
             pal2 <- c("#e5f5f9", "#41b6c4", "#8856a7", "#fa9fb5", "#2c7fb8")
@@ -212,12 +212,12 @@ no_regret_plots <- function(path, outdir, shp) {
                                       axis.title.x = element_blank(),
                                       axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                       plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                      legend.title = element_text(colour = "black", face = "bold", size = 16),
-                                      legend.text = element_text(colour = "black", face = "plain", size = 15), 
-                                      legend.key.height = unit(1.5, "cm"),
-                                      legend.key.width = unit(1.5, "cm"),
+                                      legend.title = element_text(colour = "black", face = "bold", size = 18),
+                                      legend.text = element_text(colour = "black", face = "plain", size = 16), 
+                                      legend.key.height = unit(2.7, "cm"),
+                                      legend.key.width = unit(1.6, "cm"),
                                       legend.position = "none", 
-                                      plot.tag = element_text(size = 25, face = "bold")))
+                                      plot.tag = element_text(size = 35, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#31a354")
             pal2 <- c("#e5f5f9", "#31a354")
@@ -327,11 +327,11 @@ no_regret_plots <- function(path, outdir, shp) {
                                 axis.title.x = element_blank(),
                                 axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                 plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                legend.title = element_text(colour = "black", face = "bold", size = 16),
-                                legend.text = element_text(colour = "black", face = "plain", size = 15),
-                                legend.key.height = unit(1.5, "cm"),
-                                legend.key.width = unit(1.5, "cm"),
-                                plot.tag = element_text(size = 25, face = "bold")))
+                                legend.title = element_text(colour = "black", face = "bold", size = 18),
+                                legend.text = element_text(colour = "black", face = "plain", size = 16),
+                                legend.key.height = unit(2.7, "cm"),
+                                legend.key.width = unit(1.6, "cm"),
+                                plot.tag = element_text(size = 35, face = "bold")))
     # CALIBRATION PLOTS
       p3 <-   ((plots_list02[[1]] / plots_list02[[2]] / plots_list02[[3]]) | ((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3)) +
         plot_layout(guides = "collect") +
@@ -398,12 +398,12 @@ no_regret_plots <- function(path, outdir, shp) {
                                       axis.title.x = element_blank(),
                                       axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                       plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                      legend.title = element_text(colour = "black", face = "bold", size = 16),
-                                      legend.text = element_text(colour = "black", face = "plain", size = 15), 
-                                      legend.key.height = unit(1.5, "cm"),
-                                      legend.key.width = unit(1.5, "cm"),
+                                      legend.title = element_text(colour = "black", face = "bold", size = 18),
+                                      legend.text = element_text(colour = "black", face = "plain", size = 16), 
+                                      legend.key.height = unit(2.7, "cm"),
+                                      legend.key.width = unit(1.6, "cm"),
                                       legend.position = "none", 
-                                      plot.tag = element_text(size = 25, face = "bold")))
+                                      plot.tag = element_text(size = 35, face = "bold")))
           # Color Palette, World borders and Legend
             pal <- c("#deebf7", "#31a354")
             pal2 <- c("#e5f5f9", "#31a354")
@@ -527,11 +527,11 @@ no_regret_plots <- function(path, outdir, shp) {
                                     axis.title.x = element_blank(),
                                     axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                     plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                    legend.title = element_text(colour = "black", face = "bold", size = 16),
-                                    legend.text = element_text(colour = "black", face = "plain", size = 15), 
-                                    legend.key.height = unit(1.5, "cm"),
-                                    legend.key.width = unit(1.5, "cm"),
-                                    plot.tag = element_text(size = 25, face = "bold")))
+                                    legend.title = element_text(colour = "black", face = "bold", size = 18),
+                                    legend.text = element_text(colour = "black", face = "plain", size = 16), 
+                                    legend.key.height = unit(2.7, "cm"),
+                                    legend.key.width = unit(1.6, "cm"),
+                                    plot.tag = element_text(size = 35, face = "bold")))
         # Color Palette, World borders and Legend
           pal <- c("#deebf7", "#984ea3", "#1b9e77", "#377eb8", "#e41a1c")
           pal2 <- c("#deebf7", "#fc8d59", "#df65b0", "#bae4bc", "#2c7fb8")
@@ -562,11 +562,11 @@ no_regret_plots <- function(path, outdir, shp) {
                                 axis.title.x = element_blank(),
                                 axis.title.y = element_text(face = "plain", size = 25, angle = 90),
                                 plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                legend.title = element_text(colour = "black", face = "bold", size = 16),
-                                legend.text = element_text(colour = "black", face = "plain", size = 15),
+                                legend.title = element_text(colour = "black", face = "bold", size = 18),
+                                legend.text = element_text(colour = "black", face = "plain", size = 16),
                                 legend.key.height = unit(1.5, "cm"),
                                 legend.key.width = unit(1.5, "cm"),
-                                plot.tag = element_text(size = 25, face = "bold")))
+                                plot.tag = element_text(size = 35, face = "bold")))
       # CALIBRATION PLOTS
       p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | ((no_regret_all / no_regret_all / no_regret_all) + theme_opts3)) +
         plot_layout(guides = "collect") +
