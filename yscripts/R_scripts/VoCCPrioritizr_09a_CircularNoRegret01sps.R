@@ -20,6 +20,7 @@ bap <- fread("bathyabyssopelagic.csv") %>%
   dplyr::arrange(pu) %>% 
   dplyr::select(pu, speciesID)
 
+
 species_ep <- dplyr::left_join(x = ep, y = aqm,  by = "speciesID") %>% 
   dplyr::rename(id = pu)
 species_mp <- dplyr::left_join(x = mp, y = aqm,  by = "speciesID") %>% 
@@ -33,6 +34,8 @@ no_regrets_mp <- fread("ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicat
   dplyr::select(-V1)
 no_regrets_bap <- fread("ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/Bathyabyssopelagic_sps.csv") %>% 
   dplyr::select(-V1)
+no_regrets_vert <- fread("ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/Vertical_sps.csv") %>% 
+  dplyr::select(ep_id, mp_id, bap_id, olayer)
   
 final_ep <- dplyr::left_join(x = species_ep, y = no_regrets_ep,  by = "id") %>% 
   na.omit() %>% 
@@ -76,7 +79,22 @@ final_bap <- dplyr::left_join(x = species_bap, y = no_regrets_bap,  by = "id") %
   dplyr::rename(individual = phylum) %>% 
   dplyr::mutate(value = (value/sum(value))*100)
 
-final_test <- dplyr::left_join(x = species_bap, y = no_regrets_bap,  by = "id") %>% 
+all_ep <- no_regrets_vert[,c(1,4)] %>% 
+  dplyr::rename(id = ep_id)
+all_mp <- no_regrets_vert[,c(2,4)] %>% 
+  dplyr::rename(id = mp_id)
+all_bap <- no_regrets_vert[,c(3,4)] %>% 
+  dplyr::rename(id = bap_id)
+  
+final_all_ep <- dplyr::left_join(x = species_ep, y = all_ep,  by = "id") %>% 
+  na.omit()
+final_all_mp <- dplyr::left_join(x = species_mp, y = all_mp,  by = "id") %>% 
+  na.omit()
+final_all_bap <- dplyr::left_join(x = species_bap, y = all_bap,  by = "id") %>% 
+  na.omit()
+
+final_final <- rbind(final_all_ep, final_all_mp, final_all_bap)
+final_vertical <- final_final %>% 
   na.omit() %>% 
   dplyr::arrange(id) %>% 
   dplyr::group_by(speciesID, phylum) %>% 
@@ -85,18 +103,18 @@ final_test <- dplyr::left_join(x = species_bap, y = no_regrets_bap,  by = "id") 
   dplyr::group_by(phylum) %>% 
   dplyr::summarise(value = n()) %>% 
   ungroup() %>% 
-  dplyr::mutate(group = "test") %>% 
+  dplyr::mutate(group = "Vertical") %>% 
   dplyr::relocate(phylum, group, value) %>% 
   dplyr::rename(individual = phylum) %>% 
   dplyr::mutate(value = (value/sum(value))*100)
-  
-final_ep; final_mp; final_bap; 
-sum(final_ep$value); sum(final_mp$value); sum(final_bap$value) 
 
-final <- rbind(final_ep, final_mp, final_bap, final_test) %>% 
+# final_ep; final_mp; final_bap; final_vertical
+sum(final_ep$value); sum(final_mp$value); sum(final_bap$value); sum(final_vertical$value)  
+
+final_df <- rbind(final_ep, final_mp, final_bap, final_vertical) %>% 
   data.frame() %>% 
   mutate(individual = factor(individual), group = factor(group))
-data <- final
+data <- final_df
 
 # Set a number of 'empty bar' to add at the end of each group
 empty_bar <- 3
