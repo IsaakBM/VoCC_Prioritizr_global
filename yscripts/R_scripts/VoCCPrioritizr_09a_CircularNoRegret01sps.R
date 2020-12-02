@@ -5,17 +5,17 @@ aqm <- fread("/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccurs
   dplyr::filter(rank == 1) %>% 
   dplyr::select(speciesID, phylum)
 
-ep <- fread("epipelagic.csv") %>% 
+ep <- fread("wgeneral_figs5/noregret-network_sps/epipelagic.csv") %>% 
   dplyr::mutate(speciesID = str_remove_all(string = feature_names, pattern = "_epipelagic")) %>%
   dplyr::arrange(pu) %>% 
   dplyr::select(pu, speciesID)
 
-mp <- fread("mesopelagic.csv") %>% 
+mp <- fread("wgeneral_figs5/noregret-network_sps/mesopelagic.csv") %>% 
   dplyr::mutate(speciesID = str_remove_all(string = feature_names, pattern = "_mesopelagic")) %>%
   dplyr::arrange(pu) %>% 
   dplyr::select(pu, speciesID)
 
-bap <- fread("bathyabyssopelagic.csv") %>% 
+bap <- fread("wgeneral_figs5/noregret-network_sps/bathyabyssopelagic.csv") %>% 
   dplyr::mutate(speciesID = str_remove_all(string = feature_names, pattern = "_bathyabyssopelagic")) %>%
   dplyr::arrange(pu) %>% 
   dplyr::select(pu, speciesID)
@@ -28,13 +28,13 @@ species_mp <- dplyr::left_join(x = mp, y = aqm,  by = "speciesID") %>%
 species_bap <- dplyr::left_join(x = bap, y = aqm,  by = "speciesID") %>% 
   dplyr::rename(id = pu)
 
-no_regrets_ep <- fread("ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/Epipelagic_sps.csv") %>% 
+no_regrets_ep <- fread("wgeneral_figs5/noregret-network_sps/Epipelagic_sps.csv") %>% 
   dplyr::select(-V1)
-no_regrets_mp <- fread("ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/Mesopelagic_sps.csv") %>% 
+no_regrets_mp <- fread("wgeneral_figs5/noregret-network_sps/Mesopelagic_sps.csv") %>% 
   dplyr::select(-V1)
-no_regrets_bap <- fread("ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/Bathyabyssopelagic_sps.csv") %>% 
+no_regrets_bap <- fread("wgeneral_figs5/noregret-network_sps/Bathyabyssopelagic_sps.csv") %>% 
   dplyr::select(-V1)
-no_regrets_vert <- fread("ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/Vertical_sps.csv") %>% 
+no_regrets_vert <- fread("wgeneral_figs5/noregret-network_sps/Vertical_sps.csv") %>% 
   dplyr::select(ep_id, mp_id, bap_id, olayer)
   
 final_ep <- dplyr::left_join(x = species_ep, y = no_regrets_ep,  by = "id") %>% 
@@ -170,7 +170,7 @@ p <- ggplot(data, aes(x=as.factor(id), y=value, fill=group)) +       # Note that
   geom_segment(data=base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
   geom_text(data=base_data, aes(x = title, y = -18, label=group), hjust=c(1,1,0,0), colour = "black", alpha=0.8, size=4, fontface="bold", inherit.aes = FALSE)
 
-ggsave("wgeneral_figs5/BritoMorales_Fi_4-test.pdf", width = 8, height = 8, dpi = 300)
+ggsave("wgeneral_figs5/BritoMorales_Fi_4.pdf", width = 8, height = 8, dpi = 300)
 
 
 
