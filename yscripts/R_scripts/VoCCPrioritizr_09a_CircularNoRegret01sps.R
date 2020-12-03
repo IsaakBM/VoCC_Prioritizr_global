@@ -1,4 +1,7 @@
-
+library(data.table)
+library(ggplot2)
+library(dplyr)
+library(stringr)
 
 ################
 aqm <- fread("/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccursum.csv", fill = TRUE) %>% 
@@ -27,6 +30,7 @@ species_mp <- dplyr::left_join(x = mp, y = aqm,  by = "speciesID") %>%
   dplyr::rename(id = pu)
 species_bap <- dplyr::left_join(x = bap, y = aqm,  by = "speciesID") %>% 
   dplyr::rename(id = pu)
+species_vertical <- rbind(species_ep, species_mp, species_bap)
 
 no_regrets_ep <- fread("wgeneral_figs5/noregret-network_sps/Epipelagic_sps.csv") %>% 
   dplyr::select(-V1)
@@ -37,47 +41,95 @@ no_regrets_bap <- fread("wgeneral_figs5/noregret-network_sps/Bathyabyssopelagic_
 no_regrets_vert <- fread("wgeneral_figs5/noregret-network_sps/Vertical_sps.csv") %>% 
   dplyr::select(ep_id, mp_id, bap_id, olayer)
   
+# final_ep <- dplyr::left_join(x = species_ep, y = no_regrets_ep,  by = "id") %>% 
+#   na.omit() %>% 
+#   dplyr::arrange(id) %>% 
+#   dplyr::group_by(speciesID, phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::group_by(phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::mutate(group = "Epipelagic") %>% 
+#   dplyr::relocate(phylum, group, value) %>% 
+#   dplyr::rename(individual = phylum) %>% 
+#   dplyr::mutate(value = (value/sum(value))*100)
+
 final_ep <- dplyr::left_join(x = species_ep, y = no_regrets_ep,  by = "id") %>% 
   na.omit() %>% 
-  dplyr::arrange(id) %>% 
-  dplyr::group_by(speciesID, phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::group_by(phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::mutate(group = "Epipelagic") %>% 
-  dplyr::relocate(phylum, group, value) %>% 
-  dplyr::rename(individual = phylum) %>% 
-  dplyr::mutate(value = (value/sum(value))*100)
+  dplyr::group_by(speciesID) %>%
+  dplyr::summarise(cells = n()) %>% 
+  dplyr::mutate(rep_target = round((cells/length(unique(no_regrets_ep$id)))*100, digits = 4)) %>% 
+  dplyr::arrange(-rep_target) %>% 
+  ungroup()
+  final_ep <- dplyr::left_join(x = final_ep, y = aqm,  by = "speciesID") %>%
+    dplyr::group_by(phylum) %>% 
+    dplyr::summarise(value = mean(rep_target)) %>% 
+    ungroup() %>% 
+    dplyr::arrange(-value) %>% 
+    dplyr::mutate(group = "Epipelagic") %>% 
+    dplyr::relocate(phylum, group, value) %>% 
+    dplyr::rename(individual = phylum)
 
-final_mp <- dplyr::left_join(x = species_mp, y = no_regrets_mp,  by = "id") %>% 
-  na.omit() %>% 
-  dplyr::arrange(id) %>% 
-  dplyr::group_by(speciesID, phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::group_by(phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::mutate(group = "Mesopelagic") %>% 
-  dplyr::relocate(phylum, group, value) %>% 
-  dplyr::rename(individual = phylum) %>% 
-  dplyr::mutate(value = (value/sum(value))*100)
+# final_mp <- dplyr::left_join(x = species_mp, y = no_regrets_mp,  by = "id") %>% 
+#   na.omit() %>% 
+#   dplyr::arrange(id) %>% 
+#   dplyr::group_by(speciesID, phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::group_by(phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::mutate(group = "Mesopelagic") %>% 
+#   dplyr::relocate(phylum, group, value) %>% 
+#   dplyr::rename(individual = phylum) %>% 
+#   dplyr::mutate(value = (value/sum(value))*100)
+  
+  final_mp <- dplyr::left_join(x = species_mp, y = no_regrets_mp,  by = "id") %>% 
+    na.omit() %>% 
+    dplyr::group_by(speciesID) %>%
+    dplyr::summarise(cells = n()) %>% 
+    dplyr::mutate(rep_target = round((cells/length(unique(no_regrets_mp$id)))*100, digits = 4)) %>% 
+    dplyr::arrange(-rep_target) %>% 
+    ungroup()
+  final_mp <- dplyr::left_join(x = final_mp, y = aqm,  by = "speciesID") %>%
+    dplyr::group_by(phylum) %>% 
+    dplyr::summarise(value = mean(rep_target)) %>% 
+    ungroup() %>% 
+    dplyr::arrange(-value) %>% 
+    dplyr::mutate(group = "Mesopelagic") %>% 
+    dplyr::relocate(phylum, group, value) %>% 
+    dplyr::rename(individual = phylum)
 
-final_bap <- dplyr::left_join(x = species_bap, y = no_regrets_bap,  by = "id") %>% 
-  na.omit() %>% 
-  dplyr::arrange(id) %>% 
-  dplyr::group_by(speciesID, phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::group_by(phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::mutate(group = "Bathyabyssopelagic") %>% 
-  dplyr::relocate(phylum, group, value) %>% 
-  dplyr::rename(individual = phylum) %>% 
-  dplyr::mutate(value = (value/sum(value))*100)
+# final_bap <- dplyr::left_join(x = species_bap, y = no_regrets_bap,  by = "id") %>% 
+#   na.omit() %>% 
+#   dplyr::arrange(id) %>% 
+#   dplyr::group_by(speciesID, phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::group_by(phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::mutate(group = "Bathyabyssopelagic") %>% 
+#   dplyr::relocate(phylum, group, value) %>% 
+#   dplyr::rename(individual = phylum) %>% 
+#   dplyr::mutate(value = (value/sum(value))*100)
+  
+  final_bap <- dplyr::left_join(x = species_bap, y = no_regrets_bap,  by = "id") %>% 
+    na.omit() %>% 
+    dplyr::group_by(speciesID) %>%
+    dplyr::summarise(cells = n()) %>% 
+    dplyr::mutate(rep_target = round((cells/length(unique(no_regrets_bap$id)))*100, digits = 4)) %>% 
+    dplyr::arrange(-rep_target) %>% 
+    ungroup()
+  final_bap <- dplyr::left_join(x = final_bap, y = aqm,  by = "speciesID") %>%
+    dplyr::group_by(phylum) %>% 
+    dplyr::summarise(value = mean(rep_target)) %>% 
+    ungroup() %>% 
+    dplyr::arrange(-value) %>% 
+    dplyr::mutate(group = "Bathyabyssopelagic") %>% 
+    dplyr::relocate(phylum, group, value) %>% 
+    dplyr::rename(individual = phylum)
 
 all_ep <- no_regrets_vert[,c(1,4)] %>% 
   dplyr::rename(id = ep_id)
@@ -94,19 +146,36 @@ final_all_bap <- dplyr::left_join(x = species_bap, y = all_bap,  by = "id") %>%
   na.omit()
 
 final_final <- rbind(final_all_ep, final_all_mp, final_all_bap)
+# final_vertical <- final_final %>% 
+#   na.omit() %>% 
+#   dplyr::arrange(id) %>% 
+#   dplyr::group_by(speciesID, phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::group_by(phylum) %>% 
+#   dplyr::summarise(value = n()) %>% 
+#   ungroup() %>% 
+#   dplyr::mutate(group = "Vertical") %>% 
+#   dplyr::relocate(phylum, group, value) %>% 
+#   dplyr::rename(individual = phylum) %>% 
+#   dplyr::mutate(value = (value/sum(value))*100)
+
+# length(unique(species_vertical$id)); length(unique(final_final$id)) 
 final_vertical <- final_final %>% 
-  na.omit() %>% 
-  dplyr::arrange(id) %>% 
-  dplyr::group_by(speciesID, phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::group_by(phylum) %>% 
-  dplyr::summarise(value = n()) %>% 
-  ungroup() %>% 
-  dplyr::mutate(group = "Vertical") %>% 
-  dplyr::relocate(phylum, group, value) %>% 
-  dplyr::rename(individual = phylum) %>% 
-  dplyr::mutate(value = (value/sum(value))*100)
+  na.omit() %>%
+  dplyr::group_by(speciesID) %>%
+  dplyr::summarise(cells = n()) %>% 
+  dplyr::mutate(rep_target = round((cells/length(unique(no_regrets_ep$id)))*100, digits = 4)) %>% 
+  dplyr::arrange(-rep_target) %>% 
+  ungroup()
+  final_vertical <- dplyr::left_join(x = final_vertical, y = aqm,  by = "speciesID") %>%
+    dplyr::group_by(phylum) %>% 
+    dplyr::summarise(value = mean(rep_target)) %>% 
+    ungroup() %>% 
+    dplyr::arrange(-value) %>% 
+    dplyr::mutate(group = "Vertical") %>% 
+    dplyr::relocate(phylum, group, value) %>% 
+    dplyr::rename(individual = phylum)
 
 # final_ep; final_mp; final_bap; final_vertical
 sum(final_ep$value); sum(final_mp$value); sum(final_bap$value); sum(final_vertical$value)  
@@ -148,12 +217,15 @@ grid_data <- grid_data[-1,]
 p <- ggplot(data, aes(x=as.factor(id), y=value, fill=group)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
   geom_bar(aes(x=as.factor(id), y=value, fill=group), stat="identity", alpha=0.5) +
   # Add a val=100/75/50/25 lines. I do it at the beginning to make sur barplots are OVER it.
-  geom_segment(data=grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  geom_segment(data=grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  # geom_segment(data=grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  # geom_segment(data=grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
   geom_segment(data=grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 30, xend = start, yend = 30), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
   geom_segment(data=grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 10, xend = start, yend = 10), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
   # Add text showing the value of each 100/75/50/25 lines
-  annotate("text", x = rep(max(data$id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
+  # annotate("text", x = rep(max(data$id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
+  annotate("text", x = rep(max(data$id),4), y = c(10, 20, 30, 40), label = c("10", "20", "30", "40") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
   geom_bar(aes(x=as.factor(id), y=value, fill=group), stat="identity", alpha=0.5) +
   ylim(-100,120) +
   theme_minimal() +
@@ -170,8 +242,5 @@ p <- ggplot(data, aes(x=as.factor(id), y=value, fill=group)) +       # Note that
   geom_segment(data=base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
   geom_text(data=base_data, aes(x = title, y = -18, label=group), hjust=c(1,1,0,0), colour = "black", alpha=0.8, size=4, fontface="bold", inherit.aes = FALSE)
 
-ggsave("wgeneral_figs5/BritoMorales_Fi_4.pdf", width = 8, height = 8, dpi = 300)
-
-
-
+ggsave("wgeneral_figs5/BritoMorales_Fi_4b.pdf", width = 8, height = 8, dpi = 300)
 
