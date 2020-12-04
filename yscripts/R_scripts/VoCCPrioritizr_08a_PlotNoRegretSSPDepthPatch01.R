@@ -270,7 +270,7 @@ no_regret_plots <- function(path, outdir, shp) {
         rownames(dflist02_final) <- y_axis
         write.csv(cbind(dflist01_final, dflist02_final), paste(outdir, paste("no-regrets-scenario", ".csv", sep = ""), sep = ""))  
         
-        # Getting planning units informatio for no regret areas to later get Species Information 
+        # Getting planning units information for no regret areas (SSPs) to later get Species Information 
           UseCores <- 5
           cl <- makeCluster(UseCores)  
           registerDoParallel(cl)
@@ -311,6 +311,41 @@ no_regret_plots <- function(path, outdir, shp) {
             write.csv(no_regrets02, paste(outdir, paste(paste0(y_axis[e], "_","sps"), ".csv", sep = ""), sep = ""))  
           }
           stopCluster(cl)
+          
+          # Getting planning units information for no climate change (NO CC) to later get Species Information 
+            UseCores <- 5
+            cl <- makeCluster(UseCores)  
+            registerDoParallel(cl)
+            dflist03 <- vector("list", length = length(olayers_list))
+            df_list03 <- foreach(ee = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
+              #
+              files_solution <- list.files(path = olayers_list[[ee]], pattern = "*Layer_.*.csv$", full.names = TRUE)
+              provinces_csv <- read.csv(list.files(path = olayers_list[[ee]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
+                dplyr::arrange(layer)
+              mpas_csv <- read.csv(list.files(path = olayers_list[[ee]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+                dplyr::filter(province != "non-categ_mpas")
+              vmes_csv <- read.csv(list.files(path = olayers_list[[ee]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+                dplyr::filter(province != "non-categ_VMEs")
+              pu_shpfile <- st_read(list.files(path = olayers_list[[ee]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
+              # 
+              solutions_csv <- lapply(files_solution, function(x) {
+                single <- read.csv(x)
+                sol_csv <- single %>% 
+                  dplyr::mutate(freq_sel = single[, 6]) %>% 
+                  dplyr::select(id, cost, freq_sel) %>% 
+                  dplyr::arrange(id)}) 
+              # 
+              no_cc <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[4]],  by = "id")
+              no_cc2 <- no_cc %>% 
+                dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer))) %>% 
+                dplyr::filter(freq_sel == 1) %>% 
+                dplyr::mutate(olayer = y_axis[ee]) %>% 
+                data.frame() %>%
+                dplyr::select(id, olayer)
+              
+              write.csv(no_cc2, paste(outdir, paste(paste0(y_axis[ee], "_NoCC","sps"), ".csv", sep = ""), sep = ""))  
+            }
+            stopCluster(cl)
 
   # Plotting the FINAL FIGURE AMONG SCENARIOS
     # Defining themes
