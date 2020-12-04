@@ -191,7 +191,7 @@ plot_targets <- function(path, aquamaps_data) {
           data.frame() %>% 
           mutate(individual = factor(individual), group = factor(group))
         
-      # PLOTTING CIRCULAR HISTOGRAM FOR NO REGRET INFORMATION NETWORK % TARGET
+      # PLOTTING CIRCULAR HISTOGRAM FOR NO REGRET INFORMATION NETWORK % TARGET (source code from https://www.r-graph-gallery.com/297-circular-barplot-with-groups.html)
         # Set a number of 'empty bar' to add at the end of each group
           empty_bar <- 3
           to_add <- data.frame(matrix(NA, empty_bar*nlevels(data$group), ncol(data)))
