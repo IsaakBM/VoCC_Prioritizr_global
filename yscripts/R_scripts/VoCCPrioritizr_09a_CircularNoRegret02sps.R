@@ -226,14 +226,11 @@ plot_targets <- function(path, aquamaps_data) {
           p1 <- ggplot(data, aes(x = as.factor(id), y = value, fill = group)) +
             geom_bar(aes(x = as.factor(id), y = value, fill = group), stat = "identity", alpha = 0.5) +
             # Add a val=100/75/50/25 lines. I do it at the beginning to make sur barplots are OVER it.
-            # geom_segment(data=grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-            # geom_segment(data=grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
             geom_segment(data = grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
             geom_segment(data = grid_data, aes(x = end, y = 30, xend = start, yend = 30), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
             geom_segment(data = grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
             geom_segment(data = grid_data, aes(x = end, y = 10, xend = start, yend = 10), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
             # Add text showing the value of each 100/75/50/25 lines
-            # annotate("text", x = rep(max(data$id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
             annotate("text", x = rep(max(data$id),4), y = c(10, 20, 30, 40), label = c("10", "20", "30", "40") , color = "grey", size = 3 , angle = 0, fontface = "bold", hjust = 1) +
             geom_bar(aes(x = as.factor(id), y = value, fill = group), stat = "identity", alpha = 0.5) +
             ylim(-100, 120) +
@@ -249,9 +246,47 @@ plot_targets <- function(path, aquamaps_data) {
             geom_segment(data = base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha = 0.8, size = 0.6 , inherit.aes = FALSE)  +
             geom_text(data = base_data, aes(x = title, y = -18, label = group), hjust = c(1, 1, 0, 0), colour = "black", alpha = 0.8, size = 4, fontface = "bold", inherit.aes = FALSE)
         
-      
-        
-        
+
+    # No regret ocean layers directory
+      # Begin the parallel structure      
+        cores  <-  3
+        cl <- makeCluster(cores)
+        registerDoParallel(cl)
+        dflist02 <- vector("list", length = length(olayers_nocc_list))
+        dflist_02 <- foreach(j = 1:length(olayers_nocc_list), .packages = c("dplyr", "stringr", "data.table")) %dopar% {
+          # List of files
+            files_sps <- list.files(path = olayers_nocc_list[[j]], pattern = "*lagic.csv$", full.names = TRUE)
+            files_no_regret <- list.files(path = olayers_nocc_list[[j]], pattern = "*sps.*.csv$", full.names = TRUE)
+          # Species taxonomic information among planning units
+            sps_df <- fread(files_sps) %>% 
+              dplyr::mutate(speciesID = str_split(string = feature_names, pattern = "_", simplify = TRUE)[,1]) %>%
+              dplyr::arrange(pu) %>% 
+              dplyr::select(pu, speciesID)
+          # Planning units no climate smart network
+            no_regrets_df <- fread(files_no_regret) %>% 
+              dplyr::select(-V1)
+          # Merging "Species taxonomic information among planning units" with "Planning units no climate smart network"
+            species <- dplyr::left_join(x = sps_df, y = aqm_groups,  by = "speciesID") %>% 
+              dplyr::rename(id = pu)
+          #
+            final_df <- dplyr::left_join(x = species, y = no_regrets_df,  by = "id") %>% 
+              na.omit() %>% 
+              dplyr::group_by(speciesID) %>%
+              dplyr::summarise(cells = n()) %>% 
+              dplyr::mutate(rep_target = round((cells/length(unique(no_regrets_df$id)))*100, digits = 4)) %>% 
+              dplyr::arrange(-rep_target) %>% 
+              ungroup()
+            final_df <- dplyr::left_join(x = final_df, y = aqm_groups,  by = "speciesID") %>%
+              dplyr::group_by(groups_01) %>% 
+              dplyr::summarise(value = mean(rep_target)) %>% 
+              ungroup() %>% 
+              dplyr::arrange(-value) %>% 
+              dplyr::mutate(group = y_axis[j]) %>% 
+              dplyr::relocate(groups_01, group, value) %>% 
+              dplyr::rename(individual = groups_01)
+            dflist02[[j]] <- final_df
+          }
+          stopCluster(cl)
       
     
   
