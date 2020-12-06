@@ -1,14 +1,13 @@
+# This code was written by Isaac Brito-Morales (i.britomorales@uq.edu.au)
+# Please do not distribute this code without permission.
+# NO GUARANTEES THAT CODE IS CORRECT
+# Caveat Emptor!
 
-
-path = "znoregret-network_sps"
-aquamaps_data = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccursum.csv"
-
-
-
-plot_targets <- function(path, aquamaps_data) {
+plot_targets <- function(path, aquamaps_data, outdir) {
   
   library(data.table)
   library(ggplot2)
+  library(patchwork)
   library(dplyr)
   library(stringr)
   library(doParallel)
@@ -235,6 +234,7 @@ plot_targets <- function(path, aquamaps_data) {
             geom_bar(aes(x = as.factor(id), y = value, fill = group), stat = "identity", alpha = 0.5) +
             ylim(-100, 120) +
             theme_minimal() +
+            scale_fill_manual(values = c("#1a9850", "#de2d26", "#fdae61", "#2c7fb8")) + # bathy, epi, meso, all?
             theme(legend.position = "none",
                   axis.text = element_blank(),
                   axis.title = element_blank(),
@@ -244,7 +244,8 @@ plot_targets <- function(path, aquamaps_data) {
             geom_text(data = label_data, aes(x = id, y = value + 10, label = individual, hjust = hjust), color = "black", fontface = "bold", alpha = 0.6, size = 2.5, angle = label_data$angle, inherit.aes = FALSE ) +
             # Add base line information
             geom_segment(data = base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha = 0.8, size = 0.6 , inherit.aes = FALSE)  +
-            geom_text(data = base_data, aes(x = title, y = -18, label = group), hjust = c(1, 1, 0, 0), colour = "black", alpha = 0.8, size = 4, fontface = "bold", inherit.aes = FALSE)
+            geom_text(data = base_data, aes(x = title, y = -18, label = group), hjust = c(1, 1, 0, 0), colour = "black", alpha = 0.8, size = 4, fontface = "bold", inherit.aes = FALSE) +
+            ggsave(paste(outdir, paste("spiral-diagram-noregret", ".pdf", sep = ""), sep = ""), width = 8, height = 8, dpi = 300)
         
 
     # No regret ocean layers directory
@@ -287,10 +288,71 @@ plot_targets <- function(path, aquamaps_data) {
             dflist02[[j]] <- final_df
           }
           stopCluster(cl)
-      
-    
-  
+          data2 <- do.call(rbind, dflist_02) %>% 
+            data.frame() %>% 
+            mutate(individual = factor(individual), group = factor(group))
+          
+          # PLOTTING CIRCULAR HISTOGRAM FOR NO CC INFORMATION NETWORK % TARGET
+            # Set a number of 'empty bar' to add at the end of each group
+              empty_bar <- 3
+              to_add <- data.frame(matrix(NA, empty_bar*nlevels(data2$group), ncol(data2)))
+              colnames(to_add) <- colnames(data2)
+              to_add$group <- rep(levels(data2$group), each = empty_bar)
+              data2 <- rbind(data2, to_add)
+              data2 <- data2 %>% 
+                arrange(group)
+              data2$id <- seq(1, nrow(data2))
+              # Get the name and the y position of each label
+                label_data <- data2
+                number_of_bar <- nrow(label_data)
+                angle <- 90 - 360 * (label_data$id - 0.5)/number_of_bar # substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+                label_data$hjust <- ifelse(angle < -90, 1, 0)
+                label_data$angle <- ifelse(angle < -90, angle + 180, angle)
+              # Prepare a data frame for base lines
+                base_data <- data2 %>% 
+                  group_by(group) %>% 
+                  summarize(start = min(id), end = max(id) - empty_bar) %>% 
+                  rowwise() %>% 
+                  mutate(title = mean(c(start, end)))
+              # Prepare a data frame for grid (scales)
+                grid_data <- base_data
+                grid_data$end <- grid_data$end[c(nrow(grid_data), 1:nrow(grid_data)-1)] + 1
+                grid_data$start <- grid_data$start - 1
+                grid_data <- grid_data[-1,]
+              # Final plot for NO-Regret networks of MPAs
+                p2 <- ggplot(data2, aes(x = as.factor(id), y = value, fill = group)) +
+                  geom_bar(aes(x = as.factor(id), y = value, fill = group), stat = "identity", alpha = 0.5) +
+                  # Add a val=100/75/50/25 lines. I do it at the beginning to make sur barplots are OVER it.
+                    geom_segment(data = grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
+                    geom_segment(data = grid_data, aes(x = end, y = 30, xend = start, yend = 30), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
+                    geom_segment(data = grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
+                    geom_segment(data = grid_data, aes(x = end, y = 10, xend = start, yend = 10), colour = "grey", alpha = 1, size = 0.3 , inherit.aes = FALSE ) +
+                  # Add text showing the value of each 100/75/50/25 lines
+                    annotate("text", x = rep(max(data2$id),4), y = c(10, 20, 30, 40), label = c("10", "20", "30", "40") , color = "grey", size = 3 , angle = 0, fontface = "bold", hjust = 1) +
+                    geom_bar(aes(x = as.factor(id), y = value, fill = group), stat = "identity", alpha = 0.5) +
+                    ylim(-100, 120) +
+                    theme_minimal() +
+                    scale_fill_manual(values = c("#1a9850", "#de2d26", "#fdae61")) + # bathy, epi, meso
+                    theme(legend.position = "none",
+                          axis.text = element_blank(),
+                          axis.title = element_blank(),
+                          panel.grid = element_blank(),
+                          plot.margin = unit(rep(-1,4), "cm")) +
+                    coord_polar() + 
+                    geom_text(data = label_data, aes(x = id, y = value + 10, label = individual, hjust = hjust), color = "black", fontface = "bold", alpha = 0.6, size = 2.5, angle = label_data$angle, inherit.aes = FALSE ) +
+                  # Add base line information
+                    geom_segment(data = base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha = 0.8, size = 0.6 , inherit.aes = FALSE)  +
+                    geom_text(data = base_data, aes(x = title, y = -18, label = group), hjust = c(1, 1, 0), colour = "black", alpha = 0.8, size = 4, fontface = "bold", inherit.aes = FALSE) +
+                    ggsave(paste(outdir, paste("spiral-diagram-noCC", ".pdf", sep = ""), sep = ""), width = 8, height = 8, dpi = 300)
+          
+        # PATCHWORK Figure 
+          p3 <-   (p2 | p1) +
+            plot_annotation(tag_prefix = "",
+                            tag_levels = "a",
+                            tag_suffix = ".",) +
+            ggsave(paste(outdir, paste("spiral-diagram-patch", ".pdf", sep = ""), sep = ""), width = 16, height = 8, dpi = 300)
 }
 
-
-
+system.time(plot_targets(path = "znoregret-network_sps", 
+                         aquamaps_data = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a/speciesoccursum.csv", 
+                         outdir = "znoregret-network_sps/"))
