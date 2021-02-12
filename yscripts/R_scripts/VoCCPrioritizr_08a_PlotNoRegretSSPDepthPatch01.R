@@ -161,7 +161,7 @@ no_regret_plots <- function(path, outdir, shp) {
         stopCluster(cl)
         dflist01_final <- do.call(rbind, df_list01)
         rownames(dflist01_final) <- y_axis
-      
+        write.csv(cbind(dflist01_final), paste(outdir, paste("no-regrets-scenario", ".csv", sep = ""), sep = "")) 
 
   # Plotting the FINAL FIGURE AMONG SCENARIOS
     # Defining themes
@@ -190,6 +190,48 @@ no_regret_plots <- function(path, outdir, shp) {
                         tag_levels = "a",
                         tag_suffix = ".",) +
         ggsave(paste(outdir, paste("no-regret-scenarios", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
+      
+    # Getting planning units information for no regret areas (SSPs) to later get Species Information 
+      UseCores <- 5
+      cl <- makeCluster(UseCores)  
+      registerDoParallel(cl)
+      dflist01 <- vector("list", length = length(olayers_list))
+      df_list01 <- foreach(e = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
+        #
+        files_solution <- list.files(path = olayers_list[[e]], pattern = "*Layer_.*.csv$", full.names = TRUE)
+        provinces_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
+          dplyr::arrange(layer)
+        mpas_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
+          dplyr::filter(province != "non-categ_mpas")
+        vmes_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
+          dplyr::filter(province != "non-categ_VMEs")
+        pu_shpfile <- st_read(list.files(path = olayers_list[[e]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
+        # 
+        solutions_csv <- lapply(files_solution, function(x) {
+          single <- read.csv(x)
+          sol_csv <- single %>% 
+            dplyr::mutate(freq_sel = single[, 6]) %>% 
+            dplyr::select(id, cost, freq_sel) %>% 
+            dplyr::arrange(id)})
+        # 
+        ssp126 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[1]],  by = "id") %>% 
+          dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 4, freq_sel)))
+        ssp245 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[2]],  by = "id") %>% 
+          dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 5, freq_sel)))
+        ssp585 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[3]],  by = "id") %>% 
+          dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 6, freq_sel)))
+        
+        no_regrets02 <- pu_shpfile %>% 
+          dplyr::mutate(no_regret_all = ssp126$solution1+ssp245$solution1+ssp585$solution1) %>% 
+          dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer))) %>% 
+          dplyr::filter(no_regret_all == 15) %>% 
+          dplyr::mutate(olayer = y_axis[e]) %>% 
+          data.frame() %>% 
+          dplyr::select(id, olayer)
+        
+        write.csv(no_regrets02, paste(outdir, paste(paste0(y_axis[e], "_","sps"), ".csv", sep = ""), sep = ""))  
+      }
+      stopCluster(cl)
 
   # NO REGRETS ALL [original figure 3]
     # Begin the parallel structure
