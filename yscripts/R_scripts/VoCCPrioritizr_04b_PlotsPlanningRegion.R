@@ -166,10 +166,7 @@ plot_solutions <- function(path, outdir) {
                                     legend.key.width = unit(0.9, "cm"),
                                     plot.tag = element_text(size = 25, face = "bold")))
           # CALIBRATION PLOTS
-            p3 <-   ((plots_list[[1]] / plots_list[[5]] / plots_list[[9]]) |
-                     (plots_list[[2]] / plots_list[[6]] / plots_list[[10]]) |
-                     (plots_list[[3]] / plots_list[[7]] / plots_list[[11]]) |
-                     (plots_list[[4]] / plots_list[[8]] / plots_list[[12]])) +
+            p3 <-   (plots_list[[1]] + plots_list[[2]] + plots_list[[3]] + plots_list[[4]]) +
               plot_layout(guides = "collect") +
               plot_annotation(tag_prefix = "",
                               tag_levels = "A",
