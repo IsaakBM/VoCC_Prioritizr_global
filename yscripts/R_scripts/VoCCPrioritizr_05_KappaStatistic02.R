@@ -74,21 +74,18 @@ kappa_correlation <- function(path, shp, outdir) {
       final_reshape$X1 <- as.character(final_reshape$X1)
       final_reshape$X2 <- as.character(final_reshape$X2)
       x_scenarios <- as.character(unique(final_reshape$X1))
-      x_scenarios <- c(x_scenarios[4], x_scenarios[1], x_scenarios[2], x_scenarios[3],
-                       x_scenarios[8], x_scenarios[5], x_scenarios[6], x_scenarios[7],
-                       x_scenarios[12], x_scenarios[9], x_scenarios[10], x_scenarios[11])
-      x_labs <- c("Epipelagic Base", "Epipelagic SSP126", "Epipelagic SSP245", "Epipelagic SSP585", 
-                  "Mesopelagic Base", "Mesopelagic SSP126", "Mesopelagic SSP245", "Mesopelagic SSP585", 
-                  "BathyAbyssopelagic Base", "BathyAbyssopelagic SSP126", "BathyAbyssopelagic SSP245", "BathyAbyssopelagic SSP585")
-      y_scenarios <- c(x_scenarios[12], x_scenarios[11], x_scenarios[10], x_scenarios[9],
-                       x_scenarios[8], x_scenarios[7], x_scenarios[6], x_scenarios[5],
-                       x_scenarios[4], x_scenarios[3], x_scenarios[2], x_scenarios[1])
-      y_labs <- c("BathyAbyssopelagic SSP585", "BathyAbyssopelagic SSP245", "BathyAbyssopelagic SSP126", "BathyAbyssopelagic Base",
-                  "Mesopelagic SSP585", "Mesopelagic SSP245", "Mesopelagic SSP126", "Mesopelagic Base",
-                  "Epipelagic SSP585", "Epipelagic SSP245", "Epipelagic SSP126", "Epipelagic Base")
-    # Defining generalities
-      # pal1 <- brewer.pal(6, "RdPu")
-      # cv <- c("0", "", "0.2", "", "", "0.5", "", "", "0.8", "", "1")
+      x_scenarios <- c(x_scenarios[1], x_scenarios[2], x_scenarios[3],
+                       x_scenarios[4], x_scenarios[5], x_scenarios[6],
+                       x_scenarios[7], x_scenarios[8], x_scenarios[9])
+      x_labs <- c("Epipelagic SSP126", "Epipelagic SSP245", "Epipelagic SSP585", 
+                  "Mesopelagic SSP126", "Mesopelagic SSP245", "Mesopelagic SSP585", 
+                  "BathyAbyssopelagic SSP126", "BathyAbyssopelagic SSP245", "BathyAbyssopelagic SSP585")
+      y_scenarios <- c(x_scenarios[9],x_scenarios[8], x_scenarios[7], 
+                       x_scenarios[6], x_scenarios[5], x_scenarios[4], 
+                       x_scenarios[3], x_scenarios[2], x_scenarios[1])
+      y_labs <- c("BathyAbyssopelagic SSP585", "BathyAbyssopelagic SSP245", "BathyAbyssopelagic SSP126",
+                  "Mesopelagic SSP585", "Mesopelagic SSP245", "Mesopelagic SSP126",
+                  "Epipelagic SSP585", "Epipelagic SSP245", "Epipelagic SSP126")
     # Defining themes
       theme_opts1 <- list(theme(plot.margin = margin(0, 0, 0, 0, "cm"),
                                 axis.title.x = element_blank(),
@@ -104,12 +101,6 @@ kappa_correlation <- function(path, shp, outdir) {
         scale_fill_gradient2(low = "#deebf7", high = "#08519c", mid = "#4292c6",
                              midpoint = 0.5, limit = c(0,1), space = "Lab", 
                              name = "Kappa\nCorrelation") +
-        # scale_fill_gradientn(name = "Kappa\nCorrelation",
-        #                      colours = pal1,
-        #                      limits = c(0, 1),
-        #                      breaks = seq(0, 1, 0.1),
-        #                      labels = cv, 
-        #                      space = "Lab") +
         scale_x_discrete(limits = x_scenarios, labels = x_labs) +
         scale_y_discrete(limits = y_scenarios, labels = y_labs) +
         theme_minimal() + 
@@ -123,9 +114,9 @@ kappa_correlation <- function(path, shp, outdir) {
   }
 }
 
-system.time(kappa_correlation(path = "ublm-cal_0520rce-vocc040_targets-mix", 
+system.time(kappa_correlation(path = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn", 
                               shp = "shapefiles_rasters/01_abnjs_nofilterdepth", 
-                              outdir = "ublm-cal_0520rce-vocc040_targets-mix/"))
+                              outdir = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/"))
 
 # system.time(kappa_correlation(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs/ublm-cal_0520rce-vocc020_targets-mix", 
 #                               shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth", 
