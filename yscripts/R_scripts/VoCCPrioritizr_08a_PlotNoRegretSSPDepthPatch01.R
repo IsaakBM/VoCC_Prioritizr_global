@@ -428,11 +428,11 @@ no_regret_plots <- function(path, outdir, shp) {
         ggsave(paste(outdir, paste("no-regret-FinalAll", ".pdf", sep = ""), sep = ""), width = 48, height = 20, dpi = 300)
 }
 
-# system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
-#                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/",
-#                             shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth"))
+system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03_noBase/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
+                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03_noBase/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/",
+                            shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth"))
 
-system.time(no_regret_plots(path = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy",
-                            outdir = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy/",
-                            shp = "shapefiles_rasters/01_abnjs_nofilterdepth"))
+# system.time(no_regret_plots(path = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy",
+#                             outdir = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy/",
+#                             shp = "shapefiles_rasters/01_abnjs_nofilterdepth"))
 
