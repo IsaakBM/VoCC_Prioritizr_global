@@ -18,12 +18,12 @@ plot_solutions <- function(path, outdir) {
   
   # Which directories for climate prioritization scenarios?
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
-    y_axis <- c("Epipelagic", "", "", "", 
-                "Mesopelagic", "", "", "",
-                "Bathyabyssopelagic", "", "", "")
-    main_tittles <- c("Base", "SSP1-2.6", "SSP2-4.5", "SSP5-8.5", 
-                      "", "", "", "",
-                      "", "", "", "")
+    y_axis <- c("Epipelagic", "", "", 
+                "Mesopelagic", "", "",
+                "Bathyabyssopelagic", "", "")
+    main_tittles <- c("SSP1-2.6", "SSP2-4.5", "SSP5-8.5", 
+                      "", "", "",
+                      "", "", "")
     pattern1 <-  c(paste0("*Longhurst*", ".*.csv$"), paste0("*Glasgow*", ".*.csv$"), paste0("*GOODS*", ".*.csv$"))
     
   # Loop for every directory
@@ -176,19 +176,21 @@ plot_solutions <- function(path, outdir) {
                                     legend.key.width = unit(0.9, "cm"),
                                     plot.tag = element_text(size = 25, face = "bold")))
           # CALIBRATION PLOTS
-            p3 <-   ((plots_list[[1]] / plots_list[[5]] / plots_list[[9]]) |
-                     (plots_list[[2]] / plots_list[[6]] / plots_list[[10]]) |
-                     (plots_list[[3]] / plots_list[[7]] / plots_list[[11]]) |
-                     (plots_list[[4]] / plots_list[[8]] / plots_list[[12]])) +
+            p3 <-   ((plots_list[[1]] / plots_list[[4]] / plots_list[[7]]) |
+                     (plots_list[[2]] / plots_list[[5]] / plots_list[[8]]) |
+                     (plots_list[[3]] / plots_list[[6]] / plots_list[[9]])) +
               plot_layout(guides = "collect") +
               plot_annotation(tag_prefix = "",
-                              tag_levels = "A",
+                              tag_levels = "a",
                               tag_suffix = ".",) +
               theme_opts3 +
-              ggsave(paste(outdir, paste("calibration-solutions", ".pdf", sep = ""), sep = ""), width = 40, height = 20, dpi = 300)
+              ggsave(paste(outdir, paste("calibration-solutions", ".pdf", sep = ""), sep = ""), width = 35, height = 20, dpi = 300)
 }
 
-system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs/ublm-cal_0520rce-vocc050_targets-mix_rawcost",
-                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs/ublm-cal_0520rce-vocc050_targets-mix_rawcost/"))
+# system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
+#                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/"))
+
+system.time(plot_solutions(path = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy",
+                            outdir = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy/"))
 
 
