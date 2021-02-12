@@ -187,10 +187,10 @@ plot_solutions <- function(path, outdir) {
               ggsave(paste(outdir, paste("calibration-solutions", ".pdf", sep = ""), sep = ""), width = 35, height = 20, dpi = 300)
 }
 
-# system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
-#                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/"))
+system.time(plot_solutions(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03_noBase/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
+                           outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03_noBase/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/"))
 
-system.time(plot_solutions(path = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy",
-                            outdir = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy/"))
+# system.time(plot_solutions(path = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy",
+#                             outdir = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy/"))
 
 

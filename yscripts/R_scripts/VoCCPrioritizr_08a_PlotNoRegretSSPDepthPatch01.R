@@ -218,7 +218,7 @@ no_regret_plots <- function(path, outdir, shp) {
         # 
           # no_regret <- solutions_csv[[1]][,3]*solutions_csv[[2]][,3]*solutions_csv[[3]][,3]*solutions_csv[[4]][,3]
           no_regret <- solutions_csv[[1]][,3]*solutions_csv[[2]][,3]*solutions_csv[[3]][,3]
-          no_regret_csv <- solutions_csv[[4]] %>% # [[4]] is the "base" dataframe solution but does not matter in this case
+          no_regret_csv <- solutions_csv[[1]] %>%
             dplyr::mutate(no_regret = no_regret) %>% 
             dplyr::select(id, no_regret) %>% 
             dplyr::arrange(id)
