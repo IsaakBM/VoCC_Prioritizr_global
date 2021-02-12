@@ -28,7 +28,6 @@ no_regret_plots <- function(path, outdir, shp) {
       olayers_list <- list(ep_dir, mp_dir, bap_dir)
     # 
       y_axis <- c("Epipelagic", "Mesopelagic", "Bathyabyssopelagic")
-      main_tittles1 <- c("No Climate Change", "", "")
       main_tittles2 <- c("Climate-smart network", "", "")
       
   # Loop for every directory for CLIMATE SMART AMONG SOLUTIONS FIGURE BY DEPTH LAYER [original figure 2]
@@ -163,189 +162,6 @@ no_regret_plots <- function(path, outdir, shp) {
         dflist01_final <- do.call(rbind, df_list01)
         rownames(dflist01_final) <- y_axis
       
-  # Loop for every directory for NON CLIMATE SOLUTIONS FIGURE BY DEPTH LAYER
-    # Begin the parallel structure
-      UseCores <- 5
-      cl <- makeCluster(UseCores)  
-      registerDoParallel(cl)
-      gglist02 <- vector("list", length = length(olayers_list))
-      plots_list02 <- foreach(kk = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
-        #
-          files_solution <- list.files(path = olayers_list[[kk]], pattern = "*Layer_.*.csv$", full.names = TRUE)
-          provinces_csv <- read.csv(list.files(path = olayers_list[[kk]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
-            dplyr::arrange(layer)
-          mpas_csv <- read.csv(list.files(path = olayers_list[[kk]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
-            dplyr::filter(province != "non-categ_mpas")
-          vmes_csv <- read.csv(list.files(path = olayers_list[[kk]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
-            dplyr::filter(province != "non-categ_VMEs")
-          pu_shpfile <- st_read(list.files(path = olayers_list[[kk]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
-        
-        # 
-          solutions_csv <- lapply(files_solution, function(x) {
-            single <- read.csv(x)
-            sol_csv <- single %>% 
-              dplyr::mutate(freq_sel = single[, 6]) %>% 
-              dplyr::select(id, cost, freq_sel) %>% 
-              dplyr::arrange(id)}) 
-        # 
-          no_cc <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[4]],  by = "id") %>% 
-            dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
-        # Creating the PROVINCES shapefile based on ocean layer
-          provinces_shp <- pu_shpfile %>%
-            dplyr::mutate(provinces = provinces_csv$province) %>% 
-            base::transform(id = as.numeric(factor(provinces))) %>% 
-            dplyr::group_by(id) %>% 
-            dplyr::summarise(prov = sum(id, do_union = TRUE))
-          
-        # Define themes to plot 
-          # Defining themes
-            theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
-                                      panel.grid.major = element_blank(),
-                                      panel.background = element_blank(),
-                                      plot.background = element_rect(fill = "white"),
-                                      panel.border = element_blank(),
-                                      axis.line = element_blank(),
-                                      axis.text.x = element_blank(),
-                                      axis.text.y = element_blank(),
-                                      axis.ticks = element_blank(),
-                                      axis.ticks.length = unit(.25, "cm"), 
-                                      axis.title.x = element_blank(),
-                                      axis.title.y = element_text(face = "plain", size = 25, angle = 90),
-                                      plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                                      legend.title = element_text(colour = "black", face = "bold", size = 18),
-                                      legend.text = element_text(colour = "black", face = "plain", size = 16), 
-                                      legend.key.height = unit(2.7, "cm"),
-                                      legend.key.width = unit(1.6, "cm"),
-                                      legend.position = "none", 
-                                      plot.tag = element_text(size = 35, face = "bold")))
-          # Color Palette, World borders and Legend
-            pal <- c("#deebf7", "#31a354")
-            pal2 <- c("#e5f5f9", "#31a354")
-            world_sf <- ne_countries(scale = "medium", returnclass = "sf") 
-            ranges <- c("0", "1")
-          # Plot
-            gglist02[[kk]] <- ggplot() + 
-              geom_sf(data = no_cc, aes(group = as.factor(freq_sel), fill = as.factor(freq_sel)), color = NA) +
-              geom_sf(data = provinces_shp, fill = NA) +
-              geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-              scale_fill_manual(values = pal2,
-                                name = "Selection",
-                                labels = ranges) +
-              ggtitle(main_tittles1[kk]) +
-              labs(y = y_axis[kk]) +
-              theme_opts3 +
-              theme(legend.position = "none")
-      }
-      stopCluster(cl)
-      
-      # Getting data frame information for NON CLIMATE SCENARIOS
-        UseCores <- 5
-        cl <- makeCluster(UseCores)  
-        registerDoParallel(cl)
-        dflist02 <- vector("list", length = length(olayers_list))
-        df_list02 <- foreach(b = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
-          #
-            files_solution <- list.files(path = olayers_list[[b]], pattern = "*Layer_.*.csv$", full.names = TRUE)
-            provinces_csv <- read.csv(list.files(path = olayers_list[[b]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
-              dplyr::arrange(layer)
-            mpas_csv <- read.csv(list.files(path = olayers_list[[b]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
-              dplyr::filter(province != "non-categ_mpas")
-            vmes_csv <- read.csv(list.files(path = olayers_list[[b]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
-              dplyr::filter(province != "non-categ_VMEs")
-            pu_shpfile <- st_read(list.files(path = olayers_list[[b]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
-          # 
-            solutions_csv <- lapply(files_solution, function(x) {
-              single <- read.csv(x)
-              sol_csv <- single %>% 
-                dplyr::mutate(freq_sel = single[, 6]) %>% 
-                dplyr::select(id, cost, freq_sel) %>% 
-                dplyr::arrange(id)}) 
-          # 
-            no_cc <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[4]],  by = "id") %>% 
-              dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer)))
-            dflist02[[b]] <- data.frame(no_cc = round(sum(no_cc$freq_sel == 1)/length(unique(pu_shpfile$id)), digits = 4)*100) #change this
-        }
-        stopCluster(cl)
-        dflist02_final <- do.call(rbind, df_list02)
-        rownames(dflist02_final) <- y_axis
-        write.csv(cbind(dflist01_final, dflist02_final), paste(outdir, paste("no-regrets-scenario", ".csv", sep = ""), sep = ""))  
-        
-        # Getting planning units information for no regret areas (SSPs) to later get Species Information 
-          UseCores <- 5
-          cl <- makeCluster(UseCores)  
-          registerDoParallel(cl)
-          dflist01 <- vector("list", length = length(olayers_list))
-          df_list01 <- foreach(e = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
-            #
-            files_solution <- list.files(path = olayers_list[[e]], pattern = "*Layer_.*.csv$", full.names = TRUE)
-            provinces_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
-              dplyr::arrange(layer)
-            mpas_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
-              dplyr::filter(province != "non-categ_mpas")
-            vmes_csv <- read.csv(list.files(path = olayers_list[[e]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
-              dplyr::filter(province != "non-categ_VMEs")
-            pu_shpfile <- st_read(list.files(path = olayers_list[[e]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
-            # 
-            solutions_csv <- lapply(files_solution, function(x) {
-              single <- read.csv(x)
-              sol_csv <- single %>% 
-                dplyr::mutate(freq_sel = single[, 6]) %>% 
-                dplyr::select(id, cost, freq_sel) %>% 
-                dplyr::arrange(id)})
-            # 
-            ssp126 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[1]],  by = "id") %>% 
-              dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 4, freq_sel)))
-            ssp245 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[2]],  by = "id") %>% 
-              dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 5, freq_sel)))
-            ssp585 <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[3]],  by = "id") %>% 
-              dplyr::mutate(solution1 = ifelse(is.na(freq_sel), 0, ifelse(freq_sel == 1, 6, freq_sel)))
-            
-            no_regrets02 <- pu_shpfile %>% 
-              dplyr::mutate(no_regret_all = ssp126$solution1+ssp245$solution1+ssp585$solution1) %>% 
-              dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer))) %>% 
-              dplyr::filter(no_regret_all == 15) %>% 
-              dplyr::mutate(olayer = y_axis[e]) %>% 
-              data.frame() %>% 
-              dplyr::select(id, olayer)
-            
-            write.csv(no_regrets02, paste(outdir, paste(paste0(y_axis[e], "_","sps"), ".csv", sep = ""), sep = ""))  
-          }
-          stopCluster(cl)
-          
-          # Getting planning units information for no climate change (NO CC) to later get Species Information 
-            UseCores <- 5
-            cl <- makeCluster(UseCores)  
-            registerDoParallel(cl)
-            dflist03 <- vector("list", length = length(olayers_list))
-            df_list03 <- foreach(ee = 1:length(olayers_list), .packages = c("sf", "raster", "dplyr", "ggplot2", "rnaturalearth", "rnaturalearthdata", "RColorBrewer")) %dopar% {
-              #
-              files_solution <- list.files(path = olayers_list[[ee]], pattern = "*Layer_.*.csv$", full.names = TRUE)
-              provinces_csv <- read.csv(list.files(path = olayers_list[[ee]], pattern = "*pus-.*.csv$", full.names = TRUE)[1]) %>% 
-                dplyr::arrange(layer)
-              mpas_csv <- read.csv(list.files(path = olayers_list[[ee]], pattern = "*_mpas.*.csv$", full.names = TRUE)[1]) %>% 
-                dplyr::filter(province != "non-categ_mpas")
-              vmes_csv <- read.csv(list.files(path = olayers_list[[ee]], pattern = "*_VMEs.*.csv$", full.names = TRUE)[1]) %>% 
-                dplyr::filter(province != "non-categ_VMEs")
-              pu_shpfile <- st_read(list.files(path = olayers_list[[ee]], pattern = ".shp", full.names = TRUE)[1]) # the same for every ocean layer so that's why [1]
-              # 
-              solutions_csv <- lapply(files_solution, function(x) {
-                single <- read.csv(x)
-                sol_csv <- single %>% 
-                  dplyr::mutate(freq_sel = single[, 6]) %>% 
-                  dplyr::select(id, cost, freq_sel) %>% 
-                  dplyr::arrange(id)}) 
-              # 
-              no_cc <- dplyr::left_join(x = pu_shpfile, y = solutions_csv[[4]],  by = "id")
-              no_cc2 <- no_cc %>% 
-                dplyr::filter(!id %in% unique(c(mpas_csv$layer, vmes_csv$layer))) %>% 
-                dplyr::filter(freq_sel == 1) %>% 
-                dplyr::mutate(olayer = y_axis[ee]) %>% 
-                data.frame() %>%
-                dplyr::select(id, olayer)
-              
-              write.csv(no_cc2, paste(outdir, paste(paste0(y_axis[ee], "_NoCC","sps"), ".csv", sep = ""), sep = ""))  
-            }
-            stopCluster(cl)
 
   # Plotting the FINAL FIGURE AMONG SCENARIOS
     # Defining themes
@@ -368,7 +184,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                 legend.key.width = unit(1.6, "cm"),
                                 plot.tag = element_text(size = 35, face = "bold")))
     # CALIBRATION PLOTS
-      p3 <-   ((plots_list02[[1]] / plots_list02[[2]] / plots_list02[[3]]) | ((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3)) +
+      p3 <-   (((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3)) +
         plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
                         tag_levels = "a",
@@ -603,18 +419,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                 legend.key.width = unit(1.5, "cm"),
                                 plot.tag = element_text(size = 35, face = "bold")))
       # CALIBRATION PLOTS
-      p3 <-   ((plots_list[[1]] / plots_list[[2]] / plots_list[[3]]) | ((no_regret_all / no_regret_all / no_regret_all) + theme_opts3)) +
-        plot_layout(guides = "collect") +
-        plot_annotation(tag_prefix = "",
-                        tag_levels = "a",
-                        tag_suffix = ".",) +
-        # theme_opts3 +
-        ggsave(paste(outdir, paste("no-regrets-all", ".pdf", sep = ""), sep = ""), width = 30, height = 20, dpi = 300)
-      
-      
-      # CALIBRATION PLOTS
-      p4 <-   ((plots_list02[[1]] / plots_list02[[2]] / plots_list02[[3]]) | 
-                 ((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3) |
+      p4 <-   (((plots_list01[[1]] / plots_list01[[2]] / plots_list01[[3]]) + theme_opts3) |
                  ((no_regret_all / no_regret_all / no_regret_all) + theme_opts3)) +
         # plot_layout(guides = "collect") +
         plot_annotation(tag_prefix = "",
@@ -623,11 +428,11 @@ no_regret_plots <- function(path, outdir, shp) {
         ggsave(paste(outdir, paste("no-regret-FinalAll", ".pdf", sep = ""), sep = ""), width = 48, height = 20, dpi = 300)
 }
 
-system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
-                            outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/",
-                            shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth"))
+# system.time(no_regret_plots(path = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn",
+#                             outdir = "/QRISdata/Q1216/BritoMorales/Project04b/vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn/",
+#                             shp = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/01_abnjs_nofilterdepth"))
 
-# system.time(no_regret_plots(path = "ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates",
-#                             outdir = "ublm-cal_1020rce-vocc1050_targets-mix_rawcost_noduplicates/",
-#                             shp = "shapefiles_rasters/01_abnjs_nofilterdepth"))
+system.time(no_regret_plots(path = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy",
+                            outdir = "vfinal-sol_figs_03/ublm-cal_1030rce-vocc10100_targets-mix_rawcost_noduplicates_iucn copy/",
+                            shp = "shapefiles_rasters/01_abnjs_nofilterdepth"))
 
