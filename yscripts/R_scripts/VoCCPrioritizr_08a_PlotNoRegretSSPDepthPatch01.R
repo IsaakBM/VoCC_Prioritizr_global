@@ -111,7 +111,7 @@ no_regret_plots <- function(path, outdir, shp) {
                                 name = "Coherence\n across climate scenarios",
                                 labels = ranges) +
               ggtitle(main_tittles2[i]) +
-              # labs(y = y_axis[i]) +
+              labs(y = y_axis[i]) +
               theme_opts3
       }
       stopCluster(cl)
