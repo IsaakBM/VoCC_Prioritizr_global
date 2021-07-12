@@ -46,7 +46,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
     cores  <-  3
     cl <- makeCluster(cores)
     registerDoParallel(cl)    
-    foreach(i = 1:length(dir.olayers), .packages = c("raster", "dplyr", "sf", "exactextractr")) %dopar% {
+    foreach(i = 1:length(dir.olayers), .packages = c("raster", "dplyr", "sf", "exactextractr", "nngeo")) %dopar% {
       # Reading marxan_input file
         shp_file <- st_read(list.files(path = dir.shpfile[i] , pattern = ".shp", full.names = TRUE)) %>% 
           st_transform(crs = CRS(proj.geo))
@@ -98,9 +98,9 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
 #                    var_name = "VoCC",
 #                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
 
-climatevar_feature(rs_path = "Inputs/ClimateChange/VoCC",
+climatevar_feature(rs_path = "Inputs/ClimateChange/RCE",
                    shp_path = "Output/02_abnjs_filterdepth",
-                   outdir = "Inputs/ClimateChange/VoCC/",
-                   var_name = "VoCC",
+                   outdir = "Inputs/ClimateChange/RCE/",
+                   var_name = "RCE",
                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
 

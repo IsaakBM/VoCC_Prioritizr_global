@@ -156,7 +156,7 @@
       #                        from = "2050",
       #                        to = "2100"))
       
-      system.time(vocc_model(path = "Inputs/CMIP6_zrasters_zensemble/ssp585",
+      system.time(vocc_model(path = "Inputs/CMIP6_zrasters_zensemble/ssp126",
                              outdir = "Inputs/ClimateChange/SlpTrend/",
                              variable = "tob",
                              region = "Inputs/ETOPO1_05deg/ETOPO1_ocean.grd",
