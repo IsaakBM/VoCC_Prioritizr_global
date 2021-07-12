@@ -105,8 +105,8 @@ model.mean <- function(path, outdir, from, to) {
   }
 
 
-  system.time(model.mean(path = "/Users/bri273/Desktop/CDO/models_regrid_zyear/ssp126",
-                         outdir = "/Users/bri273/Desktop/CDO/models_regrid_zyear/ssp126/",
+  system.time(model.mean(path = "/Users/bri273/Desktop/CDO/models_regrid_zyear/ssp585",
+                         outdir = "/Users/bri273/Desktop/CDO/models_regrid_zyear/ssp585/",
                          from = "2015",
                          to = "2100"))
 
