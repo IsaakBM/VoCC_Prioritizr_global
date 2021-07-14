@@ -17,6 +17,7 @@ library(readr)
 library(ggtext)
 library(stringr)
 library(data.table)
+library(kader)
 
 ####################################################################################
 ####### 0.- Calling general objects for plots
@@ -47,7 +48,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 #  
   plot_VoCC <- function(path, world_sf) { 
     # Directory planning domain
-      dir.climatic <- list.dirs(path = "Figures/General", full.names = TRUE, recursive = FALSE)
+      dir.climatic <- list.dirs(path = path, full.names = TRUE, recursive = FALSE)
     # SSPs files
       files.nc <- list.files(path = dir.climatic, pattern = paste0((paste0("*vocc*", ".*.rds$")), collapse = "|"), full.names = TRUE)
     # Loop
@@ -121,7 +122,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 # 
   plot_RCE <- function(path, world_sf) { 
     # Directory planning domain
-      dir.climatic <- list.dirs(path = "Figures/General", full.names = TRUE, recursive = FALSE)
+      dir.climatic <- list.dirs(path = path, full.names = TRUE, recursive = FALSE)
     # SSPs files
       files.nc <- list.files(path = dir.climatic, pattern = paste0((paste0("*RCE*", ".*.rds$")), collapse = "|"), full.names = TRUE)
     # Loop
@@ -188,42 +189,25 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 
 
 
+  p1 <- plot_VoCC(path = "Inputs/General", world_sf)
+  p2 <- plot_RCE(path = "Inputs/General", world_sf)
+
+  p1.1 <- patchwork::wrap_plots(p1, ncol = 3, byrow = TRUE) +
+    plot_layout(guides = "collect") +
+    plot_annotation(tag_prefix = "(",
+                    tag_levels = "a", 
+                    tag_suffix = ")",)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_2.pdf", plot = p1.1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_2.png", plot = p1.1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-p1 <- patchwork::wrap_plots(gg_list, ncol = 3, byrow = TRUE) +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_prefix = "(",
-                  tag_levels = "a", 
-                  tag_suffix = ")",)
-ggsave("Figures/test07.pdf", plot = p1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
-
-
-p1 <- patchwork::wrap_plots(gg_list, ncol = 3, byrow = TRUE) +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_prefix = "(",
-                  tag_levels = "a", 
-                  tag_suffix = ")",)
-ggsave("Figures/test08.pdf", plot = p1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+  p1.2 <- patchwork::wrap_plots(p2, ncol = 3, byrow = TRUE) +
+    plot_layout(guides = "collect") +
+    plot_annotation(tag_prefix = "(",
+                    tag_levels = "a", 
+                    tag_suffix = ")",)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_3.pdf", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_3.png", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
 
 
 
