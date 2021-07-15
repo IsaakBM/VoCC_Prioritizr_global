@@ -24,11 +24,22 @@ library(kader)
 ####################################################################################
 # Robinson Projection
 moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
-# Marine regions
+# Marine ecoregions
+lg <- readRDS("Output/PlanningUnitsProvinces/pus-epipelagic_Longhurst_.rds") %>% 
+  st_transform(crs = CRS(moll)) %>% 
+  group_by(province) %>% 
+  summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
+glw <- readRDS("Output/PlanningUnitsProvinces/pus-mesopelagic_Glasgow_.rds") %>% 
+  st_transform(crs = CRS(moll)) %>% 
+  group_by(province) %>% 
+  summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
+sflr <- readRDS("Output/PlanningUnitsProvinces/pus-seafloor_GOODS_.rds") %>% 
+  st_transform(crs = CRS(moll)) %>% 
+  group_by(province) %>% 
+  summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
+pldom <- list(lg, lg, lg, glw, glw, glw, glw, glw, glw, sflr, sflr, sflr)
 
 # Planning area
-sf_PlanningArea <- st_read("Output/PlanningUnits/PUs_SA_robin_025deg/PUs_SA_robin_025deg.shp") %>% 
-  dplyr::rename(id = layer)
 # Land
 world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>% 
   st_transform(crs = CRS(moll))
@@ -46,7 +57,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 ####### 3.- Plot Climate velocity
 ####################################################################################
 #  
-  plot_VoCC <- function(path, world_sf) { 
+  plot_VoCC <- function(path, world_sf, pldom) { 
     # Directory planning domain
       dir.climatic <- list.dirs(path = path, full.names = TRUE, recursive = FALSE)
     # SSPs files
@@ -98,7 +109,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
         # Create the ggplot
           gg_list[[j]] <- ggplot() +
             geom_sf(data = dt1, aes(fill = vocc_categ), color = NA) +
-            # geom_sf(data = provinces_shp, fill = NA) +
+            geom_sf(data = pldom[[j]], fill = NA, color = "black", lwd = 1) +
             geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
             scale_fill_gradientn(name = expression(km~dec^-1),
                                  colours = pal_vocc,
@@ -120,7 +131,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 ####### 4.- RCE
 ####################################################################################
 # 
-  plot_RCE <- function(path, world_sf) { 
+  plot_RCE <- function(path, world_sf, pldom) { 
     # Directory planning domain
       dir.climatic <- list.dirs(path = path, full.names = TRUE, recursive = FALSE)
     # SSPs files
@@ -169,7 +180,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
         # Create the ggplot
           gg_list[[j]] <- ggplot() +
             geom_sf(data = dt1, aes(fill = rce_categ), color = NA) +
-            # geom_sf(data = provinces_shp, fill = NA) +
+            geom_sf(data = pldom[[j]], fill = NA, color = "black", lwd = 1) +
             geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
             scale_fill_gradientn(name = "RCE index",
                                  colours = pal_rce,
@@ -189,8 +200,8 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 
 
 
-  p1 <- plot_VoCC(path = "Inputs/General", world_sf)
-  p2 <- plot_RCE(path = "Inputs/General", world_sf)
+  p1 <- plot_VoCC(path = "Inputs/General", world_sf, pldom)
+  p2 <- plot_RCE(path = "Inputs/General", world_sf, pldom)
 
   p1.1 <- patchwork::wrap_plots(p1, ncol = 3, byrow = TRUE) +
     plot_layout(guides = "collect") +
