@@ -22,17 +22,18 @@ library(kader)
 ####################################################################################
 ####### 0.- General shapefiles by planning domain
 ####################################################################################
-# Robinson Projection
 moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
 dir.climatic <- list.dirs(path = "Inputs", full.names = TRUE, recursive = FALSE)[6]
-files.shp <- list.files(path = dir.climatic, pattern = paste0((paste0(".*.rds$")), collapse = "|"), full.names = TRUE)
+files.shp <- list.files(path = dir.climatic, pattern = paste0((paste0(".*.shp$")), collapse = "|"), full.names = TRUE)
 
-for(i in seq_along(sf_list)) {
+for(i in seq_along(files.shp)) {
   st_read(files.shp[i]) %>%    
+    st_make_valid() %>% 
+    st_crop(xmin = -180, ymin = -90, xmax = 180, ymax = 90) %>% 
     st_transform(crs = CRS(moll)) %>% 
     saveRDS(paste0("Inputs/", str_remove(basename(files.shp[i]), pattern = ".shp"), ".rds"))}
 
-####################################################################################
+  ####################################################################################
 ####### 0.- General shapefiles by planning domain
 ####################################################################################
 files.rds <- list.files(path = dir.climatic, pattern = paste0((paste0(".*.rds$")), collapse = "|"), full.names = TRUE)
@@ -56,7 +57,9 @@ sfL <- sfL[lengths(sfL) != 0]
 abys <- sfL[[1]]
 abysType <- as.vector(unique(abys$Class))
 for(i in seq_along(abysType)){
-    dplyr::filter(Class == abysType[i]) %>% 
+  abys %>% 
+    dplyr::filter(Class == abysType[i]) %>%
+    st_make_valid() %>% 
     saveRDS(paste0("Inputs/", paste("Abyss", abysType[i], sep = "_"), ".rds"))}
 # Canyon
 canyon <- sfL[[2]]
@@ -64,6 +67,7 @@ canyonType <- as.vector(unique(canyon$type))
 for(i in seq_along(canyonType)){
   canyon %>% 
     dplyr::filter(type == canyonType[i]) %>% 
+    st_make_valid() %>% 
     saveRDS(paste0("Inputs/", paste("Canyon", canyonType[i], sep = "_"), ".rds"))}
 # Shelf 
 shelf <- sfL[[3]]
@@ -71,6 +75,7 @@ shelfType <- as.vector(unique(shelf$Class))
 for(i in seq_along(shelfType)){
   shelf %>% 
     dplyr::filter(Class == shelfType[i]) %>% 
+    st_make_valid() %>% 
     saveRDS(paste0("Inputs/", paste("Shelf", shelfType[i], sep = "_"), ".rds"))}
 # Shelf 
 ShelfValley  <- sfL[[4]]
@@ -78,9 +83,6 @@ ShelfValleyType <- as.vector(unique(ShelfValley$Type))
 for(i in seq_along(ShelfValleyType)){
   ShelfValley %>% 
     dplyr::filter(Type == ShelfValleyType[i]) %>% 
+    st_make_valid() %>% 
     saveRDS(paste0("Inputs/", paste("ShelfValley", ShelfValleyType[i], sep = "_"), ".rds"))}
-
-
-
-
 
