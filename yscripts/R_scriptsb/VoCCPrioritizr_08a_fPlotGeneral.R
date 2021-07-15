@@ -19,27 +19,13 @@ library(stringr)
 library(data.table)
 library(kader)
 
+source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
+
 ####################################################################################
 ####### 0.- Calling general objects for plots
 ####################################################################################
 # Robinson Projection
 moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
-# Marine ecoregions
-lg <- readRDS("Output/PlanningUnitsProvinces/pus-epipelagic_Longhurst_.rds") %>% 
-  st_transform(crs = CRS(moll)) %>% 
-  group_by(province) %>% 
-  summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
-glw <- readRDS("Output/PlanningUnitsProvinces/pus-mesopelagic_Glasgow_.rds") %>% 
-  st_transform(crs = CRS(moll)) %>% 
-  group_by(province) %>% 
-  summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
-sflr <- readRDS("Output/PlanningUnitsProvinces/pus-seafloor_GOODS_.rds") %>% 
-  st_transform(crs = CRS(moll)) %>% 
-  group_by(province) %>% 
-  summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
-pldom <- list(lg, lg, lg, glw, glw, glw, glw, glw, glw, sflr, sflr, sflr)
-
-# Planning area
 # Land
 world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>% 
   st_transform(crs = CRS(moll))
@@ -51,7 +37,6 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 # mpas_sf <- left_join(sf_PlanningArea, mpas, "id") %>% 
 #   na.omit() %>% 
 #   dplyr::select(id, geometry)
-
 
 ####################################################################################
 ####### 3.- Plot Climate velocity
