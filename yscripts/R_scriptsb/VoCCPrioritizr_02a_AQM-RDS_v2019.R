@@ -47,7 +47,6 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
 ####### 
 ####################################################################################
   # Loop through each file
-    files_list <- vector("list", length = length(files)) # to allocate results
   # Begin the parallel structure
     ncores <- 3
     cl <- makeCluster(ncores)
@@ -56,7 +55,8 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
       PU_list <- foreach(i = 1:length(files), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom", "data.table")) %dopar% {
         # Reading conservation features
         if(stringr::str_detect(string = files[i], pattern = ".rds") == TRUE) {
-          single <- readRDS(files[i])
+          single <- readRDS(files[i]) %>% 
+            st_make_valid()
         } else if (stringr::str_detect(string = files[i], pattern = ".shp") == TRUE) {
           single <- st_read(files[i])}
         # Intersects every conservation feature with planning unit region
@@ -64,31 +64,31 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
             filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON")) # we want just the polygons/multi not extra geometries
         # Filter the intersection with the planning unit sf object to get the exact distristribution per planning units
           if(nrow(pu_int) > 0) { # to avoid empty sf objects 
-            files_list[[i]] <- st_join(x = shp_PU_sf, y = pu_int,  by = "cellsID") %>% 
+            out <- st_join(x = shp_PU_sf, y = pu_int,  by = "cellsID") %>% 
               na.omit() %>% 
               dplyr::group_by(cellsID.x) %>% 
               dplyr::summarise(cellsID = unique(cellsID.x)) %>% 
               dplyr::select(cellsID, geometry) %>% 
               dplyr::mutate(area_km2 = as.numeric(st_area(geometry)/1e+06),
-                            feature_names = paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_")) %>% 
+                            feature_names = ifelse(str_detect(basename(files[i]), pattern = ".rds"), 
+                                                   paste(unlist(strsplit(basename(files[i]), "[.]"))[1], olayer, sep = "_"),
+                                                   paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_"))) %>% 
               ungroup()
-                # dplyr::filter(area_km2 >= pu_min_area) %>% 
+              # Write the .rds object
+                pu_rds <- paste(unique(out$feature_names), ".rds", sep = "")
+                saveRDS(out, paste(outdir, pu_rds, sep = ""))
+              # Write .csv object
+                outCSV <- out %>% 
+                  as_tibble() %>% 
+                  dplyr::select(-geometry)
+                pu_csv <- paste(unique(outCSV$feature_names), ".csv", sep = "")
+                write.csv(outCSV, paste(outdir, pu_csv, sep = ""), row.names = FALSE)
               }
           }
       stopCluster(cl)
-
-####################################################################################
-####### 
-####################################################################################
-  # Final sf with all species information and write that object (main object to develop marxan input files)
-    PU_list_b <- do.call(rbind, PU_list)
-    # Write the object
-      pu_rds <- paste(olayer, ".rds", sep = "")
-      saveRDS(PU_list_b, paste(outdir, pu_rds, sep = ""))
-  return(PU_list_b)
 }
 
-system.time(features_pus(path = "Inputs/FeaturesSeafloor2",
+system.time(features_pus(path = "Inputs/FeaturesSeafloor3",
                          outdir = "Output/",
-                         pu_shp = "Output/02_abnjs_filterdepth/abnj_02-epipelagic_global_moll_05deg_depth/abnj_02-epipelagic_global_moll_05deg_depth.shp",
-                         olayer = "epipelagic"))
+                         pu_shp = "Output/02_abnjs_filterdepth/abnj_05-seafloor_global_moll_05deg_depth/abnj_05-seafloor_global_moll_05deg_depth.shp",
+                         olayer = "seafloor"))
