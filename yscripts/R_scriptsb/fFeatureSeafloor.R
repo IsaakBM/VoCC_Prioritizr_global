@@ -33,7 +33,7 @@ for(i in seq_along(files.shp)) {
     st_transform(crs = CRS(moll)) %>% 
     saveRDS(paste0("Inputs/", str_remove(basename(files.shp[i]), pattern = ".shp"), ".rds"))}
 
-  ####################################################################################
+####################################################################################
 ####### 0.- General shapefiles by planning domain
 ####################################################################################
 files.rds <- list.files(path = dir.climatic, pattern = paste0((paste0(".*.rds$")), collapse = "|"), full.names = TRUE)
@@ -85,4 +85,49 @@ for(i in seq_along(ShelfValleyType)){
     dplyr::filter(Type == ShelfValleyType[i]) %>% 
     st_make_valid() %>% 
     saveRDS(paste0("Inputs/", paste("ShelfValley", ShelfValleyType[i], sep = "_"), ".rds"))}
+
+####################################################################################
+####### 0.- General shapefiles by planning domain
+####################################################################################
+moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
+dir.climatic <- list.dirs(path = "Output/FeaturesPUs", full.names = TRUE, recursive = FALSE)[1]
+files.rds <- list.files(path = dir.climatic, pattern = paste0((paste0(".*.rds$")), collapse = "|"), full.names = TRUE)
+sfGeo <- lapply(files.rds, function(x) readRDS(x))
+names(sfGeo) <- str_remove_all(basename(files.rds), pattern = ".rds")
+
+
+theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                          panel.grid.major = element_blank(),
+                          panel.background = element_blank(),
+                          plot.background = element_rect(fill = "white"),
+                          panel.border = element_blank(),
+                          axis.line = element_blank(),
+                          axis.text.x = element_blank(),
+                          axis.text.y = element_blank(),
+                          axis.ticks = element_blank(),
+                          axis.ticks.length = unit(.25, "cm"),
+                          axis.title.x = element_blank(),
+                          axis.title.y = element_text(face = "plain", size = 25, angle = 90),
+                          plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
+                          legend.title = element_text(colour = "black", face = "bold", size = 25),
+                          legend.text = element_text(colour = "black", face = "bold", size = 20),
+                          legend.key.height = unit(2.5, "cm"),
+                          legend.key.width = unit(1.4, "cm"),
+                          plot.tag = element_text(size = 25, face = "bold")))
+sfL <- vector("list", length = length(sfGeo))
+for(i in seq_along(sfGeo)){
+  sfL[[i]] <- ggplot() +
+    geom_sf(data = sfGeo[[i]], fill = "#31a354", color = NA) +
+    geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+    theme_opts3 +
+    ggtitle(str_remove_all(unique(sfGeo[[i]]$feature_names), pattern = "_seafloor"))}
+
+p1.1 <- patchwork::wrap_plots(sfL, ncol = 5, byrow = TRUE)
+ggsave("Figures/Exploratory/GeomFeatures.pdf", plot = p1.1, width = 30, height = 25, dpi = 300, limitsize = FALSE)
+ggsave("Figures/Exploratory/GeomFeatures.png", plot = p1.1, width = 30, height = 25, dpi = 300, limitsize = FALSE)
+
+  
+
+
+
 
