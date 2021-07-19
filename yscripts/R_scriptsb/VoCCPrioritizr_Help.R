@@ -38,5 +38,3 @@ library(kader)
     group_by(province) %>% 
     summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
   pldom <- list(lg, lg, lg, glw, glw, glw, glw, glw, glw, sflr, sflr, sflr)
-  
-

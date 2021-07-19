@@ -55,13 +55,13 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
       PU_list <- foreach(i = 1:length(files), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom", "data.table")) %dopar% {
         # Reading conservation features
         if(stringr::str_detect(string = files[i], pattern = ".rds") == TRUE) {
-          single <- readRDS(files[i]) %>% 
-            st_make_valid()
+          single <- readRDS(files[i]) #%>% 
+            # st_make_valid()
         } else if (stringr::str_detect(string = files[i], pattern = ".shp") == TRUE) {
           single <- st_read(files[i])}
         # Intersects every conservation feature with planning unit region
           pu_int <- st_intersection(shp_PU_sf, single) %>% 
-            filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON")) # we want just the polygons/multi not extra geometries
+            dplyr::filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON")) # we want just the polygons/multi not extra geometries
         # Filter the intersection with the planning unit sf object to get the exact distristribution per planning units
           if(nrow(pu_int) > 0) { # to avoid empty sf objects 
             out <- st_join(x = shp_PU_sf, y = pu_int,  by = "cellsID") %>% 
@@ -70,25 +70,25 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
               dplyr::summarise(cellsID = unique(cellsID.x)) %>% 
               dplyr::select(cellsID, geometry) %>% 
               dplyr::mutate(area_km2 = as.numeric(st_area(geometry)/1e+06),
-                            feature_names = ifelse(str_detect(basename(files[i]), pattern = ".rds"), 
+                            feature_names = ifelse(str_detect(basename(files[i]), pattern = ".shp"), 
                                                    paste(unlist(strsplit(basename(files[i]), "[.]"))[1], olayer, sep = "_"),
                                                    paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_"))) %>% 
               ungroup()
               # Write the .rds object
                 pu_rds <- paste(unique(out$feature_names), ".rds", sep = "")
                 saveRDS(out, paste(outdir, pu_rds, sep = ""))
-              # Write .csv object
-                outCSV <- out %>% 
-                  as_tibble() %>% 
-                  dplyr::select(-geometry)
-                pu_csv <- paste(unique(outCSV$feature_names), ".csv", sep = "")
-                write.csv(outCSV, paste(outdir, pu_csv, sep = ""), row.names = FALSE)
+              # # Write .csv object
+              #   outCSV <- out %>% 
+              #     as_tibble() %>% 
+              #     dplyr::select(-geometry)
+              #   pu_csv <- paste(unique(outCSV$feature_names), ".csv", sep = "")
+              #   write.csv(outCSV, paste(outdir, pu_csv, sep = ""), row.names = FALSE)
               }
           }
       stopCluster(cl)
 }
 
-system.time(features_pus(path = "Inputs/FeaturesSeafloor3",
-                         outdir = "Output/",
-                         pu_shp = "Output/02_abnjs_filterdepth/abnj_05-seafloor_global_moll_05deg_depth/abnj_05-seafloor_global_moll_05deg_depth.shp",
-                         olayer = "seafloor"))
+system.time(features_pus(path = "Inputs/Aqm/04_BathyAbyssopelagicLayer_rds",
+                         outdir = "Output/FeaturesPUs/04_BathyAbyssopelagicLayer/",
+                         pu_shp = "Output/02_abnjs_filterdepth/abnj_04-bathyabysso_global_moll_05deg_depth/abnj_04-bathyabysso_global_moll_05deg_depth.shp",
+                         olayer = "BathyAbyssopelagicLayer"))
