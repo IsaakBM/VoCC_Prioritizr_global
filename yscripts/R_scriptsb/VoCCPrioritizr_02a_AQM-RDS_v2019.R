@@ -20,7 +20,6 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
   library(dplyr)
   library(doParallel)
   library(stringr)
-  library(sf)
   library(lwgeom)
   library(data.table)
   
