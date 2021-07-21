@@ -4,6 +4,7 @@
 # Caveat Emptor!
 
 fCleanGeo <- function(path, outdir, proj.geo) {
+  library(raster)
   library(sf)
   library(lwgeom)
   library(dplyr)
@@ -15,7 +16,7 @@ fCleanGeo <- function(path, outdir, proj.geo) {
   ncores <- 5
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
-  foreach(i = 1:length(files.shp), .packages = c("sf", "dplyr", "stringr", "lwgeom", "data.table")) %dopar% {
+  foreach(i = 1:length(files.shp), .packages = c("sf", "dplyr", "stringr", "lwgeom", "data.table", "raster")) %dopar% {
     st_read(files.shp[i]) %>%    
       st_make_valid() %>% 
       st_crop(xmin = -180, ymin = -90, xmax = 180, ymax = 90) %>% 
