@@ -34,5 +34,5 @@ features_merge <- function(path, outdir) {
   write_csv(ftrs_df, paste(outdir, nsm, sep = ""))
 }
 
-system.time(features_merge(path = "/scratch/user/uqibrito/Project04c/Output/FeaturesPUs/02_EpipelagicLayer", 
+system.time(features_merge(path = "/scratch/user/uqibrito/Project04c/Output/FeaturesPUs/04_BathyAbyssopelagicLayer", 
                            outdir = "/scratch/user/uqibrito/Project04c/Output/FeaturesOLayer"))
