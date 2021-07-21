@@ -90,8 +90,7 @@ for(i in seq_along(ShelfValleyType)){
 ####### 0.- General shapefiles by planning domain
 ####################################################################################
 moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
-dir.climatic <- list.dirs(path = "Output/FeaturesPUs", full.names = TRUE, recursive = FALSE)[1]
-files.rds <- list.files(path = dir.climatic, pattern = paste0((paste0(".*.rds$")), collapse = "|"), full.names = TRUE)
+files.rds <- list.files(path = "Output/FeaturesPUs/06_GeomorphicFeatures", pattern = paste0((paste0(".*.rds$")), collapse = "|"), full.names = TRUE)
 sfGeo <- lapply(files.rds, function(x) readRDS(x))
 names(sfGeo) <- str_remove_all(basename(files.rds), pattern = ".rds")
 
@@ -122,9 +121,9 @@ for(i in seq_along(sfGeo)){
     theme_opts3 +
     ggtitle(str_remove_all(unique(sfGeo[[i]]$feature_names), pattern = "_seafloor"))}
 
-p1.1 <- patchwork::wrap_plots(sfL, ncol = 5, byrow = TRUE)
-ggsave("Figures/Exploratory/GeomFeatures.pdf", plot = p1.1, width = 30, height = 25, dpi = 300, limitsize = FALSE)
-ggsave("Figures/Exploratory/GeomFeatures.png", plot = p1.1, width = 30, height = 25, dpi = 300, limitsize = FALSE)
+p1.1 <- patchwork::wrap_plots(sfL, ncol = 6, byrow = TRUE)
+ggsave("Figures/Exploratory/GeomFeatures02.pdf", plot = p1.1, width = 30, height = 12, dpi = 300, limitsize = FALSE)
+ggsave("Figures/Exploratory/GeomFeatures02.png", plot = p1.1, width = 30, height = 12, dpi = 300, limitsize = FALSE)
 
   
 
