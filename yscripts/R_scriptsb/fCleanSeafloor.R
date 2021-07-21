@@ -4,6 +4,7 @@
 # Caveat Emptor!
 
 fCleanGeo <- function(path, outdir, proj.geo) {
+  
   library(raster)
   library(sf)
   library(lwgeom)
@@ -13,16 +14,13 @@ fCleanGeo <- function(path, outdir, proj.geo) {
   library(doParallel)
   
   files.shp <- list.files(path = path, pattern = paste0((paste0(".*.shp$")), collapse = "|"), full.names = TRUE)
-  ncores <- 5
-  cl <- makeCluster(ncores)
-  registerDoParallel(cl)
-  foreach(i = 1:length(files.shp), .packages = c("sf", "dplyr", "stringr", "lwgeom", "data.table", "raster")) %dopar% {
+  for(i in seq_along(files.shp)) {
     st_read(files.shp[i]) %>%    
       st_make_valid() %>% 
       st_crop(xmin = -180, ymin = -90, xmax = 180, ymax = 90) %>% 
       st_transform(crs = CRS(proj.geo)) %>% 
+      dplyr::select(Geomorphic, geometry) %>% 
       saveRDS(paste0(outdir, str_remove(basename(files.shp[i]), pattern = ".shp"), ".rds"))}
-  stopCluster(cl)
 }
 
 system.time(fCleanGeo(path = "/scratch/user/uqibrito/Project04c/Inputs/Global_Seafloor_Geomorphic_Features", 
