@@ -71,7 +71,7 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
               dplyr::mutate(area_km2 = as.numeric(st_area(geometry)/1e+06),
                             feature_names = ifelse(str_detect(basename(files[i]), pattern = ".shp"), 
                                                    paste(unlist(strsplit(basename(files[i]), "[.]"))[1], olayer, sep = "_"),
-                                                   paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_"))) %>% 
+                                                   paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_"))) %>%
               ungroup()
               # Write the .rds object
                 pu_rds <- paste(unique(out$feature_names), ".rds", sep = "")
@@ -87,7 +87,7 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
       stopCluster(cl)
 }
 
-system.time(features_pus(path = "Inputs/Aqm/04_BathyAbyssopelagicLayer_rds",
-                         outdir = "Output/FeaturesPUs/04_BathyAbyssopelagicLayer/",
-                         pu_shp = "Output/02_abnjs_filterdepth/abnj_04-bathyabysso_global_moll_05deg_depth/abnj_04-bathyabysso_global_moll_05deg_depth.shp",
-                         olayer = "BathyAbyssopelagicLayer"))
+system.time(features_pus(path = "Inputs/GeomorphicFeatures_rds",
+                         outdir = "Output/FeaturesPUs/06_GeomorphicFeatures/",
+                         pu_shp = "Output/02_abnjs_filterdepth/abnj_05-seafloor_global_moll_05deg_depth/abnj_05-seafloor_global_moll_05deg_depth.shp",
+                         olayer = "seafloor"))
