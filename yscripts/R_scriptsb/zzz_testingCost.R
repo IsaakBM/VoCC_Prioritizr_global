@@ -48,62 +48,66 @@ bap <- lapply(t2, function(x){
 bap <- bap[lengths(bap) != 0] # 55
 saveRDS(bap, "Inputs/Cost/04-bathyabyssopelagic_CostbySpecies.rds")
 
-
-
-bap2 <- lapply(bap, function(x){
-  ff <- x %>% 
-    dplyr::mutate(cost = .[[3]], 
-                  MinLayer = 1000,
-                  MaxLayer = 4000, 
-                  DepthRangeLayer = DepthMax - MinLayer, 
-                  cost_depth = cost/DepthRange, 
-                  cost_layer = cost_depth*DepthRangeLayer) %>% 
-  dplyr::select(x, y, cost_layer)})
-bapDF <- data.table::rbindlist(bap2, use.names = TRUE) %>% 
-  dplyr::group_by(x, y) %>% 
-  dplyr::summarise(total_cost = sum(cost_layer))
-
-test <- raster::rasterFromXYZ(bapDF)
-
-
-ep2 <- lapply(ep, function(x){
-  ff <- x %>% 
-    dplyr::mutate(cost = .[[3]], 
-                  MinLayer = 0,
-                  MaxLayer = 200, 
-                  DepthRangeLayer = MaxLayer - DepthMin, 
-                  cost_depth = cost/DepthRange, 
-                  cost_layer = cost_depth*DepthRangeLayer) %>% 
-    dplyr::select(x, y, cost_layer)})
-epDF <- data.table::rbindlist(ep2, use.names = TRUE) %>% 
-  dplyr::group_by(x, y) %>% 
-  dplyr::summarise(total_cost = sum(cost_layer))
-
-
-mp2 <- lapply(ep, function(x){
-  ff <- x %>% 
-    dplyr::mutate(cost = .[[3]], 
-                  MinLayer = 200,
-                  MaxLayer = 1000, 
-                  DepthRangeLayer = (MaxLayer- MinLayer) - ifelse(DepthMin >= 200, DepthMin, 0), 
-                  cost_depth = cost/DepthRange, 
-                  cost_layer = cost_depth*DepthRangeLayer) %>% 
-    dplyr::select(x, y, cost_layer)})
-mpDF <- data.table::rbindlist(mp2, use.names = TRUE) %>% 
-  dplyr::group_by(x, y) %>% 
-  dplyr::summarise(total_cost = sum(cost_layer))
-
-
-
-
-test1 <- raster::rasterFromXYZ(bapDF)
-plot(kader:::cuberoot(test1))
-saveRDS(test1, "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.rds")
-test3 <- raster::rasterFromXYZ(mpDF)
-saveRDS(test3, "Inputs/Cost/03-mesopelagic_CostRasterTotal.rds")
-plot(kader:::cuberoot(test3))
-test2 <- raster::rasterFromXYZ(epDF)
-plot(kader:::cuberoot(test2))
-saveRDS(test2, "Inputs/Cost/02-epipelagic_CostRasterTotal.rds")
-
-
+####################################################################################
+####### 
+####################################################################################
+# 
+  ep2 <- lapply(ep, function(x){
+    ff <- x %>% 
+      dplyr::mutate(cost = .[[3]], 
+                    MinLayer = 0,
+                    MaxLayer = 200, 
+                    DepthRangeLayer = MaxLayer - DepthMin, 
+                    cost_depth = cost/DepthRange, 
+                    cost_layer = cost_depth*DepthRangeLayer)})
+  saveRDS(ep2, "Inputs/Cost/02-epipelagic_CostbySpecies.rds")
+# 
+  epDF <- lapply(ep2, function(x) x %>% dplyr::select(x, y, cost_layer))
+  epDF <- epDF %>% 
+    data.table::rbindlist(use.names = TRUE) %>% 
+    dplyr::group_by(x, y) %>% 
+    dplyr::summarise(total_cost = sum(cost_layer))
+  epRS <- raster::rasterFromXYZ(epDF)
+  saveRDS(epRS, "Inputs/Cost/02-epipelagic_CostRasterTotal.rds")
+  writeRaster(epRS, "Inputs/Cost/02-epipelagic_CostRasterTotal.tif")
+  
+##### 
+  mp2 <- lapply(ep, function(x){
+    ff <- x %>% 
+      dplyr::mutate(cost = .[[3]], 
+                    MinLayer = 200,
+                    MaxLayer = 1000, 
+                    DepthRangeLayer = (MaxLayer- MinLayer) - ifelse(DepthMin >= 200, DepthMin, 0), 
+                    cost_depth = cost/DepthRange, 
+                    cost_layer = cost_depth*DepthRangeLayer)})
+  saveRDS(mp2, "Inputs/Cost/03-mesopelagic_CostbySpecies.rds")
+# 
+  mpDF <- lapply(mp2, function(x) x %>% dplyr::select(x, y, cost_layer))
+  mpDF <- mpDF %>% 
+    data.table::rbindlist(use.names = TRUE) %>% 
+    dplyr::group_by(x, y) %>% 
+    dplyr::summarise(total_cost = sum(cost_layer))
+  mpRS <- raster::rasterFromXYZ(mpDF)
+  saveRDS(mpRS, "Inputs/Cost/03-mesopelagic_CostRasterTotal.rds")
+  writeRaster(mpRS, "Inputs/Cost/03-mesopelagic_CostRasterTotal.tif")
+    
+#####
+# 
+  bap2 <- lapply(bap, function(x){
+    ff <- x %>% 
+      dplyr::mutate(cost = .[[3]], 
+                    MinLayer = 1000,
+                    MaxLayer = 4000, 
+                    DepthRangeLayer = DepthMax - MinLayer, 
+                    cost_depth = cost/DepthRange, 
+                    cost_layer = cost_depth*DepthRangeLayer)})
+  saveRDS(bap2, "Inputs/Cost/04-bathyabyssopelagic_CostbySpecies.rds")
+#
+  bapDF <- lapply(bap2, function(x) x %>% dplyr::select(x, y, cost_layer))
+  bapDF <- bapDF %>% 
+    data.table::rbindlist(use.names = TRUE) %>% 
+    dplyr::group_by(x, y) %>% 
+    dplyr::summarise(total_cost = sum(cost_layer))
+  bapRS <- raster::rasterFromXYZ(bapDF)
+  saveRDS(bapRS, "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.rds")
+  writeRaster(bapRS, "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.tif")
