@@ -4,9 +4,9 @@
 .Ruserdata
 /climate-change_inputs
 /Figures/SpiralPlots/znoregret-network_sps
+/Inputs/Cost/Cost_RasterStack_bySpecies.rds
 /Inputs/Boundaries/mpas_v2018
 /Inputs/CMIP6_zrasters_zensemble
-/Inputs/Cost
 /Inputs/FeaturesSeafloor
 /Inputs/FeaturesSeafloor2
 /zold
