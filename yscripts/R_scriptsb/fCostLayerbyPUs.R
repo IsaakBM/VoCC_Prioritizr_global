@@ -58,7 +58,8 @@ moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
 # Run function for every planning domain 
   epCostSF <- CostbyPUs(data = "Inputs/Cost/02-epipelagic_CostRasterTotal.tif", sfdom = pld_ep, moll = moll)
   mpCostSF <- CostbyPUs(data = "Inputs/Cost/03-mesopelagic_CostRasterTotal.tif", sfdom = pld_mp, moll = moll)
+  saveRDS(mpCostSF, "Output/CostOLayer/03-mesopelagic_CostSFTotal.rds")
   bapCostSF <- CostbyPUs(data = "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.tif", sfdom = pld_bap, moll = moll)
+  saveRDS(bapCostSF, "Output/CostOLayer/04-bathyabyssopelagic_CostSFTotal.rds")
   sflrCostSF <- CostbyPUs(data = "Inputs/Cost/05-seafloor_CostRasterTotal.tif", sfdom = pld_sflr, moll = moll)
-  
-    
+  saveRDS(sflrCostSF, "Output/CostOLayer/05-seafloorCostSFTotal.rds")
