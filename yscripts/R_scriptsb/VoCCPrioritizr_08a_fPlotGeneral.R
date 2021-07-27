@@ -18,6 +18,8 @@ library(ggtext)
 library(stringr)
 library(data.table)
 library(kader)
+library(exactextractr)
+library(nngeo)
 
 source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
 
@@ -41,64 +43,89 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 ####################################################################################
 ####### 1.- Plot Richness
 ####################################################################################
-plot_rich <- function(data, sfdom, sfprov) {
-  x <- fread(data) %>% 
-    dplyr::arrange(pu) %>% 
-    dplyr::group_by(feature_names) %>%
-    dplyr::mutate(cells = n()) %>% # global cells for that species
-    dplyr::filter(cells >= 10) %>%  # more than 10 records for species in ABNJs
-    dplyr::ungroup() %>% 
-    dplyr::arrange(pu) %>%
-    dplyr::group_by(pu) %>%
-    dplyr::summarise(richness = n()) %>%
-    dplyr::mutate(richness_log = log10(richness)) %>% 
-    dplyr::mutate(rich_categ = ifelse(richness_log == 0, 1,
-                               ifelse(richness_log > 0 & richness_log <= 1, 2,
-                               ifelse(richness_log > 1 & richness_log <= 1.69897, 3,
-                               ifelse(richness_log > 1.69897 & richness_log <= 2, 4, 
-                               ifelse(richness_log > 2 & richness_log <= 2.69897, 5, 
-                               ifelse(richness_log > 2.69897 & richness_log <= 3, 6, 7)))))))
-  dff <- left_join(sfdom, x, "pu") %>% 
-    na.omit()
-  # Defining generalities
-  pal_rich <- rev(brewer.pal(7, "RdYlBu"))
-  cv_rich <- c("1", "1 - 10", "10 - 50", "50 - 100", "100 - 500", "500 - 1000", "> 1000")
-  # Defining themes
-  theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
-                            panel.grid.major = element_blank(),
-                            panel.background = element_blank(),
-                            plot.background = element_rect(fill = "white"),
-                            panel.border = element_blank(),
-                            axis.line = element_blank(),
-                            axis.text.x = element_blank(),
-                            axis.text.y = element_blank(),
-                            axis.ticks = element_blank(),
-                            axis.ticks.length = unit(.25, "cm"),
-                            axis.title.x = element_blank(),
-                            axis.title.y = element_text(face = "plain", size = 25, angle = 90),
-                            plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
-                            legend.title = element_text(colour = "black", face = "bold", size = 25),
-                            legend.text = element_text(colour = "black", face = "bold", size = 20),
-                            legend.key.height = unit(2.5, "cm"),
-                            legend.key.width = unit(1.4, "cm"),
-                            plot.tag = element_text(size = 25, face = "bold")))
-  # Create the ggplot
-  gg_list <- ggplot() +
-    geom_sf(data = dff, aes(fill = rich_categ), color = NA) +
-    geom_sf(data = sfprov, fill = NA, color = "black", lwd = 1) +
-    geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
-    scale_fill_gradientn(name = "Richness",
-                         colours = pal_rich,
-                         limits = c(1, 7),
-                         breaks = seq(1, 7, 1),
-                         labels = cv_rich) +
-    ggtitle(ifelse(stringr::str_detect(string = basename(data), pattern = "epi"), "Richness", "")) +
-    labs(y = ifelse(stringr::str_detect(string = basename(data), pattern = "epi"), "Epipelagic",
-             ifelse(stringr::str_detect(string = basename(data), pattern = "meso"), "Mesopelagic",
-             ifelse(stringr::str_detect(string = basename(data), pattern = "Bathy"), "BathyAbyssopelagic", "Seafloor")))) +
-    theme_opts3
-  return(gg_list)
-}
+# 
+  plot_rich <- function(data, sfdom, sfprov) {
+    x <- fread(data) %>% 
+      dplyr::arrange(pu) %>% 
+      dplyr::group_by(feature_names) %>%
+      dplyr::mutate(cells = n()) %>% # global cells for that species
+      dplyr::filter(cells >= 10) %>%  # more than 10 records for species in ABNJs
+      dplyr::ungroup() %>% 
+      dplyr::arrange(pu) %>%
+      dplyr::group_by(pu) %>%
+      dplyr::summarise(richness = n()) %>%
+      dplyr::mutate(richness_log = log10(richness)) %>% 
+      dplyr::mutate(rich_categ = ifelse(richness_log == 0, 1,
+                                 ifelse(richness_log > 0 & richness_log <= 1, 2,
+                                 ifelse(richness_log > 1 & richness_log <= 1.69897, 3,
+                                 ifelse(richness_log > 1.69897 & richness_log <= 2, 4, 
+                                 ifelse(richness_log > 2 & richness_log <= 2.69897, 5, 
+                                 ifelse(richness_log > 2.69897 & richness_log <= 3, 6, 7)))))))
+    dff <- left_join(sfdom, x, "pu") %>% 
+      na.omit()
+    # Defining generalities
+    pal_rich <- rev(brewer.pal(7, "RdYlBu"))
+    cv_rich <- c("1", "1 - 10", "10 - 50", "50 - 100", "100 - 500", "500 - 1000", "> 1000")
+    # Defining themes
+    theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                              panel.grid.major = element_blank(),
+                              panel.background = element_blank(),
+                              plot.background = element_rect(fill = "white"),
+                              panel.border = element_blank(),
+                              axis.line = element_blank(),
+                              axis.text.x = element_blank(),
+                              axis.text.y = element_blank(),
+                              axis.ticks = element_blank(),
+                              axis.ticks.length = unit(.25, "cm"),
+                              axis.title.x = element_blank(),
+                              axis.title.y = element_text(face = "plain", size = 25, angle = 90),
+                              plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
+                              legend.title = element_text(colour = "black", face = "bold", size = 25),
+                              legend.text = element_text(colour = "black", face = "bold", size = 20),
+                              legend.key.height = unit(2.5, "cm"),
+                              legend.key.width = unit(1.4, "cm"),
+                              plot.tag = element_text(size = 25, face = "bold")))
+    # Create the ggplot
+    gg_list <- ggplot() +
+      geom_sf(data = dff, aes(fill = rich_categ), color = NA) +
+      geom_sf(data = sfprov, fill = NA, color = "black", lwd = 1) +
+      geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+      scale_fill_gradientn(name = "Richness",
+                           colours = pal_rich,
+                           limits = c(1, 7),
+                           breaks = seq(1, 7, 1),
+                           labels = cv_rich) +
+      ggtitle(ifelse(stringr::str_detect(string = basename(data), pattern = "epi"), "Richness", "")) +
+      labs(y = ifelse(stringr::str_detect(string = basename(data), pattern = "epi"), "Epipelagic",
+               ifelse(stringr::str_detect(string = basename(data), pattern = "meso"), "Mesopelagic",
+               ifelse(stringr::str_detect(string = basename(data), pattern = "Bathy"), "BathyAbyssopelagic", "Seafloor")))) +
+      theme_opts3
+    return(gg_list)
+  }
+
+####################################################################################
+####### 2.- Plot Cost
+####################################################################################
+# 
+  plot_cost <- function(data, sfdom, sfprov, moll) {
+    # Read raster object
+      rs_file <- readAll(raster("Inputs/Cost/02-epipelagic_CostRasterTotal.tif"))
+      crs(rs_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+      weight_rs <- raster::area(rs_file)
+      rs_file <- projectRaster(rs_file, crs = CRS(moll), method = "ngb", over = FALSE)
+      weight_rs <- projectRaster(weight_rs, crs = CRS(moll), method = "ngb", over = FALSE)
+      names(rs_file) <- "layer"
+    # Getting cost value by planning unit
+      rs_bypu <- exact_extract(rs_file, pld_ep, "weighted_mean", weights = weight_rs)
+      rs_shp <- pld_ep %>%
+        dplyr::mutate(cost = rs_bypu) %>%
+        dplyr::relocate(pu, cost)
+    # Replace NAs with nearest neighbor
+      rs_sfInt <- fCheckNAs(df = rs_shp, vari = names(rs_shp)[2])
+  }
+
+
+
 
 ####################################################################################
 ####### 3.- Plot Climate velocity
@@ -243,47 +270,4 @@ plot_rich <- function(data, sfdom, sfprov) {
       }
     return(gg_list)
   }
-
-
-
-
-
-
-
-  p1 <- plot_VoCC(path = "Inputs/General", world_sf, pldom)
-  p2 <- plot_RCE(path = "Inputs/General", world_sf, pldom)
-
-  p1.1 <- patchwork::wrap_plots(p1, ncol = 3, byrow = TRUE) +
-    plot_layout(guides = "collect") +
-    plot_annotation(tag_prefix = "(",
-                    tag_levels = "a", 
-                    tag_suffix = ")",)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_2.pdf", plot = p1.1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_2.png", plot = p1.1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
-
-
-  p1.2 <- patchwork::wrap_plots(p2, ncol = 3, byrow = TRUE) +
-    plot_layout(guides = "collect") +
-    plot_annotation(tag_prefix = "(",
-                    tag_levels = "a", 
-                    tag_suffix = ")",)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_3.pdf", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_3.png", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
-
-
-
-  
-  ep <- plot_rich(data = "Output/FeaturesOLayer/epipelagic.csv", sfdom = pld_ep, sfprov = lg)
-  mp <- plot_rich(data = "Output/FeaturesOLayer/mesopelagic.csv", sfdom = pld_mp, sfprov = glw)
-  bap <- plot_rich(data = "Output/FeaturesOLayer/BathyAbyssopelagic.csv", sfdom = pld_bap, sfprov = glw)
-  sflr <- plot_rich(data = "Output/FeaturesOLayer/seafloor.csv", sfdom = pld_sflr, sfprov = sflr)
-  p1.3 <- patchwork::wrap_plots(ep, mp, bap, sflr, ncol = 1, byrow = FALSE) +
-    plot_layout(guides = "collect") +
-    plot_annotation(tag_prefix = "(",
-                    tag_levels = "a", 
-                    tag_suffix = ")",)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_1.pdf", plot = p1.3, width = 15, height = 25, dpi = 300, limitsize = FALSE)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_1.png", plot = p1.3, width = 15, height = 25, dpi = 300, limitsize = FALSE)
-
-
 

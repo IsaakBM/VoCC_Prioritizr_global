@@ -100,7 +100,7 @@ climatevar_feature <- function(rs_path, shp_path, outdir, var_name, proj.geo, ..
 
 climatevar_feature(rs_path = "Inputs/ClimateChange/RCE",
                    shp_path = "Output/02_abnjs_filterdepth",
-                   outdir = "Inputs/ClimateChange/RCE/",
+                   outdir = "Inputs/General/",
                    var_name = "RCE",
                    proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs")
 
