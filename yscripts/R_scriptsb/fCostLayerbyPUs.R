@@ -12,6 +12,7 @@ library(kader)
 library(exactextractr)
 library(nngeo)
 
+source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
 moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
 
 # Function to replace NAs with nearest neighbor. Function wrtitten by Jason Everett (jason.everett@uq.edu.au)
@@ -55,6 +56,7 @@ moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
   }
   
 # Run function for every planning domain 
+  epCostSF <- CostbyPUs(data = "Inputs/Cost/02-epipelagic_CostRasterTotal.tif", sfdom = pld_ep, moll = moll)
   mpCostSF <- CostbyPUs(data = "Inputs/Cost/03-mesopelagic_CostRasterTotal.tif", sfdom = pld_mp, moll = moll)
   bapCostSF <- CostbyPUs(data = "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.tif", sfdom = pld_bap, moll = moll)
   sflrCostSF <- CostbyPUs(data = "Inputs/Cost/05-seafloor_CostRasterTotal.tif", sfdom = pld_sflr, moll = moll)
