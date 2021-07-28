@@ -82,7 +82,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                               plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
                               legend.title = element_text(colour = "black", face = "bold", size = 25),
                               legend.text = element_text(colour = "black", face = "bold", size = 20),
-                              legend.key.height = unit(2.5, "cm"),
+                              legend.key.height = unit(2.2, "cm"),
                               legend.key.width = unit(1.4, "cm"),
                               plot.tag = element_text(size = 25, face = "bold")))
     # Create the ggplot
@@ -107,25 +107,53 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
 ####### 2.- Plot Cost
 ####################################################################################
 # 
-  plot_cost <- function(data, sfdom, sfprov, moll) {
-    # Read raster object
-      rs_file <- readAll(raster("Inputs/Cost/02-epipelagic_CostRasterTotal.tif"))
-      crs(rs_file) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-      weight_rs <- raster::area(rs_file)
-      rs_file <- projectRaster(rs_file, crs = CRS(moll), method = "ngb", over = FALSE)
-      weight_rs <- projectRaster(weight_rs, crs = CRS(moll), method = "ngb", over = FALSE)
-      names(rs_file) <- "layer"
-    # Getting cost value by planning unit
-      rs_bypu <- exact_extract(rs_file, pld_ep, "weighted_mean", weights = weight_rs)
-      rs_shp <- pld_ep %>%
-        dplyr::mutate(cost = rs_bypu) %>%
-        dplyr::relocate(pu, cost)
-    # Replace NAs with nearest neighbor
-      rs_sfInt <- fCheckNAs(df = rs_shp, vari = names(rs_shp)[2])
+  plot_cost <- function(data, sfprov) {
+    x <- readRDS(data) %>% 
+      dplyr::mutate(cost_log = log10(cost + 1)) %>% 
+      dplyr::mutate(cost_categ = ifelse(cost_log == 0, 1,
+                                 ifelse(cost_log > 0 & cost_log <= 1, 2,
+                                 ifelse(cost_log > 1 & cost_log <= 2, 3,
+                                 ifelse(cost_log > 2 & cost_log <= 3, 4,
+                                 ifelse(cost_log > 3 & cost_log <= 4, 5, 6))))))
+    # Defining generalities
+    pal_cost <- brewer.pal(6, "RdPu")
+    cv_cost <- c("1", "1 - 10", "10 - 100", "100 - 1000", "1000 - 10000", "> 10000")
+    # Defining themes
+    theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                              panel.grid.major = element_blank(),
+                              panel.background = element_blank(),
+                              plot.background = element_rect(fill = "white"),
+                              panel.border = element_blank(),
+                              axis.line = element_blank(),
+                              axis.text.x = element_blank(),
+                              axis.text.y = element_blank(),
+                              axis.ticks = element_blank(),
+                              axis.ticks.length = unit(.25, "cm"),
+                              axis.title.x = element_blank(),
+                              axis.title.y = element_text(face = "plain", size = 25, angle = 90),
+                              plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
+                              legend.title = element_text(colour = "black", face = "bold", size = 25),
+                              legend.text = element_text(colour = "black", face = "bold", size = 20),
+                              legend.key.height = unit(2.2, "cm"),
+                              legend.key.width = unit(1.4, "cm"),
+                              plot.tag = element_text(size = 25, face = "bold")))
+    # Create the ggplot
+    gg_list <- ggplot() +
+      geom_sf(data = x, aes(fill = cost_categ), color = NA) +
+      geom_sf(data = sfprov, fill = NA, color = "black", lwd = 1) +
+      geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+      scale_fill_gradientn(name = "USD",
+                           colours = pal_cost,
+                           limits = c(1, 6),
+                           breaks = seq(1, 6, 1),
+                           labels = cv_cost) +
+      ggtitle(ifelse(stringr::str_detect(string = basename(data), pattern = "epi"), "Cost", "")) +
+      labs(y = ifelse(stringr::str_detect(string = basename(data), pattern = "epi"), "Epipelagic",
+                      ifelse(stringr::str_detect(string = basename(data), pattern = "meso"), "Mesopelagic",
+                             ifelse(stringr::str_detect(string = basename(data), pattern = "bathy"), "BathyAbyssopelagic", "Seafloor")))) +
+      theme_opts3
+    return(gg_list)
   }
-
-
-
 
 ####################################################################################
 ####### 3.- Plot Climate velocity
