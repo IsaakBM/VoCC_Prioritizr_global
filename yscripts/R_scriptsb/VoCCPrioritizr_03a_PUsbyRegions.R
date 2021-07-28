@@ -55,17 +55,17 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
           cl <- makeCluster(ncores)
           registerDoParallel(cl)
         # Get the indicator for the provinces
-          prov_code <- as.character(bioprovince$WDPAID)
+          prov_code <- as.character(bioprovince$wdpaid)
           prov_list <- list() # to allocate results
           prov_par <- foreach(i = 1:length(prov_code), .packages = c("raster", "sf", "data.table", "dplyr", "rgeos", "rgdal")) %dopar% {
             single <- bioprovince %>% 
-              filter(WDPAID == prov_code[i])
+              filter(wdpaid == prov_code[i])
             single_sfc  <-  st_geometry(single)
             single_centroid_sfc  <-  st_centroid(single_sfc)
           # each object is firstly shifted in a way that its center has coordinates of 0, 0 (single_sfc - single_centroid_sfc)
           # the sizes of the geometries are reduced by half (* 0.5)
           # each object’s centroid is moved back to the input data coordinates (+ single_centroid_sfc).
-          single_scale  <- (single_sfc - single_centroid_sfc) * 0.99 + single_centroid_sfc
+          single_scale  <- (single_sfc - single_centroid_sfc) * 0.5 + single_centroid_sfc
           st_crs(single_scale) <-  proj.geo
           dt1 <- st_intersection(pu_region, single_scale) %>% 
             filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON"))
@@ -86,7 +86,7 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
           
         } else if (prov_name == "VMEs") {
           # Set up parallel structure
-            ncores <- 24
+            ncores <- 3
             cl <- makeCluster(ncores)
             registerDoParallel(cl)
           # Get the indicator for the provinces
@@ -143,26 +143,26 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
   # 
     pu_regionCSV <- as.data.frame(pu_region)
     pu_csv <- paste(paste("pus", olayer, sep = "-"), prov_name, ".csv", sep = "_")
-    fwrite(dplyr::select(pu_regionCSV, -geometry, -depth), paste(outdir, pu_csv, sep = ""))
+    fwrite(dplyr::select(pu_regionCSV, -geometry), paste(outdir, pu_csv, sep = "")) # add , -depth
   # 
     pu_rds <- paste(paste("pus", olayer, sep = "-"), prov_name, ".rds", sep = "_")
     saveRDS(pu_region, paste(outdir, pu_rds, sep = ""))
   
 }
 
-# system.time(pu_by_provinces(pu_file = "/gpfs1/scratch/30days/uqibrito/Project05a_RafaelaSA/Output/PlanningUnits/PUs_SA_robin_025deg.shp",
-#                             province_file = "/gpfs1/scratch/30days/uqibrito/Project05a_RafaelaSA/InputFiles/MPAs_v2020/SA_MPAs.rds",
+# system.time(pu_by_provinces(pu_file = "/scratch/user/uqibrito/Project04c/Output/02_abnjs_filterdepth/abnj_05-seafloor_global_moll_05deg_depth/abnj_05-seafloor_global_moll_05deg_depth.shp",
+#                             province_file = "/QRISdata/Q1216/BritoMorales/Project04b/shapefiles_rasters/mpas_v2018/mpas_v2018.shp",
 #                             prov_name = "mpas",
-#                             olayer = "surface",
-#                             proj.geo = "+proj=robin +lon_0=0 +datum=WGS84 +units=m +no_defs",
-#                             outdir = "/gpfs1/scratch/30days/uqibrito/Project05a_RafaelaSA/Output/PlanningbyRegions/"))
+#                             olayer = "seafloor",
+#                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
+#                             outdir = "/scratch/user/uqibrito/Project04c/Output/PlanningUnitsLocks/"))
 
 system.time(pu_by_provinces(pu_file = "Output/02_abnjs_filterdepth/abnj_05-seafloor_global_moll_05deg_depth/abnj_05-seafloor_global_moll_05deg_depth.shp",
-                            province_file = "Inputs/Boundaries/GOODSprovinces/GOODSprovinces_abyssal.shp",
-                            prov_name = "GOODS",
+                            province_file = "Inputs/Boundaries/mpas_v2018/mpas_v2018.shp",
+                            prov_name = "mpas",
                             olayer = "seafloor",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
-                            outdir = "Output/PlanningUnitsProvinces/"))
+                            outdir = "Output/PlanningUnitsLocks/"))
 
 
 
