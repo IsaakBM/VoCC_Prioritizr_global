@@ -158,8 +158,8 @@ pu_by_provinces <- function(pu_file, province_file, prov_name, olayer, proj.geo,
 #                             outdir = "/scratch/user/uqibrito/Project04c/Output/PlanningUnitsLocks/"))
 
 system.time(pu_by_provinces(pu_file = "Output/02_abnjs_filterdepth/abnj_05-seafloor_global_moll_05deg_depth/abnj_05-seafloor_global_moll_05deg_depth.shp",
-                            province_file = "Inputs/Boundaries/mpas_v2018/mpas_v2018.shp",
-                            prov_name = "mpas",
+                            province_file = "Inputs/Boundaries/VMEs/VMEs.shp",
+                            prov_name = "VMEs",
                             olayer = "seafloor",
                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
                             outdir = "Output/PlanningUnitsLocks/"))
