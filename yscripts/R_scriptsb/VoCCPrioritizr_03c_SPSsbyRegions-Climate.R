@@ -17,15 +17,15 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_min_target, cl
     dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/") # Climate Models Directory
     pattern1 <-  c(paste0("*Longhurst*", ".*.csv$"), paste0("*Glasgow*", ".*.csv$"), paste0("*GOODS*", ".*.csv$")) # the different provinces
   # Begin the parallel structure      
-    cores  <-  12
+    cores  <-  5
     cl <- makeCluster(cores)
     registerDoParallel(cl)
     foreach(j = 1:length(dir.scenarios), .packages = c("dplyr", "stringr", "data.table")) %dopar% {
       # Files location 
-        csv_olayer_prov <- list.files(path = dir.scenarios[1], pattern = paste0(pattern1, collapse = "|"), full.names = TRUE) # provinces file 
-        csv_olayer_species <- list.files(path = dir.scenarios[1], pattern = paste0(c("*lagic*.csv", "*floor*.csv"), collapse = "|"), full.names = TRUE) # species file
-        rce_csv <- list.files(path = dir.scenarios[1], pattern = "_RCE_.*.csv$", full.names = TRUE) # RCE file
-        vocc_csv <- list.files(path = dir.scenarios[1], pattern = "voccMag_.*.csv$", full.names = TRUE) # VoCC file
+        csv_olayer_prov <- list.files(path = dir.scenarios[j], pattern = paste0(pattern1, collapse = "|"), full.names = TRUE) # provinces file 
+        csv_olayer_species <- list.files(path = dir.scenarios[j], pattern = paste0(c("*lagic*.csv", "*spsgf*.csv"), collapse = "|"), full.names = TRUE) # species file
+        rce_csv <- list.files(path = dir.scenarios[j], pattern = "_RCE_.*.csv$", full.names = TRUE) # RCE file
+        vocc_csv <- list.files(path = dir.scenarios[j], pattern = "voccMag_.*.csv$", full.names = TRUE) # VoCC file
       # Climate variable conditional 
         if(length(rce_csv) == 0 & length(vocc_csv) == 0) { # if you have a base scenario just do it without climatic information
           # Calculating Species by Provinces and Setting targets for each prov-species
@@ -81,9 +81,11 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_min_target, cl
           
           # Calculating VoCC-RCE by Provinces and Setting targets for each of those 
             rce <- fread(rce_csv) %>% 
-              dplyr::select(-V1)
+              dplyr::select(-V1) %>% 
+              dplyr::mutate(climate_feature = abs(climate_feature))
             vocc <- fread(vocc_csv) %>% 
-              dplyr::select(-V1)
+              dplyr::select(-V1) %>% 
+              dplyr::mutate(climate_feature = abs(climate_feature))
             # Creating the final .csv file
               rce_vocc <- rbind(rce, vocc) %>% 
                 dplyr::arrange(pu)
@@ -172,6 +174,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_min_target, cl
           # Calculating VoCC-RCE by Provinces
             vocc <- fread(vocc_csv) %>% 
               dplyr::select(-V1) %>% 
+              dplyr::mutate(climate_feature = abs(climate_feature)) %>% 
               dplyr::arrange(pu)
             # Match province name with species name
               vocc$province <- file_olayer_pus$province[match(vocc$pu, file_olayer_pus$layer)] # maybe with dplyr?
@@ -180,7 +183,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_min_target, cl
                                                    paste(feature_names, province, sep = "_")))
           
           # Creating Species LOW-VoCC Feature data
-              file_olayer_species_vocc <- rce_vocc %>% 
+              file_olayer_species_vocc <- vocc %>% 
                 dplyr::filter(str_detect(string = feature_names, pattern = "VoCC") == TRUE) %>% 
                 dplyr::left_join(x = file_olayer_species,  by = "pu") %>% 
                 dplyr::arrange(pu) %>% 
@@ -234,7 +237,8 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_min_target, cl
           
           # Calculating RCE by Provinces and Setting targets for each of those 
             rce <- fread(rce_csv) %>% 
-              dplyr::select(-V1)
+              dplyr::select(-V1) %>% 
+              dplyr::mutate(climate_feature = abs(climate_feature))
             # Match province name with species name
               rce$province <- file_olayer_pus$province[match(rce$pu, file_olayer_pus$layer)] # maybe with dplyr?
               rce <- rce %>% 
@@ -242,7 +246,7 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_min_target, cl
                                                    paste(feature_names, province, sep = "_")))
             
           # Creating Species LOW-RCE Feature data
-              file_olayer_species_rce <- rce_vocc %>% 
+              file_olayer_species_rce <- rce %>% 
                 dplyr::filter(str_detect(string = feature_names, pattern = "RCE") == TRUE) %>% 
                 dplyr::left_join(x = file_olayer_species,  by = "pu") %>% 
                 dplyr::arrange(pu) %>% 
@@ -280,14 +284,14 @@ csvs_pus_provinces <- function(path, min_target, max_target, clim_min_target, cl
     stopCluster(cl)
 }
 
-# csvs_pus_provinces(path = "/QRISdata/Q1216/BritoMorales/Project04b/features_lowCC_03_sametargets/features_10100CSV10100_targets-mix_noduplicates",
-#                    min_target = (0.10*0.25),
-#                    max_target = (1*0.25),
-#                    clim_min_target = 0.10,
-#                    clim_max_target = 1)
-
-csvs_pus_provinces(path = "Prioritisation/PrioritizrBegin/features_10100",
+csvs_pus_provinces(path = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrBegin/features_10100",
                    min_target = (0.10*0.25),
                    max_target = (1*0.25),
                    clim_min_target = 0.10,
                    clim_max_target = 1)
+
+# csvs_pus_provinces(path = "Prioritisation/PrioritizrBegin/features_10100",
+#                    min_target = (0.10*0.25),
+#                    max_target = (1*0.25),
+#                    clim_min_target = 0.10,
+#                    clim_max_target = 1)
