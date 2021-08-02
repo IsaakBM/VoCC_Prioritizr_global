@@ -290,8 +290,8 @@ csvs_pus_provinces(path = "/scratch/user/uqibrito/Project04c/Prioritisation/Prio
                    clim_min_target = 0.10,
                    clim_max_target = 1)
 
-# csvs_pus_provinces(path = "Prioritisation/PrioritizrBegin/features_10100",
-#                    min_target = (0.10*0.25),
-#                    max_target = (1*0.25),
-#                    clim_min_target = 0.10,
-#                    clim_max_target = 1)
+csvs_pus_provinces(path = "Prioritisation/PrioritizrBegin/features_10100",
+                   min_target = (0.10*0.25),
+                   max_target = (1*0.25),
+                   clim_min_target = 0.10,
+                   clim_max_target = 1)
