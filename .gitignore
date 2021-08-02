@@ -9,7 +9,9 @@
 /Inputs/CMIP6_zrasters_zensemble
 /Inputs/FeaturesSeafloor
 /Inputs/FeaturesSeafloor2
-/Prioritisation
+/Prioritisation/PrioritizrBegin
+/Prioritisation/PrioritizrCleanBegin
+/Prioritisation/PrioritizrFiles
 /yscripts/R_scripts
 /yscripts/rdm
 /zold
