@@ -26,7 +26,6 @@ marxan_dat_files <- function(path, outdir, proj.geo) {
     library(lwgeom)
     library(stringr)
     library(data.table)
-    library(exactextractr)
     library(doParallel)
     library(foreach)
   
@@ -36,7 +35,7 @@ marxan_dat_files <- function(path, outdir, proj.geo) {
     cores  <-  5
     cl <- makeCluster(cores)
     registerDoParallel(cl)
-    foreach(i = 1:length(dir.scenarios), .packages = c("raster", "sf", "dplyr", "prioritizr", "lwgeom", "stringr", "data.table", "exactextractr")) %dopar% {
+    foreach(i = 1:length(dir.scenarios), .packages = c("raster", "sf", "dplyr", "prioritizr", "lwgeom", "stringr", "data.table")) %dopar% {
       ### Files location [shapefile, sps info by province, targets by sps, mpas locked-in, vmes locked-in]
           pu_shpfile <- list.files(path = dir.scenarios[i], pattern = "*.rds$", full.names = TRUE)
           marxan_input_csv <- list.files(path = dir.scenarios[i], pattern = "*_provinces.*.csv$", full.names = TRUE)
@@ -90,14 +89,8 @@ marxan_dat_files <- function(path, outdir, proj.geo) {
             dplyr::select(id, prop, spf, name) %>% 
             data.frame()
           # Reading target files
-            df_targets <- fread(targets_csv) %>% 
-              dplyr::rename(prop = targets, 
-                            name = feature_names_prov)
-            spec <- left_join(spec, df_targets, "name") %>% 
-              dplyr::select(id, prop.y, spf, name) %>% 
-              dplyr::rename(prop = prop.y)
-	          # spec <- spec %>% 
-	          #   mutate(spf = ifelse(str_detect(string = name, pattern = paste0(c(paste0("RCE"), paste0("VoCC")), collapse = "|")), 1.2, round((prop)/(max(0.30)), digits = 2)))
+            df_targets <- fread(targets_csv)
+            spec$prop <- df_targets$targets[match(spec$name, df_targets$feature_names_prov)] # matching the targets with the generic spec file
             # Write the file
               spec_name <- paste("spec", basename(dir.scenarios[i]), sep = "_")
               write.table(spec, file = paste(outdir, spec_name, ".dat", sep = ""), row.names = FALSE, sep = ",", quote = FALSE)
@@ -138,9 +131,9 @@ system.time(marxan_dat_files(path = "/scratch/user/uqibrito/Project04c/Prioritis
                              outdir = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrFiles/features_10100/",
                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
 
-# system.time(marxan_dat_files(path = "Prioritisation/PrioritizrCleanBegin/features_10100",
-#                              outdir = "Prioritisation/PrioritizrFiles/",
-#                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
+system.time(marxan_dat_files(path = "Prioritisation/PrioritizrCleanBegin/features_10100",
+                             outdir = "Prioritisation/PrioritizrFiles/",
+                             proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
 
 
 
