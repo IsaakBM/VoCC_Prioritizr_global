@@ -63,9 +63,9 @@ system.time(pzr_function(path = "/scratch/user/uqibrito/Project04c/Prioritisatio
                          blm_df = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrFiles/BLM_0.csv",
                          sol = 1))
 
-# system.time(pzr_function(path = "Prioritisation/PrioritizrFiles/features_10100", 
-#                          outdir = "Prioritisation/PrioritizrSolutionsNCost/",
-#                          cost = "area",
-#                          blm_df = "Prioritisation/PrioritizrFiles/BLM_0.csv", 
-#                          sol = 1))
+system.time(pzr_function(path = "Prioritisation/PrioritizrFiles/features_10100",
+                         outdir = "Prioritisation/PrioritizrSolutionsNCost/",
+                         cost = "calibration",
+                         blm_df = "Prioritisation/PrioritizrFiles/BLM_0.csv",
+                         sol = 1))
 
