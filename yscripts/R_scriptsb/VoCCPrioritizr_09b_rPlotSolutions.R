@@ -1,0 +1,113 @@
+# This code was written by Isaac Brito-Morales (i.britomorales@uq.edu.au)
+# Please do not distribute this code without permission.
+# NO GUARANTEES THAT CODE IS CORRECT
+# Caveat Emptor!
+
+source("yscripts/R_scriptsb/VoCCPrioritizr_08b_fPlotSolutions.R")
+
+pldList <- list(pld_ep, pld_ep, pld_ep, pld_mp, pld_mp, pld_mp, pld_bap, pld_bap, pld_bap, pld_sflr, pld_sflr, pld_sflr)
+provList <- list(lg, lg, lg, glw, glw, glw, glw, glw, glw, sflr, sflr, sflr)
+mpaList <- list(mpas_ep, mpas_ep, mpas_ep, mpas_mp, mpas_mp, mpas_mp, mpas_bap, mpas_bap, mpas_bap, mpas_sflr, mpas_sflr, mpas_sflr)
+vmeList <- list(vmes_ep, vmes_ep, vmes_ep, vmes_mp, vmes_mp, vmes_mp, vmes_bap, vmes_bap, vmes_bap, vmes_sflr, vmes_sflr, vmes_sflr)
+
+####################################################################################
+####### 1A.- Plot Individual Solutions WITH COST
+####################################################################################
+dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
+solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
+
+plotList <- vector("list", length = length(solCostF))
+for(i in seq_along(solCostF)){
+  plotList[[i]] <- plot_sol(data = solCostF[i], 
+                            sfdom = pldList[[i]], 
+                            sfprov = provList[[i]], 
+                            mpas = mpaList[[i]], 
+                            vmes = vmeList[[i]])  
+}
+
+p1 <- patchwork::wrap_plots(plotList, ncol = 3, byrow = TRUE) +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_prefix = "(",
+                  tag_levels = "a", 
+                  tag_suffix = ")",)
+ggsave("Figures/MS_v1/BritoMorales_ED_Fi_4.pdf", plot = p1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+ggsave("Figures/MS_v1/BritoMorales_ED_Fi_4.png", plot = p1, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+
+####################################################################################
+####### 1B.- Plot Individual Solutions WITH NO COST
+####################################################################################
+dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsNCost", full.names = TRUE, recursive = FALSE)
+solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
+
+plotList <- vector("list", length = length(solCostF))
+for(i in seq_along(solCostF)){
+  plotList[[i]] <- plot_sol(data = solCostF[i], 
+                            sfdom = pldList[[i]], 
+                            sfprov = provList[[i]], 
+                            mpas = mpaList[[i]], 
+                            vmes = vmeList[[i]])  
+}
+
+p2 <- patchwork::wrap_plots(plotList, ncol = 3, byrow = TRUE) +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_prefix = "(",
+                  tag_levels = "a", 
+                  tag_suffix = ")",)
+ggsave("Figures/MS_v1/BritoMorales_ED_Fi_5.pdf", plot = p2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+ggsave("Figures/MS_v1/BritoMorales_ED_Fi_5.png", plot = p2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+
+####################################################################################
+####### 2.- Plot COMBINED Solutions
+####################################################################################
+
+dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
+solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
+
+# # Epipelagic
+# ep1 <- plot_CombSol(data1 = solCostF[1], data2 = solCostF[2], sfdom = pld_ep, sfprov = lg, mpas = mpas_ep, vmes = vmes_ep)
+# ep2 <- plot_CombSol(data1 = solCostF[1], data2 = solCostF[3], sfdom = pld_ep, sfprov = lg, mpas = mpas_ep, vmes = vmes_ep)
+# ep3 <- plot_CombSol(data1 = solCostF[2], data2 = solCostF[3], sfdom = pld_ep, sfprov = lg, mpas = mpas_ep, vmes = vmes_ep)
+# epF <- plot_NoReg(data1 = solCostF[1], data2 = solCostF[2], data3 = solCostF[3], sfdom = pld_ep, sfprov = lg, mpas = mpas_ep, vmes = vmes_ep)
+# epList <- list(ep1, ep2, ep3, epF)
+# saveRDS(epList, "Figures/MS_v1_rds/ep_plotList.rds")
+
+# # Mesopelagic
+# mp1 <- plot_CombSol(data1 = solCostF[4], data2 = solCostF[5], sfdom = pld_mp, sfprov = glw, mpas = mpas_mp, vmes = vmes_mp)
+# mp2 <- plot_CombSol(data1 = solCostF[4], data2 = solCostF[6], sfdom = pld_mp, sfprov = glw, mpas = mpas_mp, vmes = vmes_mp)
+# mp3 <- plot_CombSol(data1 = solCostF[5], data2 = solCostF[6], sfdom = pld_mp, sfprov = glw, mpas = mpas_mp, vmes = vmes_mp)
+# mpF <- plot_NoReg(data1 = solCostF[4], data2 = solCostF[5], data3 = solCostF[6], sfdom = pld_mp, sfprov = glw, mpas = mpas_mp, vmes = vmes_mp)
+# mpList <- list(mp1, mp2, mp3, mpF)
+# saveRDS(mpList, "Figures/MS_v1_rds/mp_plotList.rds")
+
+# # Bathy
+# bap1 <- plot_CombSol(data1 = solCostF[7], data2 = solCostF[8], sfdom = pld_bap, sfprov = glw, mpas = mpas_bap, vmes = vmes_bap)
+# bap2 <- plot_CombSol(data1 = solCostF[7], data2 = solCostF[9], sfdom = pld_bap, sfprov = glw, mpas = mpas_bap, vmes = vmes_bap)
+# bap3 <- plot_CombSol(data1 = solCostF[8], data2 = solCostF[9], sfdom = pld_bap, sfprov = glw, mpas = mpas_bap, vmes = vmes_bap)
+# bapF <- plot_NoReg(data1 = solCostF[7], data2 = solCostF[8], data3 = solCostF[9], sfdom = pld_bap, sfprov = glw, mpas = mpas_bap, vmes = vmes_bap)
+# bapList <- list(bap1, bap2, bap3, bapF)
+# saveRDS(bapList, "Figures/MS_v1_rds/bap_plotList.rds")
+
+# # Seafloor
+# sflr1 <- plot_CombSol(data1 = solCostF[10], data2 = solCostF[11], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
+# sflr2 <- plot_CombSol(data1 = solCostF[10], data2 = solCostF[12], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
+# sflr3 <- plot_CombSol(data1 = solCostF[11], data2 = solCostF[12], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
+# sflrF <- plot_NoReg(data1 = solCostF[10], data2 = solCostF[11], data3 = solCostF[12], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
+# sflrList <- list(sflr1, sflr2, sflr3, sflrF)
+# saveRDS(sflrList, "Figures/MS_v1_rds/sflr_plotList.rds")
+
+ep <- readRDS("Figures/MS_v1_rds/ep_plotList.rds")
+mp <- readRDS("Figures/MS_v1_rds/mp_plotList.rds")
+bap <- readRDS("Figures/MS_v1_rds/bap_plotList.rds")
+sflr <- readRDS("Figures/MS_v1_rds/sflr_plotList.rds")
+all_layers <- c(ep, mp, bap, sflr)
+
+p3 <- patchwork::wrap_plots(all_layers, ncol = 4, byrow = TRUE) +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_prefix = "(",
+                  tag_levels = "a", 
+                  tag_suffix = ")",)
+
+ggsave("Figures/MS_v1/BritoMorales_Fi_2.pdf", plot = p3, width = 43, height = 23, dpi = 300, limitsize = FALSE)
+ggsave("Figures/MS_v1/BritoMorales_Fi_2.png", plot = p3, width = 43, height = 23, dpi = 300, limitsize = FALSE)
+
+
