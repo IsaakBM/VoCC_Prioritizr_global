@@ -50,4 +50,32 @@ library(kader)
     st_transform(crs = CRS(moll)) %>% 
     group_by(province) %>% 
     summarise(ecoregion = sum(as.numeric(factor(province)), do_union = TRUE))
-  pldom <- list(lg, lg, lg, glw, glw, glw, glw, glw, glw, sflr, sflr, sflr)
+# MPAs
+  mpas_ep <- read.csv("Output/PlanningUnitsLocks/pus-epipelagic_mpas_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_mpas")
+  mpas_mp <- read.csv("Output/PlanningUnitsLocks/pus-mesopelagic_mpas_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_mpas")
+  mpas_bap <- read.csv("Output/PlanningUnitsLocks/pus-bathyabyssopelagic_mpas_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_mpas")
+  mpas_sflr <- read.csv("Output/PlanningUnitsLocks/pus-seafloor_mpas_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_mpas")
+# VMEs
+  vmes_ep <- read.csv("Output/PlanningUnitsLocks/pus-epipelagic_VMEs_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_VMEs")
+  vmes_mp <- read.csv("Output/PlanningUnitsLocks/pus-mesopelagic_VMEs_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_VMEs")
+  vmes_bap <- read.csv("Output/PlanningUnitsLocks/pus-bathyabyssopelagic_VMEs_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_VMEs")
+  vmes_sflr <- read.csv("Output/PlanningUnitsLocks/pus-seafloor_VMEs_.csv") %>% 
+    dplyr::rename(id = layer) %>% 
+    dplyr::filter(province != "non-categ_VMEs")
+  
+  
+  
