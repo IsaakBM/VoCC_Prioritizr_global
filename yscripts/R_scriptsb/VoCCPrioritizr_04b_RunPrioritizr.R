@@ -20,7 +20,7 @@ pzr_function <- function(path, outdir, cost, blm_df, sol) {
     dir.layers <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
     
   # Begin the parallel structure      
-    ncores <- 3
+    ncores <- 5
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     problem_list <- list()
@@ -47,7 +47,7 @@ pzr_function <- function(path, outdir, cost, blm_df, sol) {
           add_gap_portfolio(number_solutions = sol, pool_gap = 0)
         # Solve the problem
           mp3_solution <- mp1 %>%
-            add_gurobi_solver(gap = 0, presolve = 2, time_limit = 10800, threads = 3, first_feasible = FALSE) %>%
+            add_gurobi_solver(gap = 0, presolve = 2, time_limit = 10800, threads = 2, first_feasible = FALSE) %>%
             solve(force = TRUE)
         # Write the object
           mp3_final  <- list(mp1, mp3_solution)
@@ -57,15 +57,15 @@ pzr_function <- function(path, outdir, cost, blm_df, sol) {
     stopCluster(cl)
 }
 
-# system.time(pzr_function(path = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrFiles/features_10100",
-#                          outdir = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrSolutions/",
-#                          cost = "general",
-#                          blm_df = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrSolutions/BLM_0.csv",
-#                          sol = 1))
-
-system.time(pzr_function(path = "Prioritisation/PrioritizrFiles/features_10100", 
-                         outdir = "Prioritisation/PrioritizrSolutionsNCost/",
-                         cost = "area",
-                         blm_df = "Prioritisation/PrioritizrFiles/BLM_0.csv", 
+system.time(pzr_function(path = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrFiles/features_10100",
+                         outdir = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrSolutionsCost/features_10100/",
+                         cost = "general",
+                         blm_df = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrFiles/BLM_0.csv",
                          sol = 1))
+
+# system.time(pzr_function(path = "Prioritisation/PrioritizrFiles/features_10100", 
+#                          outdir = "Prioritisation/PrioritizrSolutionsNCost/",
+#                          cost = "area",
+#                          blm_df = "Prioritisation/PrioritizrFiles/BLM_0.csv", 
+#                          sol = 1))
 
