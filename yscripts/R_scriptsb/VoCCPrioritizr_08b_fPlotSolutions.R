@@ -220,7 +220,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
       geom_sf(data = sfprov, fill = NA, color = "black", lwd = 1) +
       geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
       scale_fill_manual(values = pal,
-                        name = "Selection",
+                        name = "",
                         labels = ranges) +
       ggtitle(ifelse(stringr::str_detect(string = basename(data1), pattern = "Epi"), "Low Regret", "")) +
       labs(y = "") +

@@ -87,7 +87,7 @@ solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
 # bapList <- list(bap1, bap2, bap3, bapF)
 # saveRDS(bapList, "Figures/MS_v1_rds/bap_plotList.rds")
 
-# # Seafloor
+# Seafloor
 # sflr1 <- plot_CombSol(data1 = solCostF[10], data2 = solCostF[11], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
 # sflr2 <- plot_CombSol(data1 = solCostF[10], data2 = solCostF[12], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
 # sflr3 <- plot_CombSol(data1 = solCostF[11], data2 = solCostF[12], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
@@ -95,11 +95,11 @@ solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
 # sflrList <- list(sflr1, sflr2, sflr3, sflrF)
 # saveRDS(sflrList, "Figures/MS_v1_rds/sflr_plotList.rds")
 
-ep <- readRDS("Figures/MS_v1_rds/ep_plotList.rds")
-mp <- readRDS("Figures/MS_v1_rds/mp_plotList.rds")
-bap <- readRDS("Figures/MS_v1_rds/bap_plotList.rds")
-sflr <- readRDS("Figures/MS_v1_rds/sflr_plotList.rds")
-all_layers <- c(ep, mp, bap, sflr)
+epL <- readRDS("Figures/MS_v1_rds/ep_plotList.rds")
+mpL <- readRDS("Figures/MS_v1_rds/mp_plotList.rds")
+bapL <- readRDS("Figures/MS_v1_rds/bap_plotList.rds")
+sflrL <- readRDS("Figures/MS_v1_rds/sflr_plotList.rds")
+all_layers <- c(epL, mpL, bapL, sflrL)
 
 p3 <- patchwork::wrap_plots(all_layers, ncol = 4, byrow = TRUE) +
   plot_layout(guides = "collect") +
