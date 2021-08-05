@@ -162,6 +162,8 @@ vmes <- vmes_ep
   # b <- epSF %>% 
   #   dplyr::filter(solutions == "Epi_Meso_Bathy_Sea")
   
+  brd <- sfdom %>% 
+    summarise(borders = sum(id, do_union = TRUE))
   
   # Defining generalities
   pal <- c("#deebf7", "#ec7014", "#0570b0")
@@ -188,6 +190,7 @@ vmes <- vmes_ep
   # Create the ggplot
   gg_list <- ggplot() +
     geom_sf(data = final, aes(group = as.factor(solution), fill = as.factor(solution)), color = NA) +
+    geom_sf(data = brd, fill = NA, color = "black", lwd = 0.3) +
     geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
     scale_fill_manual(values = pal,
                       name = "",
