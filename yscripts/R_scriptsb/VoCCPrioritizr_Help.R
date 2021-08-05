@@ -24,7 +24,20 @@ library(kader)
 ####################################################################################
 # Moll Projection
   moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
-# Planning domains
+# Planning domains NO DEPTH
+  pld_ep1 <- st_read("Output/01_abnjs_nofilterdepth/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp") %>% 
+    dplyr::rename(pu = layer) %>% 
+    dplyr::select(pu)
+  pld_mp1 <- st_read("Output/01_abnjs_nofilterdepth/abnj_03-mesopelagic_global_moll_05deg/abnj_03-mesopelagic_global_moll_05deg.shp") %>% 
+    dplyr::rename(pu = layer) %>% 
+    dplyr::select(pu)
+  pld_bap1 <- st_read("Output/01_abnjs_nofilterdepth/abnj_04-bathyabysso_global_moll_05deg/abnj_04-bathyabysso_global_moll_05deg.shp") %>% 
+    dplyr::rename(pu = layer) %>% 
+    dplyr::select(pu)
+  pld_sflr1 <- st_read("Output/01_abnjs_nofilterdepth/abnj_05-seafloor_global_moll_05deg/abnj_05-seafloor_global_moll_05deg.shp") %>% 
+    dplyr::rename(pu = layer) %>% 
+    dplyr::select(pu)
+# Planning domains BY DEPTH
   pld_ep <- st_read("Output/02_abnjs_filterdepth/abnj_02-epipelagic_global_moll_05deg_depth/abnj_02-epipelagic_global_moll_05deg_depth.shp") %>% 
     dplyr::rename(pu = layer) %>% 
     dplyr::select(pu)

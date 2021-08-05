@@ -57,7 +57,7 @@ ggsave("Figures/MS_v1/BritoMorales_ED_Fi_5.pdf", plot = p2, width = 35, height =
 ggsave("Figures/MS_v1/BritoMorales_ED_Fi_5.png", plot = p2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
 
 ####################################################################################
-####### 2.- Plot COMBINED Solutions
+####### 2.- Plot COMBINED Solutions and No regret by Ocean Layer
 ####################################################################################
 
 dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
@@ -109,5 +109,19 @@ p3 <- patchwork::wrap_plots(all_layers, ncol = 4, byrow = TRUE) +
 
 ggsave("Figures/MS_v1/BritoMorales_Fi_2.pdf", plot = p3, width = 43, height = 23, dpi = 300, limitsize = FALSE)
 ggsave("Figures/MS_v1/BritoMorales_Fi_2.png", plot = p3, width = 43, height = 23, dpi = 300, limitsize = FALSE)
+
+####################################################################################
+####### 3.- Plot No Regret Across Climate and Ocean Layer
+####################################################################################
+dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
+solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
+
+epF <- data_NoReg(data1 = solCostF[1], data2 = solCostF[2], data3 = solCostF[3], sfdom = pld_ep1)
+mpF <- data_NoReg(data1 = solCostF[4], data2 = solCostF[5], data3 = solCostF[6], sfdom = pld_mp1)
+bapF <- data_NoReg(data1 = solCostF[7], data2 = solCostF[8], data3 = solCostF[9], sfdom = pld_bap1)
+sflrF <- data_NoReg(data1 = solCostF[10], data2 = solCostF[11], data3 = solCostF[12], sfdom = pld_sflr1)
+
+
+
 
 
