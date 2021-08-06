@@ -64,10 +64,10 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
   }
 
 ####################################################################################
-####### 4.- Data No Regret climatic by Ocean Layer
+####### 4.- Data No Regret Vertical
 ####################################################################################
 # 
-  data_NoReg <- function(data1, data2, data3, data4, sfdom, mpas, vmes) {
+  NoRegVer <- function(data1, data2, data3, data4, sfdom, mpas, vmes) {
     
     sfdom <- sfdom %>% 
       dplyr::rename(id = pu)
@@ -126,7 +126,5 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
   
   # round((nrow(testNAll[testNAll$solutionAll == 1,])/90065)*100)  # just the epi
   # round((nrow(testAll[testAll$solutionAll == 1,])/90065)*100) # All
-  # 
-  # ggsave("Figures/MS_v1/BritoMorales_Fi_3.pdf", plot = gg_list, width = 12, height = 6, dpi = 300, limitsize = FALSE)
-  # ggsave("Figures/MS_v1/BritoMorales_Fi_3.png", plot = gg_list, width = 12, height = 6, dpi = 300, limitsize = FALSE)
+  
 

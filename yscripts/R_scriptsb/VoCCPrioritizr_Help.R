@@ -24,6 +24,9 @@ library(kader)
 ####################################################################################
 # Moll Projection
   moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
+# Land
+  world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>% 
+    st_transform(crs = CRS(moll))
 # Planning domains NO DEPTH
   pld_ep1 <- st_read("Output/01_abnjs_nofilterdepth/abnj_02-epipelagic_global_moll_05deg/abnj_02-epipelagic_global_moll_05deg.shp") %>% 
     dplyr::rename(pu = layer) %>% 
