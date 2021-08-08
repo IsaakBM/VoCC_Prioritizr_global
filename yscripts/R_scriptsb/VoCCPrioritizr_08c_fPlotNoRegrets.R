@@ -27,7 +27,7 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
 ####### 3.- Data No Regret climatic by Ocean Layer
 ####################################################################################
 # 
-  data_NoReg <- function(data1, data2, data3, sfdom) {
+  data_NoReg <- function(data1, data2, data3, sfdom, outdir) {
     d1 <- readRDS(data1)
     d2 <- readRDS(data2)
     d3 <- readRDS(data2)
@@ -60,6 +60,12 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
       dplyr::select(-geometry) %>%
       dplyr::arrange(id)
     
+  # Write file for later
+    ns <- paste("NoRegret", 
+                str_remove_all(unlist(str_split(basename(data1), "_"))[2], "Layer"), 
+                paste0(unlist(str_split(basename(data1), "_"))[3], unlist(str_split(basename(data2), "_"))[3], unlist(str_split(basename(data3), "_"))[3]), 
+                sep = "_")
+    saveRDS(dff, paste(outdir, paste0(ns, ".rds")))
     return(dff)
   }
 
@@ -67,7 +73,7 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
 ####### 4.- Data No Regret Vertical
 ####################################################################################
 # 
-  NoRegVer <- function(data1, data2, data3, data4, sfdom, mpas, vmes) {
+  NoRegVer <- function(data1, data2, data3, data4, sfdom, mpas, vmes, outdir) {
     
     sfdom <- sfdom %>% 
       dplyr::rename(id = pu)
@@ -77,6 +83,13 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
     ver <- sfdom %>% 
       dplyr::mutate(solutionAll = data1$solution*data2$solution*data3$solution*data4$solution) %>% 
       dplyr::mutate(solutionAll = ifelse(solutionAll == 1, 3, solutionAll))
+  # Write file for later
+    saveRDS(plg %>% 
+              as_tibble() %>% 
+              dplyr::select(-geometry), paste0(outdir, paste0("NoRegretPelagic", ".rds")))
+    saveRDS(ver %>% 
+              as_tibble() %>% 
+              dplyr::select(-geometry), paste0(outdir, paste0("NoRegret_PelagicSeafloor", ".rds")))
     
     ff <- sfdom %>% 
       dplyr::mutate(solution = plg$solutionAll+ver$solutionAll) %>% 
@@ -122,7 +135,6 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
     
     return(gg_list)
   }
-  
   
   # round((nrow(testNAll[testNAll$solutionAll == 1,])/90065)*100)  # just the epi
   # round((nrow(testAll[testAll$solutionAll == 1,])/90065)*100) # All
