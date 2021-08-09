@@ -38,7 +38,14 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_08d_fSpiralPlots.R")
   no_regret_V <- PlotSpiral_V(rbind(plg, plg_slfr))
 
 ####################################################################################
-####### 2.- Spiral Low-Regret Vertical Layer
+####### 3.- 
 ####################################################################################
   
+  pF <- patchwork::wrap_plots(no_regret, no_regret_V, ncol = 2, byrow = TRUE) +
+    plot_layout(guides = "collect") +
+    plot_annotation(tag_prefix = "(",
+                    tag_levels = "a", 
+                    tag_suffix = ")",)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_5.pdf", plot = pF, width = 20, height = 10, dpi = 300, limitsize = FALSE)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_5.png", plot = pF, width = 20, height = 10, dpi = 300, limitsize = FALSE)
   
