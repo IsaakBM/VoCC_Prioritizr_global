@@ -31,14 +31,8 @@ moll <- "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"
 # Land
 world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>% 
   st_transform(crs = CRS(moll))
-# # MPAs .csv
-# mpas <- read.csv("Output/PlanningbyRegions/pus-surface_mpas_.csv") %>% 
-#   dplyr::rename(id = layer) %>% 
-#   dplyr::filter(province != "non-categ_mpas")
-# # MPAs sf
-# mpas_sf <- left_join(sf_PlanningArea, mpas, "id") %>% 
-#   na.omit() %>% 
-#   dplyr::select(id, geometry)
+# 
+pldom <- list(lg, lg, lg, glw, glw, glw, glw, glw, glw, sflr, sflr, sflr)
 
 ####################################################################################
 ####### 1.- Plot Richness
@@ -84,7 +78,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                               legend.text = element_text(colour = "black", face = "bold", size = 20),
                               legend.key.height = unit(2.2, "cm"),
                               legend.key.width = unit(1.4, "cm"),
-                              plot.tag = element_text(size = 25, face = "bold")))
+                              plot.tag = element_text(size = 32, face = "bold")))
     # Create the ggplot
     gg_list <- ggplot() +
       geom_sf(data = dff, aes(fill = rich_categ), color = NA) +
@@ -136,7 +130,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                               legend.text = element_text(colour = "black", face = "bold", size = 20),
                               legend.key.height = unit(2.2, "cm"),
                               legend.key.width = unit(1.4, "cm"),
-                              plot.tag = element_text(size = 25, face = "bold")))
+                              plot.tag = element_text(size = 32, face = "bold")))
     # Create the ggplot
     gg_list <- ggplot() +
       geom_sf(data = x, aes(fill = cost_categ), color = NA) +
@@ -207,7 +201,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                                     legend.text = element_text(colour = "black", face = "bold", size = 20),
                                     legend.key.height = unit(2.5, "cm"),
                                     legend.key.width = unit(1.4, "cm"),
-                                    plot.tag = element_text(size = 25, face = "bold")))
+                                    plot.tag = element_text(size = 32, face = "bold")))
         # Create the ggplot
           gg_list[[j]] <- ggplot() +
             geom_sf(data = dt1, aes(fill = vocc_categ), color = NA) +
@@ -278,7 +272,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                                     legend.text = element_text(colour = "black", face = "bold", size = 20),
                                     legend.key.height = unit(2.5, "cm"),
                                     legend.key.width = unit(1.4, "cm"),
-                                    plot.tag = element_text(size = 25, face = "bold")))
+                                    plot.tag = element_text(size = 32, face = "bold")))
         # Create the ggplot
           gg_list[[j]] <- ggplot() +
             geom_sf(data = dt1, aes(fill = rce_categ), color = NA) +
@@ -299,3 +293,44 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
     return(gg_list)
   }
 
+####################################################################################
+####### 5.- Geomorphic Features
+####################################################################################
+# 
+  plot_GeomF <- function(path, sfprov) {
+    files.rds <-   list.files(path = path, pattern = paste0((paste0(".*.rds$")), collapse = "|"), full.names = TRUE)
+    imp <- paste0(c("Basins", "Sills", "Escarpments", "Seamounts", "Guyots", "Canyons", "Ridges", "Troughs", "Fans", "Plateaus", "Trenches", "Bridges"), collapse = "|")
+    imp <- files.rds[str_detect(files.rds, pattern = imp)]
+    sfGeo <- lapply(imp, function(x) readRDS(x))
+    names(sfGeo) <- str_remove_all(basename(imp), pattern = ".rds")
+    
+    theme_opts3 <- list(theme(panel.grid.minor = element_blank(),
+                              panel.grid.major = element_blank(),
+                              panel.background = element_blank(),
+                              plot.background = element_rect(fill = "white"),
+                              panel.border = element_blank(),
+                              axis.line = element_blank(),
+                              axis.text.x = element_blank(),
+                              axis.text.y = element_blank(),
+                              axis.ticks = element_blank(),
+                              axis.ticks.length = unit(.25, "cm"),
+                              axis.title.x = element_blank(),
+                              axis.title.y = element_text(face = "plain", size = 25, angle = 90),
+                              plot.title = element_text(face = "plain", size = 25, hjust = 0.5),
+                              legend.title = element_text(colour = "black", face = "bold", size = 25),
+                              legend.text = element_text(colour = "black", face = "bold", size = 20),
+                              legend.key.height = unit(2.5, "cm"),
+                              legend.key.width = unit(1.4, "cm"),
+                              plot.tag = element_text(size = 25, face = "bold")))
+    
+    sfL <- vector("list", length = length(sfGeo))
+    for(i in seq_along(sfGeo)){
+      sfL[[i]] <- ggplot() +
+        geom_sf(data = sfGeo[[i]], fill = "#31a354", color = NA) +
+        geom_sf(data = sfprov, fill = NA, color = "black", lwd = 1) +
+        geom_sf(data = world_sf, size = 0.05, fill = "grey20") +
+        theme_opts3 +
+        ggtitle(str_remove_all(unique(sfGeo[[i]]$feature_names), pattern = "_seafloor"))}
+    
+    return(sfL)
+  }
