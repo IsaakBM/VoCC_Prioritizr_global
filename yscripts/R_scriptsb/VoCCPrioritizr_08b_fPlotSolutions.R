@@ -62,7 +62,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                               legend.text = element_text(colour = "black", face = "bold", size = 20),
                               legend.key.height = unit(2.2, "cm"),
                               legend.key.width = unit(1.4, "cm"),
-                              plot.tag = element_text(size = 25, face = "bold")))
+                              plot.tag = element_text(size = 32, face = "bold")))
     # Create the ggplot
     gg_list <- ggplot() +
       geom_sf(data = dff, aes(group = as.factor(solution_1), fill = as.factor(solution_1)), color = NA) +
@@ -139,7 +139,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                               legend.text = element_text(colour = "black", face = "bold", size = 20),
                               legend.key.height = unit(2.2, "cm"),
                               legend.key.width = unit(1.4, "cm"),
-                              plot.tag = element_text(size = 25, face = "bold")))
+                              plot.tag = element_text(size = 33, face = "bold")))
     
     gg_list <- ggplot() +
       geom_sf(data = dff, aes(group = as.factor(solution_f), fill = as.factor(solution_f)), color = NA) +
@@ -213,7 +213,7 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
                               legend.text = element_text(colour = "black", face = "bold", size = 20),
                               legend.key.height = unit(2.2, "cm"),
                               legend.key.width = unit(1.4, "cm"),
-                              plot.tag = element_text(size = 25, face = "bold")))
+                              plot.tag = element_text(size = 32, face = "bold")))
     # Create the ggplot
     gg_list <- ggplot() +
       geom_sf(data = dff, aes(group = as.factor(solution_f ), fill = as.factor(solution_f )), color = NA) +
@@ -227,65 +227,6 @@ world_sf <- ne_countries(scale = "medium", returnclass = "sf") %>%
       theme_opts3
     return(gg_list)
   }
-
-
-# 
-# data <- "Prioritisation/PrioritizrSolutionsNCost/features_10100/02_EpipelagicLayer_ssp126_0_1.rds"
-# sfdom <- pld_ep
-# sfprov <- lg
-# mpas <- mpas_ep
-# vmes <- vmes_ep
-# 
-# data <- "Prioritisation/PrioritizrSolutionsNCost/features_10100/03_MesopelagicLayer_ssp126_0_1.rds"
-# sfdom <- pld_mp
-# sfprov <- glw
-# mpas <- mpas_mp
-# vmes <- vmes_mp
-# 
-# data <- "Prioritisation/PrioritizrSolutionsNCost/02_EpipelagicLayer_ssp126_0_1.rds"
-# sfdom <- pld_mp
-# sfprov <- glw
-# mpas <- mpas_mp
-# vmes <- vmes_mp
-# 
-# data <- "Prioritisation/PrioritizrSolutionsCost/features_10100/02_EpipelagicLayer_ssp126_0_1.rds"
-# sfdom <- pld_mp
-# sfprov <- glw
-# mpas <- mpas_mp
-# vmes <- vmes_mp
-# 
-# 
-# 
-# 
-# data1 <- "Prioritisation/PrioritizrSolutionsCost/features_10100/02_EpipelagicLayer_ssp126_0_1.rds"
-# sfdom <- pld_ep
-# sfprov <- lg
-# mpas <- mpas_ep
-# vmes <- vmes_ep
-# 
-# data2 <- "Prioritisation/PrioritizrSolutionsCost/features_10100/02_EpipelagicLayer_ssp245_0_1.rds"
-# sfdom <- pld_ep
-# sfprov <- lg
-# mpas <- mpas_ep
-# vmes <- vmes_ep
-# 
-# data3 <- "Prioritisation/PrioritizrSolutionsCost/features_10100/02_EpipelagicLayer_ssp585_0_1.rds"
-# sfdom <- pld_ep
-# sfprov <- lg
-# mpas <- mpas_ep
-# vmes <- vmes_ep
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
