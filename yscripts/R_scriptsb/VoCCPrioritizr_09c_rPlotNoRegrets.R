@@ -3,7 +3,7 @@
 # NO GUARANTEES THAT CODE IS CORRECT
 # Caveat Emptor!
 
-source("yscripts/R_scriptsb/VoCCPrioritizr_08c_fPlotNoRegrets.R")
+source("yscripts/R_scriptsb/VoCCPrioritizr_08b_fPlotSolutions.R")
 
 ####################################################################################
 ####### 2.- Plot COMBINED Solutions and No regret by Ocean Layer
@@ -36,7 +36,7 @@ solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
 # bapList <- list(bap1, bap2, bap3, bapF)
 # saveRDS(bapList, "Figures/MS_v1_rds/bap_plotList.rds")
 
-# Seafloor
+# # Seafloor
 # sflr1 <- plot_CombSol(data1 = solCostF[10], data2 = solCostF[11], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
 # sflr2 <- plot_CombSol(data1 = solCostF[10], data2 = solCostF[12], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
 # sflr3 <- plot_CombSol(data1 = solCostF[11], data2 = solCostF[12], sfdom = pld_sflr, sfprov = sflr, mpas = mpas_sflr, vmes = vmes_sflr)
@@ -52,9 +52,9 @@ all_layers <- c(epL, mpL, bapL, sflrL)
 
 p3 <- patchwork::wrap_plots(all_layers, ncol = 4, byrow = TRUE) +
   plot_layout(guides = "collect") +
-  plot_annotation(tag_prefix = "(",
+  plot_annotation(tag_prefix = "",
                   tag_levels = "a", 
-                  tag_suffix = ")",)
+                  tag_suffix = "",)
 
 ggsave("Figures/MS_v1/BritoMorales_Fi_2.pdf", plot = p3, width = 43, height = 23, dpi = 300, limitsize = FALSE)
 ggsave("Figures/MS_v1/BritoMorales_Fi_2.png", plot = p3, width = 43, height = 23, dpi = 300, limitsize = FALSE)
