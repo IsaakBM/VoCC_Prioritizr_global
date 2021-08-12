@@ -136,3 +136,31 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
   all_cf <- rbind(ep_cf, mp_cf, bap_cf, sflr_cf)  
   length(unique(all_cf$speciesID)) # 66,093 conservation features in TOTAL
   
+####################################################################################
+####### 4.- COST Number of Species
+####################################################################################
+# 
+  epCost <- readRDS("Inputs/Cost/02-epipelagic_CostbySpecies.rds")
+  epCost <- lapply(epCost, function(x) colnames(x)[3])
+  epCost <- do.call(rbind, epCost) %>% 
+    as_tibble() # 221 prices
+  
+  mpCost <- readRDS("Inputs/Cost/03-mesopelagic_CostbySpecies.rds")
+  mpCost <- lapply(mpCost, function(x) colnames(x)[3])
+  mpCost <- do.call(rbind, mpCost) %>% 
+    as_tibble() # 232 prices
+  
+  bapCost <- readRDS("Inputs/Cost/04-bathyabyssopelagic_CostbySpecies.rds")
+  bapCost <- lapply(bapCost, function(x) colnames(x)[3])
+  bapCost <- do.call(rbind, bapCost) %>% 
+    as_tibble() # 55 prices
+  
+  sflrCost <- readRDS("Inputs/Cost/05-seafloor_CostbySpecies.rds")
+  sflrCost <- lapply(sflrCost, function(x) colnames(x)[3])
+  sflrCost <- do.call(rbind, sflrCost) %>% 
+    as_tibble() # 834 prices
+  
+  all_cost <- rbind(epCost, mpCost, bapCost, sflrCost)
+  length(unique(all_cost$V1))
+  
+  

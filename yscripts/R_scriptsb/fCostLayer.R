@@ -40,7 +40,7 @@ mp <- lapply(t2, function(x){
   if(unique(x$DepthMin) >= 200 | unique(x$DepthMin) < 1000 | unique(x$DepthMax) >= 200 | unique(x$DepthMax) < 1000) {
     ff <- x}
 })
-test01 <- mp[lengths(mp) != 0] # 232
+mp <- mp[lengths(mp) != 0] # 232
 saveRDS(mp, "Inputs/Cost/03-mesopelagic_CostbySpecies.rds")
 
 bap <- lapply(t2, function(x){
@@ -71,10 +71,10 @@ saveRDS(bap, "Inputs/Cost/04-bathyabyssopelagic_CostbySpecies.rds")
     dplyr::summarise(total_cost = sum(cost_layer))
   epRS <- raster::rasterFromXYZ(epDF)
   saveRDS(epRS, "Inputs/Cost/02-epipelagic_CostRasterTotal.rds")
-  writeRaster(epRS, "Inputs/Cost/02-epipelagic_CostRasterTotal.tif")
+  writeRaster(epRS, "Inputs/Cost/02-epipelagic_CostRasterTotal.tif", overwrite = TRUE)
   
 ##### 
-  mp2 <- lapply(ep, function(x){
+  mp2 <- lapply(mp, function(x){
     ff <- x %>% 
       dplyr::mutate(cost = .[[3]], 
                     MinLayer = 200,
@@ -91,7 +91,7 @@ saveRDS(bap, "Inputs/Cost/04-bathyabyssopelagic_CostbySpecies.rds")
     dplyr::summarise(total_cost = sum(cost_layer))
   mpRS <- raster::rasterFromXYZ(mpDF)
   saveRDS(mpRS, "Inputs/Cost/03-mesopelagic_CostRasterTotal.rds")
-  writeRaster(mpRS, "Inputs/Cost/03-mesopelagic_CostRasterTotal.tif")
+  writeRaster(mpRS, "Inputs/Cost/03-mesopelagic_CostRasterTotal.tif", overwrite = TRUE)
     
 #####
 # 
@@ -112,7 +112,7 @@ saveRDS(bap, "Inputs/Cost/04-bathyabyssopelagic_CostbySpecies.rds")
     dplyr::summarise(total_cost = sum(cost_layer))
   bapRS <- raster::rasterFromXYZ(bapDF)
   saveRDS(bapRS, "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.rds")
-  writeRaster(bapRS, "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.tif")
+  writeRaster(bapRS, "Inputs/Cost/04-bathyabyssopelagic_CostRasterTotal.tif", overwrite = TRUE)
   
 ####################################################################################
 ####### 
