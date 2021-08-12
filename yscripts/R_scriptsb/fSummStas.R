@@ -5,7 +5,6 @@
 
 source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
 
-
 ####################################################################################
 ####### 1.- Summary Stast Individual Solutions
 ####################################################################################
@@ -73,4 +72,67 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
   # write_csv(DFList2, "SummStats/NoRegret_SummStats_features_10100.csv")
 
 
+####################################################################################
+####### 3.- Number of Species, Conservation Features, etc.
+####################################################################################
+# Number of Species 
+  ep_sps <- fread("Prioritisation/PrioritizrFiles/features_10100/02_EpipelagicLayer_ssp126/spec_02_EpipelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>%
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID)
+  length(unique(ep_sps$speciesID)) # 1081 species
+  
+  mp_sps <- fread("Prioritisation/PrioritizrFiles/features_10100/03_MesopelagicLayer_ssp126/spec_03_MesopelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>%
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID)
+  length(unique(mp_sps$speciesID)) # 1300 species
+  
+  bap_sps <- fread("Prioritisation/PrioritizrFiles/features_10100/04_BathyAbyssopelagicLayer_ssp126/spec_04_BathyAbyssopelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>%
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID)
+  length(unique(bap_sps$speciesID)) # 519 species
 
+  sflr_sps <- fread("Prioritisation/PrioritizrFiles/features_10100/05_Seafloor_ssp126/spec_05_Seafloor_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>%
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID) %>% 
+    dplyr::filter(str_detect(string = speciesID, 
+                             pattern = paste0(c("Basins", "Bridges", "Canyons", "Escarpments", 
+                                                "Fans", "Guyots", "Plateaus", "Ridges", 
+                                                "Seamounts", "Sills", "Trenches", "Troughs"), 
+                                              collapse = "|")) == FALSE)
+  length(unique(sflr_sps$speciesID)) # 10860 species
+
+  all_sps <- rbind(ep_sps, mp_sps, bap_sps, sflr_sps)  
+  length(unique(all_sps$speciesID)) # 10872 species in TOTAL
+  
+# Number of Conservation Features
+  ep_cf <- fread("Prioritisation/PrioritizrFiles/features_10100/02_EpipelagicLayer_ssp126/spec_02_EpipelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_remove_all(string = name, pattern = "_RCE|_VoCC")) %>% 
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID)
+  length(unique(ep_cf$speciesID)) # 12791 conservation features
+  
+  mp_cf <- fread("Prioritisation/PrioritizrFiles/features_10100/03_MesopelagicLayer_ssp126/spec_03_MesopelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_remove_all(string = name, pattern = "_RCE|_VoCC")) %>% 
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID)
+  length(unique(mp_cf$speciesID)) # 15141 conservation features
+  
+  bap_cf <- fread("Prioritisation/PrioritizrFiles/features_10100/04_BathyAbyssopelagicLayer_ssp126/spec_04_BathyAbyssopelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_remove_all(string = name, pattern = "_RCE|_VoCC")) %>% 
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID)
+  length(unique(bap_cf$speciesID)) # 7083 conservation features
+  
+  sflr_cf <- fread("Prioritisation/PrioritizrFiles/features_10100/05_Seafloor_ssp126/spec_05_Seafloor_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_remove_all(string = name, pattern = "_RCE|_VoCC")) %>% 
+    dplyr::arrange(id) %>% 
+    dplyr::select(id, speciesID)
+  length(unique(sflr_cf$speciesID)) # 31078 conservation features
+  
+  all_cf <- rbind(ep_cf, mp_cf, bap_cf, sflr_cf)  
+  length(unique(all_cf$speciesID)) # 66,093 conservation features in TOTAL
+  
