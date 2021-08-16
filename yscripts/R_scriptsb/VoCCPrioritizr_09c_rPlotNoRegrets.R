@@ -4,6 +4,7 @@
 # Caveat Emptor!
 
 source("yscripts/R_scriptsb/VoCCPrioritizr_08b_fPlotSolutions.R")
+source("yscripts/R_scriptsb/VoCCPrioritizr_08c_fPlotNoRegrets.R")
 
 ####################################################################################
 ####### 2.- Plot COMBINED Solutions and No regret by Ocean Layer
@@ -62,23 +63,37 @@ ggsave("Figures/MS_v1/BritoMorales_Fi_2.png", plot = p3, width = 43, height = 23
 ####################################################################################
 ####### 3.- Plot No Regret Across Climate and Ocean Layer
 ####################################################################################
-dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
-solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
-
-epF <- data_NoReg(data1 = solCostF[1], data2 = solCostF[2], data3 = solCostF[3], sfdom = pld_ep1, 
-                  outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
-mpF <- data_NoReg(data1 = solCostF[4], data2 = solCostF[5], data3 = solCostF[6], sfdom = pld_mp1, 
-                  outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
-bapF <- data_NoReg(data1 = solCostF[7], data2 = solCostF[8], data3 = solCostF[9], sfdom = pld_bap1, 
-                   outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
-sflrF <- data_NoReg(data1 = solCostF[10], data2 = solCostF[11], data3 = solCostF[12], sfdom = pld_sflr1, 
+# 
+  dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
+  solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
+  
+  epF <- data_NoReg(data1 = solCostF[1], data2 = solCostF[2], data3 = solCostF[3], sfdom = pld_ep1, 
                     outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+  mpF <- data_NoReg(data1 = solCostF[4], data2 = solCostF[5], data3 = solCostF[6], sfdom = pld_mp1, 
+                    outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+  bapF <- data_NoReg(data1 = solCostF[7], data2 = solCostF[8], data3 = solCostF[9], sfdom = pld_bap1, 
+                     outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+  sflrF <- data_NoReg(data1 = solCostF[10], data2 = solCostF[11], data3 = solCostF[12], sfdom = pld_sflr1, 
+                      outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+  
+  all <- NoRegVer(data1 = epF, data2 = mpF, data3 = bapF, data4 = sflrF, sfdom = pld_ep1, mpas = mpas_ep, vmes = vmes_ep, 
+                  outdir = "SummStats/PrioritizrSolutionsCost/features_10100/") 
+# 
+  plot_plg <- lat_plot(data = "SummStats/PrioritizrSolutionsCost/features_10100/NoRegret_Pelagic.rds", sfdom = pld_ep1, mpas = mpas_ep, vmes = vmes_ep) +
+    theme(legend.position = "none")
+  plot_plgS <- lat_plot(data = "SummStats/PrioritizrSolutionsCost/features_10100/NoRegret_PelagicSeafloor.rds", sfdom = pld_ep1, mpas = mpas_ep, vmes = vmes_ep) +
+    theme(legend.position = "none")
+# 
+  p4 <- patchwork::wrap_plots(plot_plg, all, plot_plgS, ncol = 3, byrow = TRUE) +
+    plot_annotation(tag_prefix = "",
+                    tag_levels = "a", 
+                    tag_suffix = "",) +
+    plot_layout(widths = c(0.5, 8, 0.5), guides = "collect")
 
-all <- NoRegVer(data1 = epF, data2 = mpF, data3 = bapF, data4 = sflrF, sfdom = pld_ep1, mpas = mpas_ep, vmes = vmes_ep, 
-                outdir = "SummStats/PrioritizrSolutionsCost/features_10100/") 
-
-ggsave("Figures/MS_v1/BritoMorales_Fi_3.pdf", plot = all, width = 12, height = 6, dpi = 300, limitsize = FALSE)
-ggsave("Figures/MS_v1/BritoMorales_Fi_3.png", plot = all, width = 12, height = 6, dpi = 300, limitsize = FALSE)
+  ggsave("Figures/MS_v1/BritoMorales_Fi_3b.pdf", plot = p4, width = 12, height = 6, dpi = 300, limitsize = FALSE)
+  
+# ggsave("Figures/MS_v1/BritoMorales_Fi_3.pdf", plot = all, width = 12, height = 6, dpi = 300, limitsize = FALSE)
+# ggsave("Figures/MS_v1/BritoMorales_Fi_3.png", plot = all, width = 12, height = 6, dpi = 300, limitsize = FALSE)
 
 
 
