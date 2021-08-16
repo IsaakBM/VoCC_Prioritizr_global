@@ -36,7 +36,7 @@ ggsave("Figures/MS_v1/BritoMorales_ED_Fi_5.png", plot = p1, width = 35, height =
 ####################################################################################
 ####### 1B.- Plot Individual Solutions WITH NO COST
 ####################################################################################
-dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsNCost", full.names = TRUE, recursive = FALSE)
+dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsNCostA", full.names = TRUE, recursive = FALSE)
 solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
 
 plotList <- vector("list", length = length(solCostF))
@@ -50,9 +50,9 @@ for(i in seq_along(solCostF)){
 
 p2 <- patchwork::wrap_plots(plotList, ncol = 3, byrow = TRUE) +
   plot_layout(guides = "collect") +
-  plot_annotation(tag_prefix = "(",
+  plot_annotation(tag_prefix = "",
                   tag_levels = "a", 
-                  tag_suffix = ")",)
+                  tag_suffix = "",)
 ggsave("Figures/MS_v1/BritoMorales_ED_Fi_6.pdf", plot = p2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
 ggsave("Figures/MS_v1/BritoMorales_ED_Fi_6.png", plot = p2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
 
