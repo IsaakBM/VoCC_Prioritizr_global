@@ -27,9 +27,8 @@ kappa_correlation <- function(path, shp, outdir) {
     }
   
   # List of directories with appropiate file
-    dir.scenarios <- paste(list.dirs(path = path, full.names = TRUE, recursive = FALSE), sep = "/")
     dir.shp <- paste(list.dirs(path = shp, full.names = TRUE, recursive = FALSE), sep = "/")
-    rds <- list.files(path = dir.scenarios, pattern = ".rds", full.names = TRUE)
+    rds <- list.files(path = path, pattern = ".rds", full.names = TRUE)
     shps <- list.files(path = dir.shp, pattern = "*.shp$", full.names = TRUE)
     single_csv <- unlist(lapply(rds, function(x) {ff <- readRDS(x)[2]}), recursive = FALSE)
     single_shp <- lapply(shps, function(x) {ff <- st_read(x)})
@@ -119,6 +118,6 @@ kappa_correlation <- function(path, shp, outdir) {
   }
 }
 
-system.time(kappa_correlation(path = "Prioritisation/PrioritizrSolutionsCost", 
+system.time(kappa_correlation(path = "Prioritisation/PrioritizrSolutionsCost/features_1090", 
                               shp = "Output/01_abnjs_nofilterdepth", 
                               outdir = "Figures/MS_v1/"))
