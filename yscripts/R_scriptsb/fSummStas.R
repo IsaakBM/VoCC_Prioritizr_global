@@ -356,7 +356,11 @@ library(stringr)
     ggtitle(expression(Total~Opportunity~Cost~(log[10]~USD)))
   
   ggsave("Figures/MS_v1/BritoMorales_ED_Fi_010.pdf", plot = ggff, width = 15, height = 8, dpi = 300)  
+<<<<<<< HEAD
   ggsave("Figures/MS_v1/BritoMorales_ED_Fi_010.png", plot = ggff, width = 15, height = 8, dpi = 300)  
+=======
+  
+>>>>>>> 27a1fc6a2e5e281f5ae7a2541298505ffb721939
   
   
   
