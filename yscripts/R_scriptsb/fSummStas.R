@@ -162,5 +162,114 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
   
   all_cost <- rbind(epCost, mpCost, bapCost, sflrCost)
   length(unique(all_cost$V1))
+
+####################################################################################
+####### 
+####################################################################################
+library(sf)
+library(dplyr)
+  
+  ep1 <- readRDS("Prioritisation/PrioritizrSolutionsCost/features_10100/02_EpipelagicLayer_ssp126_0_1.rds")
+  ep1 <- ep1[[2]] %>% 
+    dplyr::filter(solution_1 == 1)
+  sum(ep1$cost) # 1,034,244
+  nrow(ep1)
+  
+  ep2 <- readRDS("Prioritisation/PrioritizrSolutionsNCostA/features_10100/02_EpipelagicLayer_ssp126_0_1.rds")
+  ep2 <- ep2[[2]] %>% 
+    dplyr::filter(solution_1 == 1)
+  sum(ep2$cost) # 117,148,060
+  nrow(ep2)
+  # thinking about doing a face-face plot?  
+  
+  
+####################################################################################
+####### 
+####################################################################################
+  library(sf)
+  library(dplyr)
+  library(readr)
+  
+  sol_rds <- list.files(path = "Prioritisation/PrioritizrSolutionsCost/features_10100", pattern = ".rds", full.names = TRUE)
+  summStat <- lapply(sol_rds, function(x){
+    d1 <- readRDS(x)
+    dff <- tibble(mean = mean(d1[[1]]$data$features$prop, na.rm = TRUE), 
+                  sd = sd(d1[[1]]$data$features$prop, na.rm = TRUE), 
+                  median = median(d1[[1]]$data$features$prop, na.rm = TRUE), 
+                  q1 = quantile(d1[[1]]$data$features$prop, probs = 0.25),
+                  q3 = quantile(d1[[1]]$data$features$prop, probs = 0.75))})
+  
+  ff <- do.call(rbind, summStat)
+  mean(ff$mean) # 0.79 (0.79 +- )
+  sd(ff$mean) # 0.12
+  median(ff$mean) # 0.74
+  quantile(ff$mean, probs = 0.25) # 0.70
+  quantile(ff$mean, probs = 0.75) # 0.82
+  
+  # mean: 0.79 +- 0.12 (n = 12)
+  # median: 0.74 (0.70, 0.82)
+  
+####################################################################################
+####### AQMs Richness Phyla Supp Table
+####################################################################################
+library(sf)
+library(dplyr)
+library(data.table)
+library(readr)
+library(stringr)
+  
+# 
+  aqm <- fread("Inputs/Aqm/speciesoccursum.csv", stringsAsFactors = FALSE, fill = TRUE) %>% 
+    dplyr::select(speciesID, phylum)
+
+# Epipelagic
+  ep <- fread("Prioritisation/PrioritizrFiles/features_10100/02_EpipelagicLayer_ssp126/spec_02_EpipelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>% 
+    dplyr::select(speciesID)
+  ep_species_main <- dplyr::left_join(x = ep, y = aqm,  by = "speciesID") %>% 
+    distinct(.keep_all = TRUE) %>% 
+    group_by(phylum) %>% 
+    summarise(epipelagic = n())
+# Mesopelagic
+  mp <- fread("Prioritisation/PrioritizrFiles/features_10100/03_MesopelagicLayer_ssp126/spec_03_MesopelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>%
+    dplyr::select(speciesID)
+  mp_species_main <- dplyr::left_join(x = mp, y = aqm,  by = "speciesID") %>% 
+    distinct(.keep_all = TRUE) %>% 
+    group_by(phylum) %>% 
+    summarise(mesopelagic = n())
+# BathyAbyssopelagic
+  bap <- fread("Prioritisation/PrioritizrFiles/features_10100/04_BathyAbyssopelagicLayer_ssp126/spec_04_BathyAbyssopelagicLayer_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>%
+    dplyr::select(speciesID)
+  bap_species_main <- dplyr::left_join(x = bap, y = aqm,  by = "speciesID") %>% 
+    distinct(.keep_all = TRUE) %>% 
+    group_by(phylum) %>% 
+    summarise(bathyabyssopelagic = n())
+# Seafloor
+  sflr <- fread("Prioritisation/PrioritizrFiles/features_10100/05_Seafloor_ssp126/spec_05_Seafloor_ssp126.dat") %>% 
+    dplyr::mutate(speciesID = str_split(string = name, pattern = "_", simplify = TRUE)[,1]) %>%
+    dplyr::filter(str_detect(string = speciesID, 
+                             pattern = paste0(c("Basins", "Bridges", "Canyons", "Escarpments", 
+                                                "Fans", "Guyots", "Plateaus", "Ridges", 
+                                                "Seamounts", "Sills", "Trenches", "Troughs"), 
+                                              collapse = "|")) == FALSE) %>% 
+    dplyr::select(speciesID)
+  sflr_species_main <- dplyr::left_join(x = sflr, y = aqm,  by = "speciesID") %>% 
+    distinct(.keep_all = TRUE) %>% 
+    group_by(phylum) %>% 
+    summarise(seafloor = n())
+  
+# Creating the final Extended Table
+  df_list <- list(ep_species_main, mp_species_main, bap_species_main, sflr_species_main)
+  data <- reshape::merge_recurse(df_list) %>% 
+    arrange(phylum)
+  write.csv(data, "SummStats/zrichness_phyla.csv")
+  
+  # data <- read_csv("SummStats/zrichness_phyla.csv")
+  # sum(data$epipelagic, na.rm = T)
+  # sum(data$mesopelagic, na.rm = T)
+  # sum(data$bathyabyssopelagic, na.rm = T)
+  # sum(data$seafloor, na.rm = T)
   
   
