@@ -184,7 +184,7 @@ library(dplyr)
   
   
 ####################################################################################
-####### 
+#######  Mean and Median targets
 ####################################################################################
   library(sf)
   library(dplyr)
@@ -266,10 +266,99 @@ library(stringr)
     arrange(phylum)
   write.csv(data, "SummStats/zrichness_phyla.csv")
   
-  # data <- read_csv("SummStats/zrichness_phyla.csv")
-  # sum(data$epipelagic, na.rm = T)
-  # sum(data$mesopelagic, na.rm = T)
-  # sum(data$bathyabyssopelagic, na.rm = T)
-  # sum(data$seafloor, na.rm = T)
+####################################################################################
+####### Face to Face Bar plots
+####################################################################################
+  
+  facetoface_clean <- function(path) {
+    library(sf)
+    library(dplyr)
+    library(data.table)
+    library(readr)
+    library(stringr)
+    library(ggplot2)
+    
+      rds <- list.files(path = path, pattern = ".rds", full.names = TRUE)
+      data <- lapply(rds, function(x) {
+        d1 <- readRDS(x)
+        dff <- d1[[2]] %>% 
+          as_tibble() %>% 
+          dplyr::select(id, cost, solution_1) %>% 
+          dplyr::filter(solution_1 == 1) %>% 
+          dplyr::summarise(cost_total = sum(cost)) %>% 
+          dplyr::mutate(scenario = ifelse(str_detect(path, "PrioritizrSolutionsNCostA"), "No Cost", "Cost"),
+                        olayer = ifelse(str_detect(basename(x), "EpipelagicLayer_ssp126"), "Epipelagic SSP1-2.6", 
+                                 ifelse(str_detect(basename(x), "EpipelagicLayer_ssp245"), "Epipelagic SSP2-4.5",
+                                 ifelse(str_detect(basename(x), "EpipelagicLayer_ssp585"), "Epipelagic SSP5-8.5", 
+                                 ifelse(str_detect(basename(x), "MesopelagicLayer_ssp126"), "Mesopelagic SSP1-2.6",
+                                 ifelse(str_detect(basename(x), "MesopelagicLayer_ssp245"), "Mesopelagic SSP2-4.5",
+                                 ifelse(str_detect(basename(x), "MesopelagicLayer_ssp585"), "Mesopelagic SSP5-8.5",
+                                 ifelse(str_detect(basename(x), "BathyAbyssopelagicLayer_ssp126"), "BathyAbyssopelagicLayer SSP1-2.6",
+                                 ifelse(str_detect(basename(x), "BathyAbyssopelagicLayer_ssp245"), "BathyAbyssopelagicLayer SSP2-4.5",
+                                 ifelse(str_detect(basename(x), "BathyAbyssopelagicLayer_ssp585"), "BathyAbyssopelagicLayer SSP5-8.5",
+                                 ifelse(str_detect(basename(x), "Seafloor_ssp126"), "Seafloor SSP1-2.6",
+                                 ifelse(str_detect(basename(x), "Seafloor_ssp245"), "Seafloor SSP2-4.5",
+                                 ifelse(str_detect(basename(x), "Seafloor_ssp585"), "Seafloor SSP5-8.5", NA)))))))))))))
+      })
+      data1 <- do.call(rbind, data)
+      return(data1)
+  }
+
+  d1 <- facetoface_clean(path = "Prioritisation/PrioritizrSolutionsCost/features_10100")  
+  d2 <- facetoface_clean(path = "Prioritisation/PrioritizrSolutionsNCostA/features_10100")  
+  df <- rbind(d1, d2)
+  dff <- df %>% 
+    dplyr::mutate(cost_log = log10(cost_total + 1), 
+                  cost_log = ifelse(scenario == "No Cost", cost_log*-1, cost_log))
+  
+  ggff <- ggplot(data = dff, aes(x = olayer, y = cost_log, fill = scenario)) +
+    geom_bar(data = subset(dff, scenario == "No Cost"), position = "identity", stat = "identity") +
+    geom_bar(data = subset(dff), position = "identity", stat = "identity") +
+    geom_hline(yintercept = 0, colour = "black") +
+    geom_hline(yintercept = -6, colour = "black", linetype ="dashed") +
+    geom_hline(yintercept = 6, colour = "black", linetype ="dashed") +
+    geom_hline(yintercept = -8, colour = "black", linetype ="dashed") +
+    geom_hline(yintercept = 8, colour = "black", linetype ="dashed") +
+    scale_x_discrete(limits = rev(c("Epipelagic SSP1-2.6", 
+                                    "Epipelagic SSP2-4.5",
+                                    "Epipelagic SSP5-8.5",
+                                    "Mesopelagic SSP1-2.6", 
+                                    "Mesopelagic SSP2-4.5",
+                                    "Mesopelagic SSP5-8.5", 
+                                    "BathyAbyssopelagicLayer SSP1-2.6", 
+                                    "BathyAbyssopelagicLayer SSP2-4.5",
+                                    "BathyAbyssopelagicLayer SSP5-8.5", 
+                                    "Seafloor SSP1-2.6", 
+                                    "Seafloor SSP2-4.5", 
+                                    "Seafloor SSP5-8.5")), 
+                     labels = rev(c("SSP1-2.6", "Epipelagic SSP2-4.5", "SSP5-8.5", 
+                                    "SSP1-2.6", "Mesopelagic SSP2-4.5", "SSP5-8.5",
+                                    "SSP1-2.6", "BathyAbyssopelagicLayer SSP2-4.5", "SSP5-8.5",
+                                    "SSP1-2.6", "Seafloor SSP2-4.5", "SSP5-8.5"))) +
+    coord_flip() +
+    guides(fill = guide_legend(reverse = T)) +
+    scale_y_continuous(breaks = seq(-10, 10, 2), limits = c(-10, 10), expand = c(0, 0), labels = function(x) abs(x)) +
+    scale_fill_manual(values = c("#2b8cbe", "#969696"), 
+                      name = "Priorisation\n Runs", 
+                      labels = c("Cost", "No Cost")) +
+    theme_minimal() +
+    labs(y = "") +
+    theme(plot.title = element_text(face = "plain", size = 20, hjust = 0.5),
+          plot.tag = element_text(colour = "black", face = "bold", size = 23), 
+          axis.title.y = element_blank(),
+          axis.title.x = element_text(size = rel(1.5), angle = 0),
+          axis.text.x = element_text(size = rel(1.5), angle = 0),
+          axis.text.y = element_text(size = rel(2), angle = 0),
+          legend.title = element_text(colour = "black", face = "bold", size = 15),
+          legend.text = element_text(colour = "black", face = "bold", size = 13),
+          legend.key.height = unit(1.5, "cm"),
+          legend.key.width = unit(1.5, "cm")) +
+    ggtitle(expression(Total~Opportunity~Cost~(log[10]~USD)))
+  
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_010.pdf", plot = ggff, width = 15, height = 8, dpi = 300)  
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_010.png", plot = ggff, width = 15, height = 8, dpi = 300)  
+  
+  
+  
   
   
