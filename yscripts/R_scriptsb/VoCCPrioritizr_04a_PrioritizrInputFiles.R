@@ -128,7 +128,7 @@ marxan_dat_files <- function(path, outdir, proj.geo) {
 
 
 system.time(marxan_dat_files(path = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrCleanBegin/features_1030",
-                             outdir = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrFiles/features_10100/",
+                             outdir = "/scratch/user/uqibrito/Project04c/Prioritisation/PrioritizrFiles/features_1030/",
                              proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs"))
 
 system.time(marxan_dat_files(path = "Prioritisation/PrioritizrCleanBegin/features_10100",
