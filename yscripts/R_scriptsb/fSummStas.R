@@ -396,7 +396,34 @@ library(stringr)
   
   # it goes from (0.91, 0.95) which means a high agreement on the network
   
+####################################################################################
+####### Latitude Correlation
+####################################################################################
+  library(sf)
+  library(readr)
+  library(data.table)
+  library(dplyr)
+  library(psych)
+  library(stringr)
   
+  sfRCE_ep <- list.files(path = "Output/ClimateChange/02_EpipelagicLayer", pattern = ".rds", full.names = TRUE)
+  sfRCE_ep <- sfRCE_ep[str_detect(sfRCE_ep, pattern = "RCE")]
+  sfRCE_mp <- list.files(path = "Output/ClimateChange/03_MesopelagicLayer", pattern = ".rds", full.names = TRUE)
+  sfRCE_mp <- sfRCE_mp[str_detect(sfRCE_mp, pattern = "RCE")]
+  sfRCE_bap <- list.files(path = "Output/ClimateChange/04_BathyAbyssopelagicLayer", pattern = ".rds", full.names = TRUE)
+  sfRCE_bap <- sfRCE_bap[str_detect(sfRCE_bap, pattern = "RCE")]
+  sfRCE_sflr <- list.files(path = "Output/ClimateChange/05_Seafloor", pattern = ".rds", full.names = TRUE)
+  sfRCE_sflr <- sfRCE_sflr[str_detect(sfRCE_sflr, pattern = "RCE")]
+  dirRCE <- c(sfRCE_ep, sfRCE_mp, sfRCE_bap, sfRCE_sflr)
+  
+  latCor <- lapply(dirRCE, function(x) {
+    d1 <- readRDS(x)
+    dff <- d1 %>% 
+      cbind(st_coordinates(st_centroid(d1))) %>% 
+      as_tibble() %>% 
+      dplyr::select(Y, climate_feature)})
+  dflatCor <- rbindlist(latCor, use.names = TRUE)
+  cor(dflatCor$Y, dflatCor$climate_feature)
   
   
   
