@@ -64,20 +64,20 @@ ggsave("Figures/MS_v1/BritoMorales_Fi_2.png", plot = p3, width = 43, height = 23
 ####### 3.- Plot No Regret Across Climate and Ocean Layer
 ####################################################################################
 # 
-  dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
+  dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)[1]
   solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
   
   epF <- data_NoReg(data1 = solCostF[1], data2 = solCostF[2], data3 = solCostF[3], sfdom = pld_ep1, 
-                    outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+                    outdir = "SummStats/PrioritizrSolutionsCost/test/")
   mpF <- data_NoReg(data1 = solCostF[4], data2 = solCostF[5], data3 = solCostF[6], sfdom = pld_mp1, 
-                    outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+                    outdir = "SummStats/PrioritizrSolutionsCost/test/")
   bapF <- data_NoReg(data1 = solCostF[7], data2 = solCostF[8], data3 = solCostF[9], sfdom = pld_bap1, 
-                     outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+                     outdir = "SummStats/PrioritizrSolutionsCost/test/")
   sflrF <- data_NoReg(data1 = solCostF[10], data2 = solCostF[11], data3 = solCostF[12], sfdom = pld_sflr1, 
-                      outdir = "SummStats/PrioritizrSolutionsCost/features_10100/")
+                      outdir = "SummStats/PrioritizrSolutionsCost/test/")
   
   all <- NoRegVer(data1 = epF, data2 = mpF, data3 = bapF, data4 = sflrF, sfdom = pld_ep1, mpas = mpas_ep, vmes = vmes_ep, 
-                  outdir = "SummStats/PrioritizrSolutionsCost/features_10100/") 
+                  outdir = "SummStats/PrioritizrSolutionsCost/test/") 
 # 
   plot_plg <- lat_plot(data = "SummStats/PrioritizrSolutionsCost/features_10100/NoRegret_Pelagic.rds", sfdom = pld_ep1, mpas = mpas_ep, vmes = vmes_ep) +
     theme(legend.position = "none")

@@ -29,14 +29,14 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
     return(ff)
   }
 # 
-  dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
+  dir.sol <- list.dirs(path = "Prioritisation/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)[8]
   solCostF <- list.files(path = dir.sol, pattern = ".rds", full.names = TRUE)
 # 
   DFList <- vector("list", length = length(solCostF))
   for(i in seq_along(solCostF)){ DFList[[i]] <- SummSol(data = solCostF[i], mpas = mpaList[[i]], vmes = vmeList[[i]])}
   DFList <- do.call(rbind, DFList) %>% 
     as_tibble()
-  # write_csv(DFList, "SummStats/Solutions_SummStats_features_10100.csv")
+  # write_csv(DFList, "SummStats/Solutions_SummStats_features_1090.csv")
 
 ####################################################################################
 ####### 2.- Summary Stast No Regret Networks
@@ -61,15 +61,15 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_Help.R")
   }
   
 # 
-  dir.NR <- list.dirs(path = "SummStats/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)
+  dir.NR <- list.dirs(path = "SummStats/PrioritizrSolutionsCost", full.names = TRUE, recursive = FALSE)[9]
   NReg <- list.files(path = dir.NR, pattern = ".rds", full.names = TRUE)
-  NReg <- c(NReg[2], NReg[3], NReg[1], NReg[6], NReg[4], NReg[5])
+  NReg <- c(NReg[2], NReg[3], NReg[1], NReg[5], NReg[6], NReg[4])
 # 
   DFList2 <- vector("list", length = length(NReg))
   for(i in seq_along(NReg)){ DFList2[[i]] <- SummSol_NR(data = NReg[i], mpas = mpaList2[[i]], vmes = vmeList2[[i]])}
   DFList2 <- do.call(rbind, DFList2) %>% 
     as_tibble()
-  # write_csv(DFList2, "SummStats/NoRegret_SummStats_features_10100.csv")
+  write_csv(DFList2, "SummStats/NoRegret_SummStats_features_1090.csv")
 
 
 ####################################################################################
@@ -358,4 +358,46 @@ library(stringr)
   ggsave("Figures/MS_v1/BritoMorales_ED_Fi_010.pdf", plot = ggff, width = 15, height = 8, dpi = 300)  
   ggsave("Figures/MS_v1/BritoMorales_ED_Fi_010.png", plot = ggff, width = 15, height = 8, dpi = 300)  
   
+####################################################################################
+####### Kappa cost vs no cost
+####################################################################################
+  library(sf)
+  library(readr)
+  library(dplyr)
+  library(psych)
   
+  solCost <- list.files(path = "Prioritisation/PrioritizrSolutionsCost/features_10100", pattern = ".rds", full.names = TRUE)
+  solNCost <- list.files(path = "Prioritisation/PrioritizrSolutionsNCostA/features_10100", pattern = ".rds", full.names = TRUE)
+  
+  ls_solCost <- lapply(solCost, function(x) {
+    d1 <- readRDS(x)
+    dff <- d1[[2]] %>% 
+      dplyr::select(solution_1)})
+  ls_solNCost <- lapply(solNCost, function(x) {
+    d1 <- readRDS(x)
+    dff <- d1[[2]] %>% 
+      dplyr::select(solution_1)})
+
+  irr::kappa2(cbind(ls_solCost[[12]]$solution_1, ls_solNCost[[12]]$solution_1))
+  # unlist(cohen.kappa(x = cbind(ls_solCost[[12]]$solution_1, ls_solNCost[[12]]$solution_1)))[1]
+    
+  # ep_126 = 0.95
+  # ep_245 = 0.92
+  # ep_585 = 0.93
+  # mp_126 = 0.92
+  # mp_245 = 0.91
+  # mp_585 = 0.92
+  # bap_126 = 0.92 
+  # bap_245 = 0.92
+  # bap_585 = 0.93
+  # sflr_126 = 0.93 
+  # sflr_245 = 0.93
+  # sflr_585 = 0.94
+  
+  # it goes from (0.91, 0.95) which means a high agreement on the network
+  
+  
+  
+  
+  
+    
