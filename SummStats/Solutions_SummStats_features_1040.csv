@@ -1,0 +1,13 @@
+Ocean_layer,Scenario,Protection
+Epipelagic,ssp126,15
+Epipelagic,ssp245,18.2
+Epipelagic,ssp585,18.4
+Mesopelagic,ssp126,18.6
+Mesopelagic,ssp245,18.4
+Mesopelagic,ssp585,18.8
+BathyAbyssopelagic,ssp126,16.1
+BathyAbyssopelagic,ssp245,15.8
+BathyAbyssopelagic,ssp585,15.7
+Seafloor,ssp126,13.2
+Seafloor,ssp245,13.2
+Seafloor,ssp585,13.3
