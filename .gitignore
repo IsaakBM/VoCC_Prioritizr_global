@@ -10,9 +10,11 @@
 /Inputs/CMIP6_zrasters_zensemble
 /Inputs/FeaturesSeafloor
 /Inputs/FeaturesSeafloor2
+/Inputs/GeomorphicFeatures_rds
 /Prioritisation/PrioritizrBegin
 /Prioritisation/PrioritizrCleanBegin
 /Prioritisation/PrioritizrFiles
+/Output/FeaturesOLayer
 /yscripts/R_scripts
 /yscripts/rdm
 /zold
