@@ -7,7 +7,7 @@ library(sf)
 library(raster)
 library(ggplot2)
 library(prioritizr)
-library(gurobi)
+# library(gurobi)
 library(patchwork)
 library(rnaturalearth)
 library(rnaturalearthdata)
@@ -252,7 +252,7 @@ pldom <- list(lg, lg, lg, glw, glw, glw, glw, glw, glw, sflr, sflr, sflr)
                                     ifelse(croot_rce > 2 & croot_rce <= 4, 9,
                                     ifelse(croot_rce > 4 & croot_rce <= 6, 10, 11)))))))))))
         # Defining generalities to plot
-          pal_rce <- rev(brewer.pal(11, "Spectral"))
+          pal_rce <- rev(brewer.pal(11, "PuOr")) # Spectral
           cv_rce <- c("min", "", "", "", "", "", "", "", "", "", "max")
         # Defining themes
           theme_opts3 <- list(theme(panel.grid.minor = element_blank(),

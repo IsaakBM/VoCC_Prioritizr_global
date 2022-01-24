@@ -62,8 +62,9 @@ source("yscripts/R_scriptsb/VoCCPrioritizr_08a_fPlotGeneral.R")
     plot_annotation(tag_prefix = "",
                     tag_levels = "a", 
                     tag_suffix = "",)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_4.pdf", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
-  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_4.png", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_4b.pdf", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_4b.png", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
+  ggsave("Figures/MS_v1/BritoMorales_ED_Fi_4b.tiff", plot = p1.2, width = 35, height = 25, dpi = 300, limitsize = FALSE)
 
 
 
