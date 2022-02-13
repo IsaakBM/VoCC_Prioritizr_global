@@ -12,4 +12,4 @@ Isaac Brito-Morales. (2022). Towards climate-smart, 3-D protected areas for biod
 
 This is the following paper:
 
-Brito-Morales I, Schoeman DS, Everett JD, Klein CJ, Dunn DC, García Molinos J, Burrows MT, Buenafe KCV, Dominguez RM, Possingham HP & AJ Richardson (in press). Towards climate-smart, 3-D protected areas for biodiversity conservation in the high seas. Nature Climate Changge
+Brito-Morales I, Schoeman DS, Everett JD, Klein CJ, Dunn DC, García Molinos J, Burrows MT, Buenafe KCV, Dominguez RM, Possingham HP & AJ Richardson (in press). Towards climate-smart, 3-D protected areas for biodiversity conservation in the high seas. Nature Climate Change
